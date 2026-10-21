@@ -7,6 +7,7 @@ import {
 } from "@/lib/observability";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
 import { ModalFrame } from "./ModalFrame";
+import { useI18n } from "@/i18n/I18nProvider";
 import { Activity, Database, Radio, X } from "lucide-react";
 
 interface ObservabilityDrawerProps {
@@ -18,6 +19,7 @@ export function ObservabilityDrawer({
   isOpen,
   onClose,
 }: ObservabilityDrawerProps) {
+  const { t } = useI18n();
   const [events, setEvents] = useState<TelemetryEventRecord[]>([]);
 
   useEffect(() => {
@@ -41,24 +43,24 @@ export function ObservabilityDrawer({
     <ModalFrame
       isOpen={isOpen}
       onClose={onClose}
-      ariaLabel="Observability stream"
-      overlayClassName="fixed inset-0 z-50 flex justify-end bg-slate-900/30 backdrop-blur-sm"
+      ariaLabel={t("telemetry.aria")}
+      overlayClassName="winegrid-modal-safe fixed inset-0 z-50 flex justify-end bg-slate-900/30 backdrop-blur-sm"
       panelClassName="w-full max-w-md h-full bg-white border-l border-slate-200 flex flex-col shadow-modal"
     >
         <div className="bg-slate-50/80 px-6 py-5 border-b border-slate-200/80 flex items-center justify-between">
           <div>
             <div className="text-[11px] uppercase tracking-wider text-wine-600 font-semibold flex items-center gap-1.5">
-              <Activity className="w-3.5 h-3.5" /> Telemetry
+              <Activity className="w-3.5 h-3.5" /> {t("telemetry.kicker")}
             </div>
             <h2 className="font-display text-lg font-bold text-slate-900 mt-0.5">
-              Observability Stream
+              {t("telemetry.title")}
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="rounded-full p-2 text-slate-400 hover:bg-slate-200/60 hover:text-slate-700 transition"
-            aria-label="Close"
+            aria-label={t("action.close")}
           >
             <X className="w-5 h-5" />
           </button>
@@ -77,7 +79,7 @@ export function ObservabilityDrawer({
                     : "bg-amber-50 text-amber-700 border border-amber-200"
                 }`}
               >
-                {posthogReady ? "Live" : "Ready"}
+                {posthogReady ? t("telemetry.live") : t("telemetry.ready")}
               </span>
             </div>
           </div>
@@ -94,7 +96,7 @@ export function ObservabilityDrawer({
                     : "bg-amber-50 text-amber-700 border border-amber-200"
                 }`}
               >
-                {supabaseReady ? "Connected" : "Local"}
+                {supabaseReady ? t("telemetry.connected") : t("telemetry.local")}
               </span>
             </div>
           </div>
