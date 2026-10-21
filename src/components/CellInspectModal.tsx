@@ -6,6 +6,7 @@ import { WINE_ENTITY_BY_ID } from "@/data/wineDatabase";
 import { ModalFrame } from "./ModalFrame";
 import { useI18n } from "@/i18n/I18nProvider";
 import { localizedNote } from "@/i18n/notesPt";
+import { alsoTraditionalLine } from "@/data/alsoTraditional";
 import { originLine } from "@/i18n/places";
 import { validEntityIds } from "@/lib/pickerList";
 import { formatDecimal } from "@/lib/shareScore";
@@ -93,6 +94,11 @@ export function CellInspectModal({
                 {originLine(pickedEntity.country, pickedEntity.macroRegion, locale)} &bull;{" "}
                 {pickedEntity.primaryGrapes.join(", ")}
               </div>
+              {alsoTraditionalLine(pickedEntity, locale) && (
+                <p className="text-xs text-slate-600 mt-1 leading-snug">
+                  {alsoTraditionalLine(pickedEntity, locale)}
+                </p>
+              )}
               <p className="text-sm text-slate-700 mt-3 leading-relaxed">
                 {localizedNote(pickedEntity.id, pickedEntity.sommelierNote, locale)}
               </p>
@@ -125,6 +131,11 @@ export function CellInspectModal({
                         <span className="ml-2 text-xs text-slate-500">
                           {originLine(entity.country, entity.macroRegion, locale)}
                         </span>
+                        {alsoTraditionalLine(entity, locale) && (
+                          <div className="text-xs text-slate-500 mt-1 leading-snug">
+                            {alsoTraditionalLine(entity, locale)}
+                          </div>
+                        )}
                       </div>
                       <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full capitalize">
                         {t(

@@ -20,6 +20,11 @@ export function shouldIgnoreHotkey(event: {
   return false;
 }
 
+/** Escape closes an open overflow menu and the caller returns focus to its button. */
+export function overflowMenuEscape(key: string, open: boolean): boolean {
+  return open && (key === "Escape" || key === "Esc");
+}
+
 export type EscapeAction = "ignore" | "close-layer" | "close-dialog";
 
 /** Escape closes the topmost dialog, or only its open nested layer. */

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { consumeModalEscape, modalEscapeAction, shouldIgnoreHotkey } from "./hotkeys";
+import { consumeModalEscape, modalEscapeAction, overflowMenuEscape, shouldIgnoreHotkey } from "./hotkeys";
 
 describe("hotkeys", () => {
   it("ignores keys while typing, in a dialog, or with a modifier", () => {
@@ -78,6 +78,13 @@ describe("hotkeys", () => {
       }),
       true
     );
+  });
+
+  it("closes an open overflow menu on Escape", () => {
+    assert.equal(overflowMenuEscape("Escape", true), true);
+    assert.equal(overflowMenuEscape("Esc", true), true);
+    assert.equal(overflowMenuEscape("Escape", false), false);
+    assert.equal(overflowMenuEscape("n", true), false);
   });
 
   it("allows a bare key on the board itself", () => {

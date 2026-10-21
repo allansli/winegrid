@@ -3,6 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ALL_WINE_ENTITIES, entityMatchesSearch } from "@/data/wineDatabase";
 import { localizedNote } from "@/i18n/notesPt";
+import { alsoTraditionalLine } from "@/data/alsoTraditional";
 import { originLine } from "@/i18n/places";
 import { CLUE_CATALOG } from "@/data/clueCatalog";
 import { EntityFilterMode } from "@/types/wine";
@@ -131,6 +132,11 @@ export function SommelierCodexModal({
                     <div className="text-xs text-slate-500 mt-0.5">
                       {originLine(entity.country, entity.macroRegion, locale)}
                     </div>
+                    {alsoTraditionalLine(entity, locale) && (
+                      <p className="text-xs text-slate-500 mt-1 leading-snug">
+                        {alsoTraditionalLine(entity, locale)}
+                      </p>
+                    )}
                   </div>
                   <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-600">
                     {t(
