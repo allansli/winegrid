@@ -11,16 +11,16 @@ const jakarta = Plus_Jakarta_Sans({
 const outfit = Outfit({
   subsets: ["latin"],
   variable: "--font-outfit",
-  weight: ["500", "600", "600", "700"],
+  weight: ["500", "600", "700"],
 });
 
 const SITE_URL = "https://winegrid.vercel.app";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: "WineGrid — The Daily Sommelier Matrix",
+  title: "WineGrid | The Daily Sommelier Matrix",
   description:
-    "Test your wine knowledge on the daily 3×3 sommelier matrix. Match Appellations, Grape Varieties, and Iconic Estates across Terroir, Soil, Climate, and Classification.",
+    "Test your wine knowledge on the daily 3x3 sommelier matrix. Match Appellations, Grape Varieties, and Iconic Estates across Terroir, Soil, Climate, and Classification.",
   icons: {
     icon: "/icon.svg",
     shortcut: "/icon.svg",
@@ -28,28 +28,26 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    url: SITE_URL,
     siteName: "WineGrid",
-    title: "WineGrid — The Daily Sommelier Matrix",
+    title: "WineGrid | The Daily Sommelier Matrix",
     description:
-      "Can you solve today's 3×3 Wine Matrix? Match Regions, Grapes & Iconic Producers across Terroir, Soil, and Classification.",
+      "Can you solve today's 3x3 Wine Matrix? Match Regions, Grapes & Iconic Producers across Terroir, Soil, and Classification.",
     images: [
       {
-        url: `${SITE_URL}/og-image.jpg`,
-        secureUrl: `${SITE_URL}/og-image.jpg`,
+        url: `${SITE_URL}/og-hero.jpg`,
         width: 1200,
         height: 630,
         type: "image/jpeg",
-        alt: "WineGrid — The Daily Sommelier Matrix Game",
+        alt: "WineGrid - The Daily Sommelier Matrix Game",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "WineGrid — The Daily Sommelier Matrix",
+    title: "WineGrid | The Daily Sommelier Matrix",
     description:
-      "Can you solve today's 3×3 Wine Matrix? Match Regions, Grapes & Iconic Producers across Terroir, Soil, and Classification.",
-    images: [`${SITE_URL}/og-image.jpg`],
+      "Can you solve today's 3x3 Wine Matrix? Match Regions, Grapes & Iconic Producers across Terroir, Soil, and Classification.",
+    images: [`${SITE_URL}/og-hero.jpg`],
   },
 };
 
