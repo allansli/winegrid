@@ -3,9 +3,11 @@ import { describe, it } from "node:test";
 import {
   entityMatchesSearch,
   fieldsMatchSearch,
+  filterCodexEntities,
   normalizeSearchText,
   searchQuery,
   searchWineEntities,
+  ALL_WINE_ENTITIES,
   WINE_ENTITY_BY_ID,
 } from "./wineDatabase";
 
@@ -139,5 +141,17 @@ describe("cell-scoped entity search", () => {
       acceptedTypes: ["grape"],
     });
     assert.equal(results.length, 0);
+  });
+
+  it("ranks País ahead of note-only hits in the Codex", () => {
+    const ranked = filterCodexEntities(ALL_WINE_ENTITIES, { query: "País", locale: "pt-BR" });
+    const indexOf = (id: string) => ranked.findIndex((entity) => entity.id === id);
+    const pais = indexOf("grape-pais");
+    assert.equal(ranked[0]?.id, "grape-pais");
+    assert.ok(pais >= 0);
+    for (const id of ["grape-tempranillo", "app-itata", "grape-torrontes"]) {
+      const other = indexOf(id);
+      assert.ok(other > pais, `${id} at ${other}, País at ${pais}`);
+    }
   });
 });

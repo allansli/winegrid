@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { CLUE_BY_ID, COUNTRY_REGION_GROUP } from "./clueCatalog";
-import { ALSO_COUNTRY_SOURCES, TAG_SOURCES, alsoCountryNote } from "./tagSources";
+import { ALSO_COUNTRY_SOURCES, CLIMATE_SOURCES, TAG_SOURCES, alsoCountryNote } from "./tagSources";
 import { ALL_WINE_ENTITIES, WINE_ENTITY_BY_ID } from "./wineDatabase";
 import { WineEntity } from "../types/wine";
 
@@ -37,6 +37,19 @@ describe("attribute tag sources", () => {
       }
     }
     assert.deepEqual([...missing], []);
+  });
+
+  it("sources the Puente Alto Mediterranean climate on Almaviva and Don Melchor", () => {
+    for (const id of ["prod-almaviva", "prod-don-melchor"]) {
+      const entity = WINE_ENTITY_BY_ID[id];
+      assert.ok(entity.climates.includes("mediterranean"), id);
+      const note = CLIMATE_SOURCES[id]?.mediterranean ?? "";
+      assert.match(note, /Puente Alto/);
+      assert.match(note, /Mediterranean/);
+      assert.match(note, /https:\/\/www\.winesofchile\.org\/denominations-of-origin\//);
+      assert.equal(accepts("clim-mediterranean", id), true, id);
+      assert.equal(accepts("geo-southern-hemisphere", id), true, id);
+    }
   });
 
   it("gives every curated alsoCountries entry its own source note", () => {

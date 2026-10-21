@@ -8,6 +8,7 @@ import { useI18n } from "@/i18n/I18nProvider";
 import { localizedNote } from "@/i18n/notesPt";
 import { alsoTraditionalLine } from "@/data/alsoTraditional";
 import { originLine } from "@/i18n/places";
+import { displayEntityName } from "@/lib/entityName";
 import { validEntityIds } from "@/lib/pickerList";
 import { formatDecimal } from "@/lib/shareScore";
 import { localizedClue } from "@/i18n/clues";
@@ -87,8 +88,19 @@ export function CellInspectModal({
                   </span>
                 )}
               </div>
-              <div className="mt-2 font-display text-xl font-bold text-slate-900">
-                {pickedEntity.name}
+              <div className="mt-2 flex items-center gap-2 flex-wrap">
+                <div className="font-display text-xl font-bold text-slate-900">
+                  {displayEntityName(pickedEntity.name, pickedEntity.entityType)}
+                </div>
+                <span className="text-xs font-medium text-emerald-800 bg-white border border-emerald-200 px-2.5 py-0.5 rounded-full">
+                  {t(
+                    pickedEntity.entityType === "appellation"
+                      ? "type.region"
+                      : pickedEntity.entityType === "grape"
+                      ? "type.grape"
+                      : "type.producer"
+                  )}
+                </span>
               </div>
               <div className="text-xs text-slate-500 mt-0.5">
                 {originLine(pickedEntity.country, pickedEntity.macroRegion, locale)} &bull;{" "}
@@ -126,7 +138,7 @@ export function CellInspectModal({
                     <div className="flex items-center justify-between flex-wrap gap-2">
                       <div>
                         <span className="font-display font-bold text-base text-slate-900">
-                          {entity.name}
+                          {displayEntityName(entity.name, entity.entityType)}
                         </span>
                         <span className="ml-2 text-xs text-slate-500">
                           {originLine(entity.country, entity.macroRegion, locale)}
