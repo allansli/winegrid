@@ -35,6 +35,28 @@ export function clueTooltipEscape(key: string, open: boolean, dialogOpen = false
   return open && (key === "Escape" || key === "Esc");
 }
 
+/**
+ * Document-level listener for a pinned clue tooltip. It does not look at
+ * focus or at event.target, so Escape closes the tooltip when the key is
+ * delivered to the page rather than to a node inside the tooltip.
+ * Returns the unsubscribe function.
+ */
+export function attachClueTooltipEscape(input: {
+  isOpen: () => boolean;
+  close: () => void;
+  dialogOpen?: () => boolean;
+}): () => void {
+  const onKey = (event: Event) => {
+    const keyEvent = event as KeyboardEvent;
+    if (!clueTooltipEscape(keyEvent.key, input.isOpen(), input.dialogOpen?.() ?? false)) return;
+    keyEvent.preventDefault();
+    keyEvent.stopPropagation();
+    input.close();
+  };
+  document.addEventListener("keydown", onKey, true);
+  return () => document.removeEventListener("keydown", onKey, true);
+}
+
 export type EscapeAction = "ignore" | "close-layer" | "close-dialog";
 
 /** Escape closes the topmost dialog, or only its open nested layer. */

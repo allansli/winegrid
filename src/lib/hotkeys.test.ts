@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  attachClueTooltipEscape,
   clueTooltipEscape,
   consumeModalEscape,
   modalEscapeAction,
@@ -104,6 +105,46 @@ describe("hotkeys", () => {
     assert.equal(clueTooltipEscape("Escape", false, false), false);
     assert.equal(clueTooltipEscape("Escape", true, true), false);
     assert.equal(clueTooltipEscape("Enter", true, false), false);
+  });
+
+  it("closes a pinned clue tooltip when Escape is dispatched on document", () => {
+    const target = new EventTarget();
+    const previous = globalThis.document;
+    Object.assign(globalThis, {
+      document: {
+        addEventListener: target.addEventListener.bind(target),
+        removeEventListener: target.removeEventListener.bind(target),
+        dispatchEvent: target.dispatchEvent.bind(target),
+        querySelector: () => null,
+      },
+    });
+
+    class PageKey extends Event {
+      key: string;
+      constructor(key: string) {
+        super("keydown", { bubbles: true, cancelable: true });
+        this.key = key;
+      }
+    }
+
+    let pinned = false;
+    const detach = attachClueTooltipEscape({
+      isOpen: () => pinned,
+      close: () => {
+        pinned = false;
+      },
+    });
+    try {
+      pinned = true;
+      document.dispatchEvent(new PageKey("n"));
+      assert.equal(pinned, true);
+      // Dispatched on document. The listener does not require focus inside the tooltip.
+      document.dispatchEvent(new PageKey("Escape"));
+      assert.equal(pinned, false);
+    } finally {
+      detach();
+      Object.assign(globalThis, { document: previous });
+    }
   });
 
   it("allows a bare key on the board itself", () => {
