@@ -38,6 +38,7 @@ import {
   BookOpen,
   Castle,
   CheckCircle2,
+  Clock,
   Eye,
   Flame,
   Grape,
@@ -65,6 +66,7 @@ interface PersistedActiveState {
 
 export function WineGridGame() {
   const [todayStr, setTodayStr] = useState<string>("2026-10-20");
+  const [nextDailyCountdown, setNextDailyCountdown] = useState<string>("");
   const [mode, setMode] = useState<GameMode>("daily");
   const [difficulty, setDifficulty] = useState<DifficultyLevel>("wset3");
   const [entityFilter, setEntityFilter] = useState<EntityFilterMode>("all");
@@ -117,6 +119,34 @@ export function WineGridGame() {
     const dd = String(now.getDate()).padStart(2, "0");
     setTodayStr(`${yyyy}-${mm}-${dd}`);
 
+    const updateCountdown = () => {
+      const current = new Date();
+      const curY = current.getFullYear();
+      const curM = String(current.getMonth() + 1).padStart(2, "0");
+      const curD = String(current.getDate()).padStart(2, "0");
+      const currentDayStr = `${curY}-${curM}-${curD}`;
+      setTodayStr((prev) => (prev !== currentDayStr ? currentDayStr : prev));
+
+      const tomorrowMidnight = new Date(
+        current.getFullYear(),
+        current.getMonth(),
+        current.getDate() + 1,
+        0,
+        0,
+        0,
+        0
+      );
+      const diffMs = Math.max(0, tomorrowMidnight.getTime() - current.getTime());
+      const totalSeconds = Math.floor(diffMs / 1000);
+      const hours = String(Math.floor(totalSeconds / 3600)).padStart(2, "0");
+      const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2, "0");
+      const seconds = String(totalSeconds % 60).padStart(2, "0");
+      setNextDailyCountdown(`${hours}:${minutes}:${seconds}`);
+    };
+
+    updateCountdown();
+    const timer = window.setInterval(updateCountdown, 1000);
+
     setHistory(getLocalHistory());
 
     const demoRaw = window.localStorage.getItem("winegrid_demo_user");
@@ -139,6 +169,8 @@ export function WineGridGame() {
         }
       });
     }
+
+    return () => window.clearInterval(timer);
   }, []);
 
   const initBoard = useCallback(
@@ -719,6 +751,15 @@ export function WineGridGame() {
             <span className="font-display text-sm sm:text-base font-bold text-slate-800 mt-0.5">
               {board.mode === "daily" ? todayStr : "Custom 3×3"}
             </span>
+            {board.mode === "daily" && nextDailyCountdown && (
+              <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 mt-1">
+                <Clock className="w-3 h-3 text-slate-400 shrink-0" />
+                Refreshes in{" "}
+                <span className="font-mono font-semibold text-slate-600">
+                  {nextDailyCountdown}
+                </span>
+              </span>
+            )}
           </div>
 
           {/* 3 Column Headers */}
