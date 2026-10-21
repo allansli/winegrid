@@ -99,6 +99,10 @@ export function HowToPlayModal({ isOpen, onClose }: HowToPlayModalProps) {
         )}
       </div>
 
+      <p className="px-5 sm:px-6 pb-4 text-[11px] leading-relaxed text-slate-500">
+        {t("howto.shortcuts")}
+      </p>
+
       <div className="px-5 sm:px-6 py-4 border-t border-slate-200/80 flex items-center justify-between bg-slate-50/70">
         <div className="flex items-center gap-1.5" aria-hidden="true">
           {STEP_KEYS.map((_, index) => (

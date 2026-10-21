@@ -314,6 +314,15 @@ export function saveActiveBoardState(boardId: string, state: unknown): void {
   }
 }
 
+export function clearActiveBoardState(boardId: string): void {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.removeItem(`${ACTIVE_BOARD_STORAGE_PREFIX}${boardId}`);
+  } catch {
+    // Ignore
+  }
+}
+
 export function loadActiveBoardState<T>(boardId: string): T | null {
   if (typeof window === "undefined") return null;
   try {

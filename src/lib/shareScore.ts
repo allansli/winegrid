@@ -1,25 +1,34 @@
 import { GameMode } from "@/types/wine";
 import { Locale } from "@/i18n/locale";
 
-export type ShareCell = "green" | "yellow" | "empty";
+export type ShareCell = "purple" | "green" | "yellow" | "orange" | "empty";
 
 export const SHARE_URL = "https://winegrid.vercel.app";
 
-/** Rare picks (under 12% of players) are the yellow square. */
+/**
+ * Pick-rate shades: purple under 10%, green from 10% up to 25%,
+ * yellow from 25% through 40%, orange above 40%. An empty cell is unsolved.
+ */
 export function shareCellForPick(picked: boolean, rarityPct: number | null): ShareCell {
   if (!picked) return "empty";
-  if ((rarityPct ?? 50) < 12) return "yellow";
-  return "green";
+  const pct = rarityPct ?? 50;
+  if (pct < 10) return "purple";
+  if (pct < 25) return "green";
+  if (pct <= 40) return "yellow";
+  return "orange";
 }
 
 const EMOJI: Record<ShareCell, string> = {
+  purple: "🟪",
   green: "🟩",
   yellow: "🟨",
+  orange: "🟧",
   empty: "⬜",
 };
 
-function rarityText(rarity: number): string {
-  return String(Number(rarity.toFixed(1)));
+export function formatDecimal(value: number, locale: Locale): string {
+  const text = Number(value.toFixed(1)).toString();
+  return locale === "pt-BR" ? text.replace(".", ",") : text;
 }
 
 export interface ShareScoreInput {
@@ -28,17 +37,19 @@ export interface ShareScoreInput {
   difficultyLabel: string;
   correct: number;
   rarity: number;
+  missesUsed: number;
+  streak: number;
   rows: ShareCell[][];
   locale: Locale;
 }
 
 export function buildShareText(input: ShareScoreInput): string {
   const grid = input.rows.map((row) => row.map((cell) => EMOJI[cell]).join("")).join("\n");
-  const rarity = rarityText(input.rarity);
+  const rarity = formatDecimal(input.rarity, input.locale);
   const score =
     input.locale === "pt-BR"
-      ? `Placar: ${input.correct}/9 · Raridade: ${rarity}`
-      : `Score: ${input.correct}/9 · Rarity: ${rarity}`;
+      ? `Placar: ${input.correct}/9 · Raridade: ${rarity} · ❌×${input.missesUsed} · Sequência ${input.streak}`
+      : `Score: ${input.correct}/9 · Rarity: ${rarity} · ❌×${input.missesUsed} · Streak ${input.streak}`;
   let title: string;
   if (input.locale === "pt-BR") {
     title =

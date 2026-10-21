@@ -21,16 +21,27 @@ export function getEntitiesByFilter(filter: EntityFilterMode): WineEntity[] {
 }
 
 export function normalizeSearchText(text: string): string {
-  return text
+  const folded = text
     .toLowerCase()
+    .replace(/ß/g, "ss")
+    .replace(/ä/g, "ae")
+    .replace(/ö/g, "oe")
+    .replace(/ü/g, "ue")
+    .replace(/[’‘´`]/g, "'")
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
+    .replace(/·/g, "")
+    .replace(/[-‐–—_.'’]/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
+  return folded.replace(/\bste\b/g, "sainte").replace(/\bst\b/g, "saint");
 }
 
 export interface WineEntitySearchOptions {
   /** Cell-level type constraint. Applied before ranking so the list cannot leak other types. */
   acceptedTypes?: WineEntityType[];
+  /** Keep entities that match at least one of the cell's clues. Drops the clearly irrelevant ones. */
+  matchesCell?: (entity: WineEntity) => boolean;
   limit?: number;
 }
 
@@ -46,6 +57,7 @@ export function searchWineEntities(
   const pool = getEntitiesByFilter(filter).filter((entity) => {
     if (excludeIds.has(entity.id)) return false;
     if (accepted && !accepted.has(entity.entityType)) return false;
+    if (options.matchesCell && !options.matchesCell(entity)) return false;
     return true;
   });
   const limit = options.limit ?? 40;
@@ -67,6 +79,7 @@ export function searchWineEntities(
       const regionNorm = normalizeSearchText(entity.macroRegion);
       const aliasNorms = entity.aliases.map(normalizeSearchText);
       const grapeNorms = entity.primaryGrapes.map(normalizeSearchText);
+      const subRegionNorm = entity.subRegion ? normalizeSearchText(entity.subRegion) : "";
 
       let score = 0;
       if (canonNorm === q || nameNorm === q || aliasNorms.includes(q)) {
@@ -79,6 +92,8 @@ export function searchWineEntities(
         score = 50;
       } else if (grapeNorms.some((g) => g.includes(q))) {
         score = 40;
+      } else if (subRegionNorm.includes(q)) {
+        score = 30;
       }
 
       return { entity, score };

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import confetti from "canvas-confetti";
 import {
   ClueDefinition,
@@ -15,9 +15,11 @@ import {
 import { useI18n } from "@/i18n/I18nProvider";
 import { localizedClue } from "@/i18n/clues";
 import { MessageKey } from "@/i18n/messages";
+import { localizedNote } from "@/i18n/notesPt";
+import { placeLabel } from "@/i18n/places";
 import { readDailyStreak, recordDailyResult, writeDailyStreak, EMPTY_DAILY_STREAK } from "@/lib/dailyStreak";
 import { leaderboard } from "@/lib/leaderboard";
-import { buildShareText, deliverShareText, shareCellForPick } from "@/lib/shareScore";
+import { buildShareText, deliverShareText, formatDecimal, shareCellForPick } from "@/lib/shareScore";
 import { WINE_ENTITY_BY_ID } from "@/data/wineDatabase";
 import {
   DAILY_DIFFICULTY,
@@ -27,8 +29,8 @@ import {
 import {
   ECONOMY_VERSION,
   MISS_BUDGET,
+  GuessBudget,
   applyPick,
-  boardSwitchNeedsConfirm,
   freshGuessBudget,
   isMissBudgetExhausted,
   restoreGuessBudget,
@@ -41,12 +43,28 @@ import {
 import {
   GameHistoryEntry,
   computePlayerStats,
+  clearActiveBoardState,
   getLocalHistory,
   loadActiveBoardState,
   recordAndCalculateCellRarity,
   saveActiveBoardState,
   saveGameSession,
 } from "@/lib/storageAndSync";
+import {
+  InfiniteRunState,
+  ResumeSnapshot,
+  advanceInfiniteRun,
+  clearResumeSnapshot,
+  freshInfiniteRun,
+  readInfiniteRun,
+  readResumeSnapshot,
+  readStoredMode,
+  readUnlimitedBoard,
+  writeInfiniteRun,
+  writeResumeSnapshot,
+  writeStoredMode,
+  writeUnlimitedBoard,
+} from "@/lib/sessionPersistence";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { EntitySearchModal } from "./EntitySearchModal";
 import { CellInspectModal } from "./CellInspectModal";
@@ -54,7 +72,6 @@ import { SommelierCodexModal } from "./SommelierCodexModal";
 import { AuthAndHistoryModal } from "./AuthAndHistoryModal";
 import { ObservabilityDrawer } from "./ObservabilityDrawer";
 import { HowToPlayModal } from "./HowToPlayModal";
-import { ConfirmDialog } from "./ConfirmDialog";
 import {
   Activity,
   BookOpen,
@@ -109,12 +126,6 @@ function filterKey(filter: EntityFilterMode): MessageKey {
   return "filter.allTypes";
 }
 
-function modeKey(mode: GameMode): MessageKey {
-  if (mode === "daily") return "mode.daily";
-  if (mode === "infinite") return "mode.infinite";
-  return "mode.unlimited";
-}
-
 function categoryKey(category: string): MessageKey {
   return `category.${category}` as MessageKey;
 }
@@ -130,12 +141,17 @@ function shareRows(cells: MatrixCell[]) {
 
 export function WineGridGame() {
   const { locale, setLocale, t } = useI18n();
-  const [todayStr, setTodayStr] = useState<string>("2026-10-20");
+  const [booted, setBooted] = useState(false);
+  const [todayStr, setTodayStr] = useState<string>("");
   const [nextDailyCountdown, setNextDailyCountdown] = useState<string>("");
   const [mode, setMode] = useState<GameMode>("daily");
   const [difficulty, setDifficulty] = useState<DifficultyLevel>("wset3");
   const [entityFilter, setEntityFilter] = useState<EntityFilterMode>("all");
-  const [unlimitedSeed, setUnlimitedSeed] = useState<string>("somm-1");
+  const [unlimitedSeed, setUnlimitedSeed] = useState<string>("unlimited-0");
+  const [infiniteRun, setInfiniteRun] = useState<InfiniteRunState | null>(null);
+  const [resumeOffer, setResumeOffer] = useState<ResumeSnapshot | null>(null);
+  const runBudgetRef = useRef<GuessBudget>(freshGuessBudget());
+  const keepFeedbackRef = useRef(false);
 
   const [sessionId, setSessionId] = useState<string>("");
   const [board, setBoard] = useState<GeneratedBoard | null>(null);
@@ -159,7 +175,6 @@ export function WineGridGame() {
   const [shareState, setShareState] = useState<"idle" | "copied" | "shared">("idle");
   const [dailyStreak, setDailyStreak] = useState(EMPTY_DAILY_STREAK);
   const [howToOpen, setHowToOpen] = useState(false);
-  const [pendingChange, setPendingChange] = useState<PendingBoardChange | null>(null);
   const [justFilledIndex, setJustFilledIndex] = useState<number | null>(null);
   const [missFlashIndex, setMissFlashIndex] = useState<number | null>(null);
 
@@ -183,11 +198,41 @@ export function WineGridGame() {
     const id = getOrCreateAnonId();
     setAnonId(id);
 
+    const storedMode = readStoredMode(window.localStorage);
+    const storedRun = readInfiniteRun(window.localStorage);
+    const storedUnlimited = readUnlimitedBoard(window.localStorage);
+    setMode(storedMode);
+    if (storedMode === "infinite") {
+      const run =
+        storedRun ?? freshInfiniteRun(difficulty, entityFilter);
+      if (!storedRun) writeInfiniteRun(window.localStorage, run);
+      setInfiniteRun(run);
+      setDifficulty(run.difficulty);
+      setEntityFilter(run.entityFilter);
+      setUnlimitedSeed(run.seed);
+    } else if (storedMode === "unlimited" && storedUnlimited) {
+      setDifficulty(storedUnlimited.difficulty);
+      setEntityFilter(storedUnlimited.entityFilter);
+      setUnlimitedSeed(storedUnlimited.seed);
+    } else if (storedMode === "unlimited") {
+      const seed = `unlimited-${Date.now()}`;
+      setUnlimitedSeed(seed);
+      writeUnlimitedBoard(window.localStorage, {
+        seed,
+        difficulty,
+        entityFilter,
+      });
+    }
+    if (storedMode === "unlimited" || storedMode === "infinite") {
+      setResumeOffer(readResumeSnapshot(window.localStorage, storedMode));
+    }
+
     const now = new Date();
     const yyyy = now.getFullYear();
     const mm = String(now.getMonth() + 1).padStart(2, "0");
     const dd = String(now.getDate()).padStart(2, "0");
     setTodayStr(`${yyyy}-${mm}-${dd}`);
+    setBooted(true);
 
     const updateCountdown = () => {
       const current = new Date();
@@ -277,6 +322,7 @@ export function WineGridGame() {
       targetFilter: EntityFilterMode,
       targetSeed: string
     ) => {
+      if (!booted || !todayStr) return;
       const effDiff = targetMode === "daily" ? DAILY_DIFFICULTY : targetDiff;
       const effFilter = targetMode === "daily" ? "all" : targetFilter;
 
@@ -308,6 +354,7 @@ export function WineGridGame() {
             )
           : null;
       if (saved && saved.cells && saved.cells.length === 9 && restoredBudget) {
+        if (targetMode === "infinite") runBudgetRef.current = restoredBudget;
         setSessionId(saved.sessionId);
         setBoard(generated);
         setCells(saved.cells);
@@ -317,7 +364,8 @@ export function WineGridGame() {
         setIsRevealed(saved.isRevealed);
       } else {
         const newSessionId = crypto.randomUUID();
-        const fresh = freshGuessBudget();
+        const fresh =
+          targetMode === "infinite" ? runBudgetRef.current : freshGuessBudget();
         setSessionId(newSessionId);
         setBoard(generated);
         setCells(generated.cells);
@@ -325,7 +373,8 @@ export function WineGridGame() {
         setGuessesUsedCount(fresh.missesUsed);
         setIsCompleted(false);
         setIsRevealed(false);
-        setFeedback(null);
+        if (!keepFeedbackRef.current) setFeedback(null);
+        keepFeedbackRef.current = false;
 
         trackEvent("game_started", {
           board_id: generated.boardId,
@@ -335,13 +384,13 @@ export function WineGridGame() {
         });
       }
     },
-    [todayStr]
+    [booted, todayStr]
   );
 
   useEffect(() => {
-    if (!todayStr) return;
+    if (!booted || !todayStr) return;
     initBoard(mode, difficulty, entityFilter, unlimitedSeed);
-  }, [todayStr, mode, difficulty, entityFilter, unlimitedSeed, initBoard]);
+  }, [booted, todayStr, mode, difficulty, entityFilter, unlimitedSeed, initBoard]);
 
   useEffect(() => {
     if (!board || !sessionId || cells.length !== 9) return;
@@ -387,7 +436,8 @@ export function WineGridGame() {
     async (
       updatedCells: MatrixCell[],
       missesUsed: number,
-      revealedByGiveUp = false
+      revealedByGiveUp = false,
+      options?: { continueRun?: boolean }
     ) => {
       if (!board) return;
       const solved = updatedCells.filter((c) => Boolean(c.pickedEntityId)).length;
@@ -405,7 +455,7 @@ export function WineGridGame() {
           .toFixed(1)
       );
 
-      setIsCompleted(true);
+      if (!options?.continueRun) setIsCompleted(true);
       if (won) {
         confetti({
           particleCount: 80,
@@ -458,6 +508,8 @@ export function WineGridGame() {
           difficultyLabel: t("difficulty.standard"),
           correct: solved,
           rarity: rarityTotal,
+          missesUsed,
+          streak: nextStreak.current,
           rows: shareRows(updatedCells),
           locale,
         });
@@ -492,6 +544,14 @@ export function WineGridGame() {
 
   const handleSelectEntity = async (entity: WineEntity) => {
     if (activeCellIndex === null || !board || isCompleted) return;
+    if (usedEntityIds.has(entity.id)) {
+      setFeedback({
+        type: "info",
+        title: t("picker.used"),
+        detail: entity.name,
+      });
+      return;
+    }
     const cellIndex = activeCellIndex;
     const cell = cells[cellIndex];
     const rowClue = board.rowClues[cell.row];
@@ -508,6 +568,7 @@ export function WineGridGame() {
     setActiveCellIndex(null);
     setGuessesRemaining(nextBudget.missesRemaining);
     setGuessesUsedCount(nextBudget.missesUsed);
+    if (board.mode === "infinite") runBudgetRef.current = nextBudget;
 
     if (isValid) {
       const rarityPct = await recordAndCalculateCellRarity(
@@ -533,7 +594,7 @@ export function WineGridGame() {
       setFeedback({
         type: "success",
         title: t("feedback.correctTitle", { name: entity.name, pct: rarityPct }),
-        detail: entity.sommelierNote,
+        detail: localizedNote(entity.id, entity.sommelierNote, locale),
       });
 
       trackEvent("cell_guess_submitted", {
@@ -549,7 +610,19 @@ export function WineGridGame() {
       });
 
       const allNineSolved = nextCells.every((c) => Boolean(c.pickedEntityId));
-      if (allNineSolved) {
+      if (allNineSolved && board.mode === "infinite" && infiniteRun && !infiniteRun.failed) {
+        await finalizeGame(nextCells, nextBudget.missesUsed, false, { continueRun: true });
+        const next = advanceInfiniteRun(infiniteRun);
+        writeInfiniteRun(window.localStorage, next);
+        setInfiniteRun(next);
+        keepFeedbackRef.current = true;
+        setFeedback({
+          type: "success",
+          title: t("infinite.next"),
+          detail: t("infinite.boards") + `: ${next.boardsCleared}`,
+        });
+        setUnlimitedSeed(next.seed);
+      } else if (allNineSolved) {
         await finalizeGame(nextCells, nextBudget.missesUsed, false);
       }
     } else {
@@ -563,6 +636,9 @@ export function WineGridGame() {
           : "feedback.missCol";
 
       setMissFlashIndex(cellIndex);
+      const why = [!matchesRow ? rowCopy.tooltip : "", !matchesCol ? colCopy.tooltip : ""]
+        .filter(Boolean)
+        .join(" ");
       setFeedback({
         type: "error",
         title: t("feedback.missTitle", { name: entity.name }),
@@ -570,6 +646,7 @@ export function WineGridGame() {
           name: entity.name,
           row: !matchesRow && matchesCol ? rowCopy.label : rowCopy.shortLabel,
           col: matchesRow && !matchesCol ? colCopy.label : colCopy.shortLabel,
+          why,
         }),
       });
 
@@ -585,39 +662,158 @@ export function WineGridGame() {
       });
 
       if (isMissBudgetExhausted(nextBudget, board.mode)) {
+        if (board.mode === "infinite" && infiniteRun) {
+          const failed = { ...infiniteRun, failed: true };
+          writeInfiniteRun(window.localStorage, failed);
+          setInfiniteRun(failed);
+          setFeedback({
+            type: "error",
+            title: t("infinite.failedTitle"),
+            detail: t("infinite.failedDetail", {
+              boards: failed.boardsCleared,
+              misses: nextBudget.missesUsed,
+            }),
+          });
+        }
         await finalizeGame(cells, nextBudget.missesUsed, false);
       }
     }
   };
 
-  const handleNewUnlimitedBoard = () => {
-    const nextSeed = `somm-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-    setUnlimitedSeed(nextSeed);
+  const rememberPracticeBoard = (
+    nextMode: GameMode,
+    nextSeed: string,
+    nextDifficulty: DifficultyLevel,
+    nextFilter: EntityFilterMode
+  ) => {
+    if (nextMode === "unlimited") {
+      writeUnlimitedBoard(window.localStorage, {
+        seed: nextSeed,
+        difficulty: nextDifficulty,
+        entityFilter: nextFilter,
+      });
+    }
   };
 
-  const applyBoardChange = (change: PendingBoardChange) => {
-    if (change.kind === "mode") setMode(change.mode);
-    else if (change.kind === "difficulty") setDifficulty(change.difficulty);
-    else if (change.kind === "filter") setEntityFilter(change.filter);
-    else handleNewUnlimitedBoard();
-    setPendingChange(null);
+  const stashPracticeBoard = (from: GameMode) => {
+    if (!board || (from !== "unlimited" && from !== "infinite") || isCompleted) return;
+    if (correctCount === 0 && guessesUsedCount === 0) return;
+    const snap: ResumeSnapshot = {
+      seed: unlimitedSeed,
+      difficulty,
+      entityFilter,
+      sessionId,
+      cells,
+      guessesRemaining,
+      missesUsed: guessesUsedCount,
+      economyVersion: ECONOMY_VERSION,
+      isRevealed,
+      run: from === "infinite" ? infiniteRun ?? undefined : undefined,
+    };
+    writeResumeSnapshot(window.localStorage, from, snap);
+    clearActiveBoardState(board.boardId);
+  };
+
+  const startFreshPractice = (nextMode: "unlimited" | "infinite") => {
+    if (nextMode === "infinite") {
+      const run = freshInfiniteRun(difficulty, entityFilter);
+      runBudgetRef.current = freshGuessBudget();
+      writeInfiniteRun(window.localStorage, run);
+      setInfiniteRun(run);
+      setUnlimitedSeed(run.seed);
+      return;
+    }
+    const seed = `unlimited-${Date.now()}`;
+    setUnlimitedSeed(seed);
+    writeUnlimitedBoard(window.localStorage, {
+      seed,
+      difficulty,
+      entityFilter,
+    });
   };
 
   const requestBoardChange = (change: PendingBoardChange) => {
     if (change.kind === "mode" && change.mode === mode) return;
     if (change.kind === "difficulty" && change.difficulty === difficulty) return;
     if (change.kind === "filter" && change.filter === entityFilter) return;
-    if (
-      boardSwitchNeedsConfirm({
-        isCompleted,
-        filledCells: correctCount,
-        missesUsed: guessesUsedCount,
-      })
-    ) {
-      setPendingChange(change);
+
+    if (change.kind === "new-board") {
+      if (board) clearActiveBoardState(board.boardId);
+      if (mode === "unlimited" || mode === "infinite") {
+        clearResumeSnapshot(window.localStorage, mode);
+      }
+      if (mode === "infinite") startFreshPractice("infinite");
+      else startFreshPractice("unlimited");
+      setResumeOffer(null);
       return;
     }
-    applyBoardChange(change);
+
+    if (change.kind === "mode") {
+      stashPracticeBoard(mode);
+      writeStoredMode(window.localStorage, change.mode);
+      setMode(change.mode);
+      if (change.mode === "daily") {
+        setResumeOffer(null);
+        return;
+      }
+      setResumeOffer(readResumeSnapshot(window.localStorage, change.mode));
+      startFreshPractice(change.mode);
+      return;
+    }
+
+    if (board && mode !== "daily") clearActiveBoardState(board.boardId);
+    const nextDiff = change.kind === "difficulty" ? change.difficulty : difficulty;
+    const nextFilter = change.kind === "filter" ? change.filter : entityFilter;
+    if (change.kind === "difficulty") setDifficulty(nextDiff);
+    else setEntityFilter(nextFilter);
+    if (mode === "infinite" && infiniteRun) {
+      const run = {
+        ...infiniteRun,
+        difficulty: nextDiff,
+        entityFilter: nextFilter,
+        seed: `infinite-${infiniteRun.runId}-${infiniteRun.boardsCleared}-${Date.now()}`,
+      };
+      writeInfiniteRun(window.localStorage, run);
+      setInfiniteRun(run);
+      setUnlimitedSeed(run.seed);
+    } else {
+      rememberPracticeBoard(mode, unlimitedSeed, nextDiff, nextFilter);
+    }
+  };
+
+  const resumePractice = () => {
+    if (!resumeOffer || (mode !== "unlimited" && mode !== "infinite")) return;
+    const boardId = `${mode}-${resumeOffer.seed}-${resumeOffer.difficulty}-${resumeOffer.entityFilter}`;
+    saveActiveBoardState(boardId, {
+      sessionId: resumeOffer.sessionId,
+      boardId,
+      cells: resumeOffer.cells,
+      guessesRemaining: resumeOffer.guessesRemaining,
+      missesUsed: resumeOffer.missesUsed,
+      economyVersion: resumeOffer.economyVersion,
+      isCompleted: false,
+      isRevealed: resumeOffer.isRevealed,
+    });
+    runBudgetRef.current = {
+      missesRemaining: resumeOffer.guessesRemaining,
+      missesUsed: resumeOffer.missesUsed,
+    };
+    if (resumeOffer.run) {
+      const run = {
+        ...resumeOffer.run,
+        seed: resumeOffer.seed,
+        difficulty: resumeOffer.difficulty,
+        entityFilter: resumeOffer.entityFilter,
+        failed: false,
+      };
+      writeInfiniteRun(window.localStorage, run);
+      setInfiniteRun(run);
+    }
+    setDifficulty(resumeOffer.difficulty);
+    setEntityFilter(resumeOffer.entityFilter);
+    setUnlimitedSeed(resumeOffer.seed);
+    clearResumeSnapshot(window.localStorage, mode);
+    setResumeOffer(null);
   };
 
   const closeHowTo = () => {
@@ -631,6 +827,11 @@ export function WineGridGame() {
 
   const handleRevealSolutions = async () => {
     setIsRevealed(true);
+    if (mode === "infinite" && infiniteRun && !infiniteRun.failed) {
+      const failed = { ...infiniteRun, failed: true };
+      writeInfiniteRun(window.localStorage, failed);
+      setInfiniteRun(failed);
+    }
     if (!isCompleted) {
       await finalizeGame(cells, guessesUsedCount, true);
     }
@@ -649,6 +850,8 @@ export function WineGridGame() {
       difficultyLabel: t(difficultyKey(board.difficulty)),
       correct: correctCount,
       rarity: currentRarityScore,
+      missesUsed: guessesUsedCount,
+      streak: board.mode === "daily" ? dailyStreak.current : 0,
       rows: shareRows(cells),
       locale,
     });
@@ -804,7 +1007,7 @@ export function WineGridGame() {
             <button
               type="button"
               onClick={() => requestBoardChange({ kind: "mode", mode: "daily" })}
-              className={`px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs font-semibold text-center transition-all ${
+              className={`winegrid-mode-tab px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs font-semibold text-center transition-all ${
                 mode === "daily"
                   ? "bg-white text-slate-900 shadow-sm"
                   : "text-slate-500 hover:text-slate-800"
@@ -815,7 +1018,7 @@ export function WineGridGame() {
             <button
               type="button"
               onClick={() => requestBoardChange({ kind: "mode", mode: "unlimited" })}
-              className={`px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs font-semibold text-center transition-all ${
+              className={`winegrid-mode-tab px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs font-semibold text-center transition-all ${
                 mode === "unlimited"
                   ? "bg-white text-slate-900 shadow-sm"
                   : "text-slate-500 hover:text-slate-800"
@@ -826,7 +1029,7 @@ export function WineGridGame() {
             <button
               type="button"
               onClick={() => requestBoardChange({ kind: "mode", mode: "infinite" })}
-              className={`inline-flex items-center justify-center gap-1 px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+              className={`winegrid-mode-tab inline-flex items-center justify-center gap-1 px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
                 mode === "infinite"
                   ? "bg-white text-slate-900 shadow-sm"
                   : "text-slate-500 hover:text-slate-800"
@@ -967,13 +1170,38 @@ export function WineGridGame() {
               {t("filter.hint")}
             </p>
 
+            {resumeOffer && (
+              <button
+                type="button"
+                onClick={resumePractice}
+                className="winegrid-mode-tab inline-flex items-center justify-center gap-1.5 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-800 shadow-sm transition w-full sm:w-auto"
+              >
+                {t("action.resume")}
+              </button>
+            )}
+
             <button
               type="button"
               onClick={() => requestBoardChange({ kind: "new-board" })}
-              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-wine-600 hover:bg-wine-700 px-4 py-2 text-xs font-semibold text-white shadow-sm transition w-full sm:w-auto"
+              className="winegrid-mode-tab inline-flex items-center justify-center gap-1.5 rounded-xl bg-wine-600 hover:bg-wine-700 px-4 py-2 text-xs font-semibold text-white shadow-sm transition w-full sm:w-auto"
             >
-              <RefreshCw className="w-3.5 h-3.5" /> {t("action.newBoard")}
+              <RefreshCw className="w-3.5 h-3.5" />{" "}
+              {mode === "infinite" && infiniteRun?.failed
+                ? t("infinite.newRun")
+                : t("action.newBoard")}
             </button>
+          </div>
+        )}
+
+        {board.mode === "infinite" && infiniteRun?.failed && (
+          <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-950">
+            <div className="font-display font-semibold">{t("infinite.failedTitle")}</div>
+            <p className="mt-1 text-rose-800">
+              {t("infinite.failedDetail", {
+                boards: infiniteRun.boardsCleared,
+                misses: guessesUsedCount,
+              })}
+            </p>
           </div>
         )}
 
@@ -1003,6 +1231,16 @@ export function WineGridGame() {
                     current: dailyStreak.current,
                     best: dailyStreak.best,
                   })}
+                </div>
+              )}
+              {board.mode === "daily" && isCompleted && (
+                <div className="text-[10px] sm:text-xs font-semibold text-wine-700 mt-1">
+                  {t("daily.comeBack")}
+                </div>
+              )}
+              {board.mode === "infinite" && (
+                <div className="text-[10px] sm:text-xs font-semibold text-slate-600 mt-1">
+                  {t("infinite.boards")}: {infiniteRun?.boardsCleared ?? 0}
                 </div>
               )}
             </div>
@@ -1126,8 +1364,8 @@ export function WineGridGame() {
                       }`}
                     >
                       <div className="flex items-center justify-between gap-1 w-full flex-wrap">
-                        <span className="text-[9px] sm:text-[11px] font-semibold uppercase tracking-wider text-emerald-700 truncate">
-                          {pickedEntity.country}
+                        <span className="winegrid-card-meta text-[9px] sm:text-[11px] font-semibold uppercase tracking-wider text-emerald-700 truncate">
+                          {placeLabel(pickedEntity.country, locale, "country")}
                         </span>
                         <span
                           className={`text-[10px] sm:text-xs font-bold px-1.5 sm:px-2.5 py-0.5 rounded-full shrink-0 ${getRarityPillStyle(
@@ -1142,12 +1380,12 @@ export function WineGridGame() {
                         <div className="winegrid-clue-title font-display font-bold text-xs sm:text-lg text-slate-900 leading-snug">
                           {pickedEntity.canonicalName}
                         </div>
-                        <div className="text-xs text-slate-500 mt-1 hidden sm:block">
-                          {pickedEntity.macroRegion}
+                        <div className="winegrid-card-meta text-xs text-slate-500 mt-1 hidden sm:block">
+                          {placeLabel(pickedEntity.macroRegion, locale, "region")}
                         </div>
                       </div>
 
-                      <div className="text-[10px] sm:text-xs font-medium text-emerald-700">
+                      <div className="winegrid-card-meta text-[10px] sm:text-xs font-medium text-emerald-700">
                         <span className="hidden sm:inline">{t("stat.tasting")}</span>
                         <span className="sm:hidden">{t("stat.notes")}</span>
                       </div>
@@ -1170,9 +1408,9 @@ export function WineGridGame() {
                         <div className="winegrid-clue-title font-display font-bold text-xs sm:text-lg text-slate-900 leading-snug">
                           {sampleSolutionEntity.canonicalName}
                         </div>
-                        <div className="text-xs text-slate-500 mt-1 hidden sm:block">
-                          {sampleSolutionEntity.country} &bull;{" "}
-                          {sampleSolutionEntity.macroRegion}
+                        <div className="winegrid-card-meta text-xs text-slate-500 mt-1 hidden sm:block">
+                          {placeLabel(sampleSolutionEntity.country, locale, "country")} &bull;{" "}
+                          {placeLabel(sampleSolutionEntity.macroRegion, locale, "region")}
                         </div>
                       </div>
                       <span className="text-[10px] sm:text-xs font-medium text-amber-800">
@@ -1233,25 +1471,14 @@ export function WineGridGame() {
           <div className="grid grid-cols-3 sm:flex items-center gap-3 sm:gap-10 w-full sm:w-auto text-center sm:text-left">
             <div>
               <div className="text-[10px] sm:text-[11px] font-medium text-slate-400 uppercase tracking-wider">
-                {board.mode === "infinite" ? t("stat.misses") : t("stat.missesLeft")}
+                {t("stat.missesLeft")}
               </div>
               <div className="font-display text-xl sm:text-2xl font-bold text-slate-900 mt-0.5 flex items-center justify-center sm:justify-start gap-1">
-                {board.mode === "infinite" ? (
-                  <>
-                    <InfinityIcon className="w-5 h-5 sm:w-6 sm:h-6 text-slate-900" />
-                    <span className="text-[11px] sm:text-xs font-normal text-slate-400">
-                      ({guessesUsedCount})
-                    </span>
-                  </>
-                ) : (
-                  <>
-                    {guessesRemaining}
-                    <span className="text-xs sm:text-sm font-normal text-slate-400">
-                      {" "}
-                      / {MISS_BUDGET}
-                    </span>
-                  </>
-                )}
+                {guessesRemaining}
+                <span className="text-xs sm:text-sm font-normal text-slate-400">
+                  {" "}
+                  / {MISS_BUDGET}
+                </span>
               </div>
             </div>
 
@@ -1269,12 +1496,15 @@ export function WineGridGame() {
 
             <div className="hidden sm:block h-8 w-px bg-slate-200" />
 
-            <div>
+            <div title={t("stat.rarityHint")}>
               <div className="text-[10px] sm:text-[11px] font-medium text-slate-400 uppercase tracking-wider flex items-center justify-center sm:justify-start gap-1">
                 <Sparkles className="w-3 h-3 text-amber-500 shrink-0" /> {t("stat.rarity")}
               </div>
+              <div className="text-[10px] font-medium text-slate-400 normal-case tracking-normal">
+                {t("stat.rarityScale")}
+              </div>
               <div className="font-display text-xl sm:text-2xl font-bold text-slate-900 mt-0.5">
-                {currentRarityScore}
+                {formatDecimal(currentRarityScore, locale)}
               </div>
             </div>
           </div>
@@ -1360,35 +1590,8 @@ export function WineGridGame() {
 
       <HowToPlayModal isOpen={howToOpen} onClose={closeHowTo} />
 
-      <ConfirmDialog
-        isOpen={pendingChange !== null}
-        title={t("confirm.title")}
-        body={
-          pendingChange?.kind === "new-board"
-            ? t("confirm.newBody")
-            : t("confirm.switchBody", {
-                name: pendingChange
-                  ? pendingChange.kind === "mode"
-                    ? t(modeKey(pendingChange.mode))
-                    : pendingChange.kind === "difficulty"
-                    ? t(difficultyKey(pendingChange.difficulty))
-                    : pendingChange.kind === "filter"
-                    ? t(filterKey(pendingChange.filter))
-                    : t("confirm.fallback")
-                  : t("confirm.fallback"),
-              })
-        }
-        confirmLabel={
-          pendingChange?.kind === "new-board" ? t("confirm.newBoard") : t("confirm.switch")
-        }
-        onConfirm={() => {
-          if (pendingChange) applyBoardChange(pendingChange);
-        }}
-        onClose={() => setPendingChange(null)}
-      />
-
       {feedback && (
-        <div className="pointer-events-none fixed inset-x-0 top-[4.75rem] sm:top-20 z-40 flex justify-center px-3">
+        <div className="pointer-events-none fixed z-40 bottom-4 left-3 right-3 sm:left-auto sm:right-6 sm:bottom-6 sm:max-w-md flex justify-end">
           <div
             role="status"
             aria-live="polite"

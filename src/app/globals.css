@@ -179,3 +179,21 @@ body {
     font-size: 0.66rem;
   }
 }
+
+/* Phones at 520px and under: 44px targets, answer cards show name and pick rate. */
+@media (max-width: 520px) {
+  .winegrid-mode-tab,
+  .winegrid-clue-card,
+  .winegrid-cell {
+    min-height: 44px;
+  }
+
+  .winegrid-plus-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .winegrid-card-meta {
+    display: none;
+  }
+}

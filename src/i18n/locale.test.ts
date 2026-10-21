@@ -28,7 +28,7 @@ describe("locale", () => {
     const red = localizedClue(CLUE_BY_ID["style-dry-red"], "pt-BR");
     assert.equal(red.shortLabel, "Vinho tinto seco");
     const france = localizedClue(CLUE_BY_ID["geo-france"], "pt-BR");
-    assert.equal(france.shortLabel, "France");
+    assert.equal(france.shortLabel, "França");
     const bordeaux = localizedClue(CLUE_BY_ID["reg-bordeaux"], "pt-BR");
     assert.equal(bordeaux.shortLabel, "Bordeaux");
     const drcName = "Domaine de la Romanée-Conti";
