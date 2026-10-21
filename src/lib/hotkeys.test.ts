@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { consumeModalEscape, modalEscapeAction, overflowMenuEscape, shouldIgnoreHotkey } from "./hotkeys";
+import {
+  clueTooltipEscape,
+  consumeModalEscape,
+  modalEscapeAction,
+  overflowMenuEscape,
+  shouldIgnoreHotkey,
+} from "./hotkeys";
 
 describe("hotkeys", () => {
   it("ignores keys while typing, in a dialog, or with a modifier", () => {
@@ -90,6 +96,14 @@ describe("hotkeys", () => {
   it("lets the first Escape close a dialog instead of the menu behind it", () => {
     assert.equal(overflowMenuEscape("Escape", true, true), false);
     assert.equal(overflowMenuEscape("Escape", true, false), true);
+  });
+
+  it("closes a clue tooltip on the first Escape and leaves it for an open dialog", () => {
+    assert.equal(clueTooltipEscape("Escape", true, false), true);
+    assert.equal(clueTooltipEscape("Esc", true, false), true);
+    assert.equal(clueTooltipEscape("Escape", false, false), false);
+    assert.equal(clueTooltipEscape("Escape", true, true), false);
+    assert.equal(clueTooltipEscape("Enter", true, false), false);
   });
 
   it("allows a bare key on the board itself", () => {

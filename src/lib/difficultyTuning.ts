@@ -9,7 +9,8 @@ import { DifficultyLevel } from "@/types/wine";
  * legal answers above the floor. There is no upper cap.
  *
  * Standard is the easy tier: every cell has at least 5 answers. A floor of
- * 6 cannot build a grapes-only board. A clue must still match at least 3
+ * 6 still cannot build a grapes-only board after the South America clue:
+ * that clue adds regions and producers, not grapes. A clue must still match at least 3
  * entities in the active filter before it is dealt. Sommelier stays at 3
  * answers and a support floor of 3. Master stays
  * hard: a cell may have 2 answers, master-only clues stay in the pool, and

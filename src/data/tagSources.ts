@@ -166,6 +166,9 @@ export const TAG_SOURCES: Record<string, string> = {
   loess_silt: "Wind-blown loess or silt.",
   tuffeau: "Turonian tuffeau chalk of the middle Loire.",
   iron_clay: "Iron-rich clay, including Pomerol's crasse de fer.",
+  sandy_soil:
+    "Sand, sandy loam, or sandstone named as a defining vineyard soil by the producer or appellation body. Limestone, marl and clay do not count, and no generic 'sedimentary' reading is used.",
+  gneiss: "Gneiss bedrock (for example the Wachau's Gföhl gneiss or southern Côte-Rôtie). Read with granite by the crystalline-bedrock clue.",
 
   maritime: "Ocean-moderated climate.",
   continental: "Inland climate with a wide seasonal range.",
@@ -176,6 +179,8 @@ export const TAG_SOURCES: Record<string, string> = {
   rain_shadow: "A range that leaves the vineyard in a rain shadow.",
   diurnal_shift: "A large day-to-night temperature swing.",
   alpine_foothills: "Foothill sites. Not used by the ≥450 m clue.",
+  tropical_double_pruning:
+    "Tropical or subtropical viticulture with two prunings a year: either two harvests a year (Vale do São Francisco) or a reversed cycle that moves harvest into the dry winter (Brazil's 'vinhos de inverno').",
 
   gironde_estuary: "The Gironde estuary itself, not the Dordogne or Garonne upstream of it.",
   rhone_river: "The Rhône river.",
@@ -207,6 +212,8 @@ export const TAG_SOURCES: Record<string, string> = {
   flor_yeast: "Aged under flor or voile.",
   co_fermentation: "Red and white grapes fermented together, as in Côte-Rôtie.",
   amphora_concrete_unoaked: "Fermented and raised without oak, in stainless steel, concrete, or amphora.",
+  used_neutral_oak:
+    "Raised mainly in used barrels, with stated new oak at or below about 20%, or in demi-muids / tonneaux of about 400–700 L. Foudres and botti keep large_neutral_botte_foudre.",
 
   high_tannin_high_acid: "Both tannin and acidity are high.",
   laser_high_acid: "A low-pH, high-acid benchmark. Moderate acidity plus sugar does not qualify.",

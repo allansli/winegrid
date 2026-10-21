@@ -53,6 +53,11 @@ export const PT_CLUE_COPY: Record<string, ClueCopy> = {
     label: "América do Sul andina (Argentina ou Chile)",
     tooltip: "Fica na Argentina ou no Chile, ou é típico desses países.",
   },
+  "geo-south-america-all": {
+    shortLabel: "América do Sul",
+    label: "América do Sul (Brasil, Uruguai, Chile ou Argentina)",
+    tooltip: "Fica no Brasil, no Uruguai, no Chile ou na Argentina, ou é típico desses países.",
+  },
   "geo-old-world": {
     shortLabel: "Velho Mundo",
     label: "Tradição do Velho Mundo",
@@ -165,16 +170,22 @@ export const PT_CLUE_COPY: Record<string, ClueCopy> = {
       "Leitos drenantes de cascalho ou blocos de rio (Margem Esquerda de Bordeaux, Châteauneuf-du-Pape, Marlborough, Mendoza, Napa).",
   },
   "soil-granite": {
-    shortLabel: "Terroir de granito",
-    label: "Rocha-mãe de granito decomposto",
+    shortLabel: "Granito / gnaisse",
+    label: "Granito ou gnaisse (rocha-mãe cristalina)",
     tooltip:
-      "Rocha ígnea cristalina e ácida (Rhône Norte, Beaujolais Crus, Rías Baixas, Vinho Verde, Alsácia, Stellenbosch).",
+      "Rocha-mãe cristalina e ácida, granito ou gnaisse (Rhône Norte, Beaujolais Crus, Wachau, Muscadet, Rías Baixas, Vinho Verde, Alsácia, Stellenbosch).",
   },
   "soil-sand-phylloxera": {
     shortLabel: "Solo arenoso / pé franco",
     label: "Solo arenoso / terroir resistente à filoxera",
     tooltip:
       "Solos muito arenosos onde a filoxera não escava túneis (por exemplo Château Rayas, Santorini, Barossa, Colares/Etna).",
+  },
+  "soil-sandy": {
+    shortLabel: "Solo arenoso",
+    label: "Solo arenoso ou franco-arenoso (inclui arenito)",
+    tooltip:
+      "Areia, solo franco-arenoso ou arenito é um solo marcante do vinhedo (Barsac, Muscadet, Campanha Gaúcha, Colares, Rayas). Calcário, marga e argila não contam.",
   },
   "clim-maritime": {
     shortLabel: "Clima marítimo",
@@ -215,6 +226,12 @@ export const PT_CLUE_COPY: Record<string, ClueCopy> = {
     label: "Grande amplitude térmica ou sombra de chuva",
     tooltip:
       "Protegido por uma barreira de montanha, ou com queda forte de temperatura da noite para o dia, o que preserva o ácido málico.",
+  },
+  "clim-tropical-double-pruning": {
+    shortLabel: "Dupla poda",
+    label: "Dupla poda tropical (duas safras ou colheita de inverno)",
+    tooltip:
+      "Viticultura tropical com duas podas por ano: duas safras anuais no Vale do São Francisco, ou ciclo invertido que leva a colheita para o inverno seco no Sudeste.",
   },
   "hydro-major-river": {
     shortLabel: "Grande vale fluvial",
@@ -262,6 +279,12 @@ export const PT_CLUE_COPY: Record<string, ClueCopy> = {
     label: "Amadurecimento em botti grandes de carvalho da Eslavônia ou foudres neutros",
     tooltip:
       "Tonéis grandes (1.000 L–10.000 L) que permitem evolução oxidativa suave, sem lactonas pesadas de carvalho.",
+  },
+  "vin-used-large-oak": {
+    shortLabel: "Barrica usada / demi-muid",
+    label: "Amadurecido em barricas usadas ou demi-muids (pouco ou nenhum carvalho novo)",
+    tooltip:
+      "Sobretudo barricas velhas (cerca de 20% de carvalho novo ou menos) ou demi-muids e tonneaux de 400–700 L, como Chave, Coulée de Serrant, Dagueneau, Huet e Rayas.",
   },
   "vin-extended-aging-36m": {
     shortLabel: "36+ meses de amadurecimento",

@@ -1,0 +1,250 @@
+[
+ {
+  "card": "prod-chave",
+  "tag": "used_neutral_oak",
+  "url": "https://www.decanter.com/learn/wine-legend-jl-chave-cathelin-ermitage-1990-297936/",
+  "status": "200",
+  "strength": "press (Decanter, Stephen Brook) – not first-party",
+  "quote": "aged in casks of different sizes, with a modest proportion of new wood, never exceeding 20%"
+ },
+ {
+  "card": "prod-coulee-de-serrant",
+  "tag": "used_neutral_oak",
+  "url": "https://www.vinsdeloire.fr/en/loire-wines/coulee-serrant/all-about-coulee-serrant",
+  "status": "200",
+  "strength": "official interprofession (Vins de Loire) – regional body for a monopole-producer claim, FLAGGED",
+  "quote": "Matured in oak barrels for 6 to 8 months. New wood limited 5%"
+ },
+ {
+  "card": "prod-dagueneau",
+  "tag": "used_neutral_oak",
+  "url": "https://www.elitewines.com/wp-content/uploads/2023/08/Didier-Dagueneau-Sliex-NV-TS.pdf",
+  "status": "200",
+  "strength": "WEAK – distributor tech sheet",
+  "quote": "Aged mostly in 450 and 600 liter barrels, as well as some of Dagueneau's famous cigar barrels"
+ },
+ {
+  "card": "prod-dagueneau",
+  "tag": "used_neutral_oak",
+  "url": "https://www.idealwine.com/public-files/auction-reports/Auction%20Report%20-%20avril%202026.pdf",
+  "status": "200",
+  "strength": "WEAK – auction house report",
+  "quote": "élevages longs sur lies sans soutirage (en grands contenants en bois de 320 ou 600L …)"
+ },
+ {
+  "card": "prod-huet",
+  "tag": "used_neutral_oak",
+  "url": "https://www.domainehuet.com/",
+  "status": "200",
+  "strength": "first-party",
+  "quote": "l'autre en barriques anciennes … nos demi-muids"
+ },
+ {
+  "card": "prod-huet",
+  "tag": "used_neutral_oak",
+  "url": "https://www.elevage.wine/producer/huet-662/",
+  "status": "200",
+  "strength": "WEAK – retailer",
+  "quote": "pressed into a 50/50 mix of tanks and old demi-muids … racked into old barrels"
+ },
+ {
+  "card": "prod-foillard",
+  "tag": "used_neutral_oak",
+  "url": "https://kermitlynch.com/files/jean-foillard.pdf",
+  "status": "200",
+  "strength": "importer (Kermit Lynch) – WEAK",
+  "quote": "Barrels are minimum 2 years old … Aged for 6-9 months in used oak barrels"
+ },
+ {
+  "card": "prod-chateau-rayas",
+  "tag": "used_neutral_oak",
+  "url": "https://www.thewinecellarinsider.com/rhone-wines-cote-rotie-hermitage-chateauneuf-du-pape/chateauneuf-du-pape-wine-producer-profiles/rayas-chateauneuf-du-pape-rhone-wine/",
+  "status": "200",
+  "strength": "WEAK – critic blog",
+  "quote": "aged demi-muids ranging from 450-600 liters and old foudres … there are no new French [oak]"
+ },
+ {
+  "card": "prod-raveneau",
+  "tag": "used_neutral_oak",
+  "url": "https://www.rare.wine/producer/raveneau-chablis/",
+  "status": "200",
+  "strength": "WEAK – importer/retailer",
+  "quote": "feuillettes … Averaging seven to eight years in age, they don't contribute new oak aromas"
+ },
+ {
+  "card": "prod-chateau-climens",
+  "tag": "sandy_soil",
+  "url": "https://chateau-climens.com/en/an-exceptional-terroir/",
+  "status": "200",
+  "strength": "first-party",
+  "quote": "the famous red sands of Barsac. This thin layer of clayey ferruginous sands"
+ },
+ {
+  "card": "app-muscadet",
+  "tag": "sandy_soil",
+  "url": "https://extranet.inao.gouv.fr/fichier/2b-CDC-Muscadet-Sevre-et-Maine-2026.pdf",
+  "status": "200",
+  "strength": "official (INAO cahier des charges)",
+  "quote": "à l'origine de sols bruns filtrants, sableux et caillouteux"
+ },
+ {
+  "card": "prod-salton",
+  "tag": "sandy_soil",
+  "url": "https://www.salton.com.br/a-salton/o-terroir",
+  "status": "200",
+  "strength": "first-party",
+  "quote": "CAMPANHA Solo Arenosos bem drenados … Em sua unidade de Santana do Livramento, a Salton cultiva … Chardonnay e Pinot Noir em vinhedos próprios"
+ },
+ {
+  "card": "app-muscadet",
+  "tag": "gneiss",
+  "url": "https://extranet.inao.gouv.fr/fichier/2b-CDC-Muscadet-Sevre-et-Maine-2026.pdf",
+  "status": "200",
+  "strength": "official (INAO)",
+  "quote": "orthogneiss, roche-mère caractéristique de … « La Haye-Fouassière », ainsi que de gneiss peu acides"
+ },
+ {
+  "card": "app-muscadet",
+  "tag": "gneiss",
+  "url": "https://www.muscadet.fr/les-vins-de-nantes/la-geologie-des-terroirs/",
+  "status": "200",
+  "strength": "official (Interprofession des Vins de Nantes)",
+  "quote": "roches dites métamorphiques (gneiss, orthogneiss, micaschistes…)"
+ },
+ {
+  "card": "app-wachau",
+  "tag": "gneiss",
+  "url": "https://www.bmluk.gv.at/dam/jcr:e3bf80c9-6295-4e83-b7c1-ab830c69f76a/Wachau%20Produktspezifikation.pdf",
+  "status": "200",
+  "strength": "official (BMLUK product specification)",
+  "quote": "hat sich die Donau ihren windungsreichen Weg durch den Gföhler Gneis gegraben"
+ },
+ {
+  "card": "prod-fx-pichler",
+  "tag": "gneiss",
+  "url": "https://fx-pichler.at/en/wachau_/soils/",
+  "status": "200",
+  "strength": "first-party",
+  "quote": "An array of gneiss dominates"
+ },
+ {
+  "card": "prod-prager",
+  "tag": "gneiss",
+  "url": "https://www.winebow.com/our-brands/prager/prager-achleiten-riesling/2024",
+  "status": "200",
+  "strength": "WEAK – importer (Winebow); official site has no soil info",
+  "quote": "Soil composition: Gföler Gneiss"
+ },
+ {
+  "card": "app-cote-rotie",
+  "tag": "gneiss",
+  "url": "https://www.vins-rhone.com/en/cotes-du-rhone-cru-aoc-cote-rotie",
+  "status": "200",
+  "strength": "official (Inter Rhône)",
+  "quote": "mica schist to the north, gneiss to the south"
+ },
+ {
+  "card": "app-vale-do-sao-francisco",
+  "tag": "tropical_double_pruning",
+  "url": "https://www.embrapa.br/uva-e-vinho/indicacoes-geograficas-de-vinhos-do-brasil/ip-vale-do-sao-francisco",
+  "status": "200",
+  "strength": "official (Embrapa)",
+  "quote": "adotando-se duas podas anuais, que resultam em duas safras"
+ },
+ {
+  "card": "app-vale-do-sao-francisco",
+  "tag": "GI / municipalities / 350–400 m / major_river",
+  "url": "https://www.embrapa.br/uva-e-vinho/indicacoes-geograficas-de-vinhos-do-brasil/ip-vale-do-sao-francisco",
+  "status": "200",
+  "strength": "official (Embrapa)",
+  "quote": "Casa Nova e Curaçá, na Bahia, Petrolina, Lagoa Grande e Santa Maria da Boa Vista … irrigados com água do Rio São Francisco … 2022 – Concessão"
+ },
+ {
+  "card": "app-vale-do-sao-francisco",
+  "tag": "amphora_concrete_unoaked / dry_red / dry_white / grapes",
+  "url": "https://www.gov.br/inpi/pt-br/servicos/indicacoes-geograficas/arquivos/cadernos-de-especificacoes-tecnicas/ValedoSoFrancisco.pdf",
+  "status": "200",
+  "strength": "official (INPI caderno)",
+  "quote": "Vinho Fino e Vinho Nobre Branco … tanques de fermentação em inox, com controle de temperatura; cultivar lists"
+ },
+ {
+  "card": "prod-guaspari",
+  "tag": "tropical_double_pruning",
+  "url": "https://www.vinicolaguaspari.com.br/revista/syrah-de-altitude/",
+  "status": "200",
+  "strength": "first-party",
+  "quote": "altitude elevada, solos graníticos e a técnica inovadora da dupla poda"
+ },
+ {
+  "card": "prod-rio-sol",
+  "tag": "tropical_double_pruning",
+  "url": "https://www.riosol.com.br/principal/",
+  "status": "200",
+  "strength": "first-party",
+  "quote": "Este é o único lugar do mundo que produz, hoje, duas safras de uvas por ano"
+ },
+ {
+  "card": "prod-rio-sol",
+  "tag": "low_tannin_delicate / dry_red",
+  "url": "https://www.riosol.com.br/produtos/03.php",
+  "status": "200",
+  "strength": "first-party",
+  "quote": "Rio Sol Reserva … Delicado, com boa acidez, com taninos elegantes e macios"
+ },
+ {
+  "card": "prod-rio-sol",
+  "tag": "low_tannin_delicate",
+  "url": "https://www.riosol.com.br/produtos/07.php",
+  "status": "200",
+  "strength": "first-party",
+  "quote": "Rio Sol Tempranillo … Delicado, com boa acidez, com taninos elegantes e macios. Sem maturação"
+ },
+ {
+  "card": "prod-rio-sol",
+  "tag": "primaryGrapes / note",
+  "url": "https://www.riosol.com.br/produtos/01.php",
+  "status": "200",
+  "strength": "first-party",
+  "quote": "Rio Sol Premium Cabernet Sauvignon, Syrah, Alicante Bouschet, Touriga Nacional e Aragonês … 12 meses em barrica carvalho francês"
+ },
+ {
+  "card": "prod-salton",
+  "tag": "sur_lie_autolysis / sparkling_traditional",
+  "url": "https://www.salton.com.br/upload/produto/ficha/pt_salton-evidence-cuvee-brut.pdf",
+  "status": "200",
+  "strength": "first-party",
+  "quote": "Segunda fermentação alcoólica em garrafas • Amadurecimento sobre leveduras durante, ao menos, 12 meses"
+ },
+ {
+  "card": "prod-salton",
+  "tag": "full_bodied_high_abv / dry_red",
+  "url": "https://www.salton.com.br/produto/salton-ip-campanha-gaucha-vinhedo-da-lebre-cabernet-sauvignon",
+  "status": "200",
+  "strength": "first-party",
+  "quote": "CORPO Encorpado … GRADUAÇÃO ALCOÓLICA: 14,5% vol."
+ },
+ {
+  "card": "prod-salton",
+  "tag": "note (1878/1910/1933/2012)",
+  "url": "https://www.salton.com.br/a-salton/a-nossa-historia",
+  "status": "200",
+  "strength": "first-party",
+  "quote": "Em 1878 … constituída em 1910 … em 1933, quando iniciou-se a elaboração de espumantes … 2012 A chegada na Campanha Gaúcha"
+ },
+ {
+  "card": "prod-salton",
+  "tag": "allowlist reason (climates)",
+  "url": "https://www.infoteca.cnptia.embrapa.br/infoteca/bitstream/doc/1186369/1/Tonietto-LV-IGCampanha.pdf",
+  "status": "200",
+  "strength": "official (Embrapa)",
+  "quote": "classes de clima vitícola IF … “De noites temperadas” e “De noites quentes”"
+ },
+ {
+  "card": "app-vale-do-sao-francisco",
+  "tag": "allowlist reason (soils)",
+  "url": "https://periodicos.ufpe.br/revistas/index.php/rbgfe/article/view/263879",
+  "status": "200",
+  "strength": "academic",
+  "quote": "Argissolos Vermelho-Amarelo … textura argilosa e … Argissolos Amarelos … média/argilosa … arenosa/média"
+ }
+]

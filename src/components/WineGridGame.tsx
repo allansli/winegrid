@@ -24,7 +24,7 @@ import { WINE_ENTITY_BY_ID } from "@/data/wineDatabase";
 import { boardClueHash, reconcileSavedBoard } from "@/lib/boardClueHash";
 import { clientVercelEnv, parseDailyQuery, searchWithoutRejectedFuture } from "@/lib/dailyDate";
 import { futureNoticeVisible } from "@/lib/futureNotice";
-import { overflowMenuEscape } from "@/lib/hotkeys";
+import { clueTooltipEscape, overflowMenuEscape } from "@/lib/hotkeys";
 import { displayEntityName } from "@/lib/entityName";
 import {
   DAILY_DIFFICULTY,
@@ -165,8 +165,20 @@ function ClueCard({
         setHover(false);
       }
     };
+    const onKey = (event: KeyboardEvent) => {
+      const dialogOpen = Boolean(document.querySelector("[role='dialog'][aria-modal='true']"));
+      if (!clueTooltipEscape(event.key, true, dialogOpen)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      setPinned(false);
+      setHover(false);
+    };
     document.addEventListener("pointerdown", onPointer);
-    return () => document.removeEventListener("pointerdown", onPointer);
+    document.addEventListener("keydown", onKey, true);
+    return () => {
+      document.removeEventListener("pointerdown", onPointer);
+      document.removeEventListener("keydown", onKey, true);
+    };
   }, [open]);
 
   const alignClass =

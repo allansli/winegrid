@@ -359,6 +359,12 @@ export const PT_NOTES: Record<string, string> = {
     "Vinhateiro de Vertus, na Côte des Blancs, com Chardonnay orgânico e biodinâmico sobre giz campaniano. Os vinhos fermentam com leveduras próprias e amadurecem cerca de um ano sobre as borras; o Terre de Vertus depois passa seis anos ou mais na adega e se destaca pela salinidade e mineralidade.",
   "prod-felton-road":
     "Propriedade de Bannockburn em encostas quentes voltadas para o norte, de loess glacial, com cultivo biodinâmico certificado pela Demeter e pela BioGro. Central Otago é a exceção continental da Nova Zelândia; o Pinot Noir da Felton Road estagia em carvalho francês, cerca de 30% novo.",
+  "app-vale-do-sao-francisco":
+    "A IG do vinho tropical brasileiro (IP, 2022), às margens do rio São Francisco, entre a Bahia e Pernambuco. Os vinhedos, a 350–400 m, são irrigados com água do rio e podados duas vezes por ano, o que dá duas safras anuais e colheitas de janeiro a dezembro. Os espumantes são o carro-chefe, e os brancos fermentam em inox com controle de temperatura.",
+  "prod-rio-sol":
+    "Vinícola do Vale do São Francisco em Lagoa Grande (PE), pertencente à Global Wines, do Dão, em Portugal. A região dá duas safras de uva por ano. O tinto Premium (Cabernet Sauvignon, Syrah, Alicante Bouschet, Touriga Nacional e Aragonês) passa 12 meses em barricas de carvalho francês, enquanto o Syrah e o Tempranillo varietais não passam por madeira e são delicados, de taninos elegantes.",
+  "prod-salton":
+    "Vinícola familiar fundada em Bento Gonçalves: Antonio Domenico Salton chegou do Vêneto em 1878, os filhos constituíram a empresa em 1910 e os espumantes começaram em 1933. Desde 2012 cultiva Chardonnay e Pinot Noir próprios em solos arenosos e bem drenados em Santana do Livramento, na Campanha. O Évidence Brut é feito pelo método tradicional, com pelo menos 12 meses sobre as leveduras; o Cabernet Vinhedo da Lebre é encorpado, com 14,5%.",
 };
 
 export function localizedNote(id: string, fallback: string, locale: Locale): string {

@@ -98,6 +98,7 @@ export const REGION_LABELS: Record<string, Record<Locale, string>> = {
   "Campanha Gaúcha": { en: "Campanha Gaúcha", "pt-BR": "Campanha Gaúcha" },
   "Santa Catarina Highlands": { en: "Santa Catarina Highlands", "pt-BR": "Planalto Catarinense" },
   "Southeast Brazil": { en: "Southeast Brazil", "pt-BR": "Sudeste do Brasil" },
+  "São Francisco Valley": { en: "São Francisco Valley", "pt-BR": "Vale do São Francisco" },
   Patagonia: { en: "Patagonia", "pt-BR": "Patagônia" },
   Aconcagua: { en: "Aconcagua", "pt-BR": "Aconcágua" },
   Coquimbo: { en: "Coquimbo", "pt-BR": "Coquimbo" },

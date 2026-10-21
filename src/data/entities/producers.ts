@@ -223,7 +223,7 @@ export const PRODUCER_ENTITIES: WineEntity[] = [
     climates: ["mediterranean"],
     waterBodies: ["rhone_river", "major_river"],
     styles: ["dry_red", "dry_white"],
-    vinification: ["large_neutral_botte_foudre", "carbonic_whole_cluster"],
+    vinification: ["large_neutral_botte_foudre", "carbonic_whole_cluster", "used_neutral_oak"],
     sensory: ["low_tannin_delicate", "violet_rose_floral", "full_bodied_high_abv", "long_cellar_20yr"],
     varietalTraits: ["rhone_family", "single_varietal_strict"],
     primaryGrapes: ["Grenache", "Clairette"],
