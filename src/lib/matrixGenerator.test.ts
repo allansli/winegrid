@@ -4,14 +4,11 @@ import { CLUE_BY_ID } from "../data/clueCatalog";
 import { DifficultyLevel, EntityFilterMode } from "../types/wine";
 import {
   DAILY_DIFFICULTY,
-  answerCountBounds,
   assignmentSurvivesAnyPick,
   dailySeedForDate,
   generateDailyBoard,
   generateWineGridBoard,
-  maximumValidAnswers,
   minimumValidAnswers,
-  pairIsRedundant,
 } from "./matrixGenerator";
 
 const DIFFICULTIES: DifficultyLevel[] = ["wset2", "wset3", "master_somm"];
@@ -47,11 +44,11 @@ const TECHNICAL_CLUE_IDS = [
 ];
 
 function assertCellFloors(board: ReturnType<typeof generateWineGridBoard>) {
-  const { min, max } = answerCountBounds(board.difficulty);
+  const min = minimumValidAnswers(board.difficulty);
   for (const cell of board.cells) {
     assert.ok(
-      cell.validEntityIds.length >= min && cell.validEntityIds.length <= max,
-      `${board.boardId} cell ${cell.index} has ${cell.validEntityIds.length}, need ${min}–${max}`
+      cell.validEntityIds.length >= min,
+      `${board.boardId} cell ${cell.index} has ${cell.validEntityIds.length}, need at least ${min}`
     );
   }
   assert.equal(new Set(board.guaranteedSolution).size, 9);
@@ -66,11 +63,8 @@ describe("board difficulty floors", () => {
   it("keeps the easy tier on broad clues and the technical clues off it", () => {
     assert.equal(DAILY_DIFFICULTY, "wset2");
     assert.equal(minimumValidAnswers("wset2"), 3);
-    assert.equal(maximumValidAnswers("wset2"), 15);
     assert.equal(minimumValidAnswers("wset3"), 3);
-    assert.equal(maximumValidAnswers("wset3"), 8);
     assert.equal(minimumValidAnswers("master_somm"), 2);
-    assert.equal(maximumValidAnswers("master_somm"), 4);
     for (const id of BROAD_CLUE_IDS) {
       assert.equal(CLUE_BY_ID[id]?.difficulty, "wset2", id);
     }
@@ -126,14 +120,6 @@ describe("board difficulty floors", () => {
       first.colClues.map((clue) => clue.id),
       again.colClues.map((clue) => clue.id)
     );
-  });
-
-  it("treats a large contained clue as redundant and a small region clue as a real filter", () => {
-    const piedmont = new Set(["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l"]);
-    const dryRed = new Set([...piedmont, "m", "n"]);
-    assert.equal(pairIsRedundant(piedmont, dryRed), true);
-    const bordeauxGrapes = new Set(["cf", "sb", "merlot"]);
-    assert.equal(pairIsRedundant(bordeauxGrapes, dryRed), false);
   });
 
   it("keeps the appellation category off most daily boards", () => {

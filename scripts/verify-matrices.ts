@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { ALL_WINE_ENTITIES, WINE_ENTITY_BY_ID } from "../src/data/wineDatabase";
 import { CLUE_CATALOG } from "../src/data/clueCatalog";
-import { answerCountBounds, generateDailyBoard, generateWineGridBoard } from "../src/lib/matrixGenerator";
+import { generateDailyBoard, generateWineGridBoard, minimumValidAnswers } from "../src/lib/matrixGenerator";
 import { DifficultyLevel, EntityFilterMode } from "../src/types/wine";
 
 function escapeSql(str: string): string {
@@ -41,7 +41,7 @@ function main() {
     master_somm: [],
   };
   for (const diff of difficulties) {
-    const bounds = answerCountBounds(diff);
+    const minAnswers = minimumValidAnswers(diff);
     for (const filter of filters) {
       for (let i = 0; i < 15; i++) {
         const board = generateWineGridBoard({
@@ -56,9 +56,9 @@ function main() {
         }
         for (const cell of board.cells) {
           const count = cell.validEntityIds.length;
-          if (count < bounds.min || count > bounds.max) {
+          if (count < minAnswers) {
             throw new Error(
-              `${board.boardId} cell ${cell.index} has ${count} answers, outside ${bounds.min}–${bounds.max}`
+              `${board.boardId} cell ${cell.index} has ${count} answers, under the floor of ${minAnswers}`
             );
           }
           sizesByLevel[diff].push(count);
@@ -73,9 +73,8 @@ function main() {
     const sizes = [...sizesByLevel[diff]].sort((a, b) => a - b);
     const mid = Math.floor(sizes.length / 2);
     const median = sizes.length % 2 === 0 ? (sizes[mid - 1] + sizes[mid]) / 2 : sizes[mid];
-    const bounds = answerCountBounds(diff);
     console.log(
-      `  ${diff}: min ${sizes[0]} / median ${median} / max ${sizes[sizes.length - 1]} (cap ${bounds.min}–${bounds.max}, n=${sizes.length})`
+      `  ${diff}: min ${sizes[0]} / median ${median} / max ${sizes[sizes.length - 1]} (floor ${minimumValidAnswers(diff)}, n=${sizes.length})`
     );
   }
 
