@@ -2,6 +2,7 @@ import {
   ClueDefinition,
   DifficultyLevel,
   EntityFilterMode,
+  GameMode,
   GeneratedBoard,
   MatrixCell,
   WineEntity,
@@ -71,7 +72,7 @@ export function findDistinctAssignment(cellValidIds: string[][]): string[] | nul
 
 export function generateWineGridBoard(options: {
   seed: string;
-  mode: "daily" | "unlimited";
+  mode: GameMode;
   difficulty?: DifficultyLevel;
   entityFilter?: EntityFilterMode;
   boardDate?: string;

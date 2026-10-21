@@ -66,7 +66,7 @@ create table if not exists public.game_sessions (
   anon_id text not null,
   board_id text not null,
   board_date date,
-  game_mode text not null check (game_mode in ('daily', 'unlimited')),
+  game_mode text not null check (game_mode in ('daily', 'unlimited', 'infinite')),
   difficulty text not null default 'wset3',
   entity_filter text not null default 'all',
   row_clue_ids text[] not null,

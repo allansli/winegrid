@@ -5,6 +5,7 @@ import confetti from "canvas-confetti";
 import {
   DifficultyLevel,
   EntityFilterMode,
+  GameMode,
   GeneratedBoard,
   MatrixCell,
   WineEntity,
@@ -41,6 +42,7 @@ import {
   Flame,
   Grape,
   HelpCircle,
+  Infinity as InfinityIcon,
   Info,
   Plus,
   RefreshCw,
@@ -63,7 +65,7 @@ interface PersistedActiveState {
 
 export function WineGridGame() {
   const [todayStr, setTodayStr] = useState<string>("2026-10-20");
-  const [mode, setMode] = useState<"daily" | "unlimited">("daily");
+  const [mode, setMode] = useState<GameMode>("daily");
   const [difficulty, setDifficulty] = useState<DifficultyLevel>("wset3");
   const [entityFilter, setEntityFilter] = useState<EntityFilterMode>("all");
   const [unlimitedSeed, setUnlimitedSeed] = useState<string>("somm-1");
@@ -72,6 +74,7 @@ export function WineGridGame() {
   const [board, setBoard] = useState<GeneratedBoard | null>(null);
   const [cells, setCells] = useState<MatrixCell[]>([]);
   const [guessesRemaining, setGuessesRemaining] = useState<number>(10);
+  const [guessesUsedCount, setGuessesUsedCount] = useState<number>(0);
   const [isCompleted, setIsCompleted] = useState<boolean>(false);
   const [isRevealed, setIsRevealed] = useState<boolean>(false);
 
@@ -140,7 +143,7 @@ export function WineGridGame() {
 
   const initBoard = useCallback(
     (
-      targetMode: "daily" | "unlimited",
+      targetMode: GameMode,
       targetDiff: DifficultyLevel,
       targetFilter: EntityFilterMode,
       targetSeed: string
@@ -165,6 +168,7 @@ export function WineGridGame() {
         setBoard(generated);
         setCells(saved.cells);
         setGuessesRemaining(saved.guessesRemaining);
+        setGuessesUsedCount(Math.max(0, 10 - saved.guessesRemaining));
         setIsCompleted(saved.isCompleted);
         setIsRevealed(saved.isRevealed);
       } else {
@@ -172,7 +176,8 @@ export function WineGridGame() {
         setSessionId(newSessionId);
         setBoard(generated);
         setCells(generated.cells);
-        setGuessesRemaining(10);
+        setGuessesRemaining(targetMode === "infinite" ? 999 : 10);
+        setGuessesUsedCount(0);
         setIsCompleted(false);
         setIsRevealed(false);
         setFeedback(null);
@@ -314,8 +319,13 @@ export function WineGridGame() {
 
     setActiveCellIndex(null);
 
+    const isInfinite = board.mode === "infinite";
     const isValid = cell.validEntityIds.includes(entity.id);
-    const nextGuesses = Math.max(0, guessesRemaining - 1);
+    const nextUsed = guessesUsedCount + 1;
+    setGuessesUsedCount(nextUsed);
+    const nextGuesses = isInfinite
+      ? 999
+      : Math.max(0, guessesRemaining - 1);
     setGuessesRemaining(nextGuesses);
 
     if (isValid) {
@@ -357,8 +367,12 @@ export function WineGridGame() {
       });
 
       const allNineSolved = nextCells.every((c) => Boolean(c.pickedEntityId));
-      if (allNineSolved || nextGuesses === 0) {
-        await finalizeGame(nextCells, nextGuesses, false);
+      if (allNineSolved || (!isInfinite && nextGuesses === 0)) {
+        await finalizeGame(
+          nextCells,
+          isInfinite ? Math.max(0, 10 - nextUsed) : nextGuesses,
+          false
+        );
       }
     } else {
       const matchesRow = rowClue.predicate(entity);
@@ -389,7 +403,7 @@ export function WineGridGame() {
         guesses_remaining: nextGuesses,
       });
 
-      if (nextGuesses === 0) {
+      if (!isInfinite && nextGuesses === 0) {
         await finalizeGame(cells, 0, false);
       }
     }
@@ -508,24 +522,35 @@ export function WineGridGame() {
             <button
               type="button"
               onClick={() => setMode("daily")}
-              className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
                 mode === "daily"
                   ? "bg-white text-slate-900 shadow-sm"
                   : "text-slate-500 hover:text-slate-800"
               }`}
             >
-              Daily Puzzle
+              Daily
             </button>
             <button
               type="button"
               onClick={() => setMode("unlimited")}
-              className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${
+              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
                 mode === "unlimited"
                   ? "bg-white text-slate-900 shadow-sm"
                   : "text-slate-500 hover:text-slate-800"
               }`}
             >
-              Unlimited
+              Unlimited (10)
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("infinite")}
+              className={`inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+                mode === "infinite"
+                  ? "bg-white text-slate-900 shadow-sm"
+                  : "text-slate-500 hover:text-slate-800"
+              }`}
+            >
+              <InfinityIcon className="w-3.5 h-3.5" /> Infinite
             </button>
           </div>
 
@@ -578,8 +603,8 @@ export function WineGridGame() {
 
       {/* Spacious Centered Main Content */}
       <main className="flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-6">
-        {/* Unlimited Mode Filter Bar */}
-        {mode === "unlimited" && (
+        {/* Unlimited / Infinite Mode Filter Bar */}
+        {(mode === "unlimited" || mode === "infinite") && (
           <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-soft flex flex-wrap items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-4">
               <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
@@ -685,7 +710,11 @@ export function WineGridGame() {
           {/* Top-Left Corner Info */}
           <div className="flex flex-col justify-end p-2 sm:p-4">
             <span className="text-[11px] font-semibold uppercase tracking-wider text-wine-600">
-              {board.mode === "daily" ? "Daily Grid" : "Practice"}
+              {board.mode === "daily"
+                ? "Daily Grid"
+                : board.mode === "infinite"
+                ? "Infinite Mode"
+                : "Practice"}
             </span>
             <span className="font-display text-sm sm:text-base font-bold text-slate-800 mt-0.5">
               {board.mode === "daily" ? todayStr : "Custom 3×3"}
@@ -868,11 +897,25 @@ export function WineGridGame() {
           <div className="flex items-center gap-6 sm:gap-10">
             <div>
               <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
-                Guesses Left
+                {board.mode === "infinite" ? "Guesses Limit" : "Guesses Left"}
               </div>
-              <div className="font-display text-2xl font-bold text-slate-900 mt-0.5">
-                {guessesRemaining}
-                <span className="text-sm font-normal text-slate-400"> / 10</span>
+              <div className="font-display text-2xl font-bold text-slate-900 mt-0.5 flex items-center gap-1.5">
+                {board.mode === "infinite" ? (
+                  <>
+                    <InfinityIcon className="w-6 h-6 text-slate-900" />
+                    <span className="text-xs font-normal text-slate-400">
+                      ({guessesUsedCount} used)
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    {guessesRemaining}
+                    <span className="text-sm font-normal text-slate-400">
+                      {" "}
+                      / 10
+                    </span>
+                  </>
+                )}
               </div>
             </div>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { WINE_ENTITY_BY_ID } from "@/data/wineDatabase";
-import { DifficultyLevel, EntityFilterMode } from "@/types/wine";
+import { DifficultyLevel, EntityFilterMode, GameMode } from "@/types/wine";
 import { getOrCreateAnonId, trackEvent } from "./observability";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "./supabase/client";
 
@@ -16,7 +16,7 @@ export interface GameHistoryEntry {
   sessionId: string;
   boardId: string;
   boardDate: string;
-  mode: "daily" | "unlimited";
+  mode: GameMode;
   difficulty: DifficultyLevel;
   entityFilter: EntityFilterMode;
   rowClueLabels: string[];

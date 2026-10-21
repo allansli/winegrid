@@ -190,10 +190,12 @@ export interface MatrixCell {
   isLocked: boolean;
 }
 
+export type GameMode = "daily" | "unlimited" | "infinite";
+
 export interface GeneratedBoard {
   boardId: string;
   boardDate?: string;
-  mode: "daily" | "unlimited";
+  mode: GameMode;
   difficulty: DifficultyLevel;
   entityFilter: EntityFilterMode;
   rowClues: ClueDefinition[];
