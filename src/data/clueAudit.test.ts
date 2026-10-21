@@ -209,7 +209,7 @@ describe("audit clue accept and reject cases", () => {
     ["geo-old-world", "grape-zinfandel", true],
     ["geo-new-world", "grape-merlot", false],
     ["geo-southern-hemisphere", "grape-merlot", false],
-    ["geo-old-world", "grape-malbec", false],
+    ["geo-old-world", "grape-malbec", true],
     ["geo-new-world", "grape-malbec", true],
     ["her-unesco-monastic", "app-pauillac", false],
     ["clim-high-altitude", "app-naoussa", false],
@@ -269,13 +269,26 @@ describe("audit clue accept and reject cases", () => {
     assert.match(ALSO_COUNTRY_SOURCES["grape-sauvignon-blanc"].Australia, /Margaret River/);
     assert.match(ALSO_COUNTRY_SOURCES["grape-chardonnay"].Australia, /Margaret River/);
     assert.match(ALSO_COUNTRY_SOURCES["grape-sauvignon-blanc"]["New Zealand"], /Marlborough/);
+    assert.match(ALSO_COUNTRY_SOURCES["grape-chardonnay"]["New Zealand"], /Marlborough|Hawke's Bay/);
+    assert.doesNotMatch(ALSO_COUNTRY_SOURCES["grape-chardonnay"]["New Zealand"], /Central Otago/);
+    assert.match(ALSO_COUNTRY_SOURCES["grape-chenin-blanc"]["South Africa"], /most planted/i);
+    assert.match(ALSO_COUNTRY_SOURCES["grape-chenin-blanc"]["South Africa"], /SAWIS/);
+    assert.match(
+      ALSO_COUNTRY_SOURCES["grape-cabernet-sauvignon"].Chile,
+      /https:\/\/www\.winesofchile\.org\/wine-regions-map\//
+    );
+    assert.doesNotMatch(ALSO_COUNTRY_SOURCES["grape-cabernet-sauvignon"].Chile, /\/zh\//);
+    const malbec = WINE_ENTITY_BY_ID["grape-malbec"];
+    assert.ok(malbec.alsoCountries?.includes("France"));
+    assert.match(ALSO_COUNTRY_SOURCES["grape-malbec"].France, /Cahors/);
+    assert.equal(CLUE_BY_ID["geo-old-world"].predicate(malbec), true);
     const grenache = WINE_ENTITY_BY_ID["grape-grenache"];
     const mourvedre = WINE_ENTITY_BY_ID["grape-mourvedre"];
     assert.equal(grenache.country, "Spain");
     assert.equal(grenache.macroRegion, "Aragon");
     assert.ok(grenache.alsoRegions?.includes("Rhône Valley"));
     assert.equal(mourvedre.country, "Spain");
-    assert.equal(mourvedre.macroRegion, "Valencia");
+    assert.equal(mourvedre.macroRegion, "Murcia (Jumilla)");
     assert.ok(mourvedre.alsoRegions?.includes("Provence"));
   });
 

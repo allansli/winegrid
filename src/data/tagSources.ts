@@ -25,7 +25,7 @@ export const ALSO_COUNTRY_SOURCES: Record<string, Record<string, string>> = {
     "United States":
       "Wine Institute: Cabernet Sauvignon is California's most widely planted red wine grape, with the most acreage in Napa County. https://wineinstitute.org/our-industry/statistics/wine-fact-sheets/cabernet-sauvignon/",
     Chile:
-      "Wines of Chile: Cabernet Sauvignon is the main variety planted in the Maipo Valley. https://www.winesofchile.org/zh/wine-regions-map/",
+      "Wines of Chile: Cabernet Sauvignon is the main variety planted in the Maipo Valley. https://www.winesofchile.org/wine-regions-map/",
     Australia:
       "Wine Australia: Cabernet Sauvignon leads Coonawarra and is one of Margaret River's main varieties. https://www.wineaustralia.com/market-insights/regions-and-varieties/south-australia-wines/coonawarra",
   },
@@ -41,7 +41,7 @@ export const ALSO_COUNTRY_SOURCES: Record<string, Record<string, string>> = {
     "United States":
       "Wine Institute: Chardonnay is California's most planted white wine grape, and Sonoma County leads the acreage. https://wineinstitute.org/our-industry/statistics/wine-fact-sheets/chardonnay/",
     "New Zealand":
-      "New Zealand Wine: Central Otago is renowned for Chardonnay, and Marlborough offers intense Chardonnay. https://www.nzwine.com/en/regions/centralotago/",
+      "New Zealand Wine: Marlborough produces zesty Chardonnay, and Hawke's Bay is known for concentrated Chardonnay. https://www.nzwine.com/en/winestyles/chardonnay/",
     Australia:
       "Wine Australia: Chardonnay is one of Margaret River's main varieties. https://www.wineaustralia.com/market-insights/regions-and-varieties/western-australia-wines/margaret-river",
   },
@@ -73,7 +73,7 @@ export const ALSO_COUNTRY_SOURCES: Record<string, Record<string, string>> = {
   },
   "grape-chenin-blanc": {
     "South Africa":
-      "Wines of South Africa: Chenin Blanc (Steen) is an approved Wine of Origin cultivar. https://www.wosa.co.za/The-Industry/Wines-Of-Origin/The-Role-Of-Cultivar/",
+      "WOSA / SAWIS: Chenin Blanc is South Africa's most planted wine grape, 15,949 ha as of 31 December 2025. https://www.wosa.co.za/wosadocs/32026/SAWIS_Status_of_wine_grapes_2025_FA.pdf",
   },
   "grape-albarino": {
     Portugal:
@@ -86,6 +86,10 @@ export const ALSO_COUNTRY_SOURCES: Record<string, Record<string, string>> = {
   "grape-zinfandel": {
     Italy:
       "Consorzio di Tutela del Primitivo di Manduria: the DOC is at least 85% Primitivo (https://www.consorziotutelaprimitivo.com/disciplinare-doc/). Primitivo and Zinfandel are the same variety (Vitis 44, 2005, https://doi.org/10.5073/vitis.2005.44.147-148).",
+  },
+  "grape-malbec": {
+    France:
+      "Vins de Cahors: the Cahors AOC is reserved for red wines made from Malbec, which must be at least 70% of the blend, and Cahors is the cradle of the grape. https://vindecahors.fr/en/cahors-vineyard/",
   },
   "grape-semillon": {
     Australia:

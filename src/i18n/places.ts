@@ -38,6 +38,7 @@ const REGION_PT: Record<string, string> = {
   Andalusia: "Andaluzia",
   Aragon: "Aragão",
   Valencia: "Valência",
+  "Murcia (Jumilla)": "Múrcia (Jumilla)",
   Bekaa: "Vale do Bekaa",
   Campania: "Campânia",
   "Campania & Basilicata": "Campânia e Basilicata",
