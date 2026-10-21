@@ -162,6 +162,16 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     predicate: (e) => inCountry(e, "Argentina", "Chile"),
   },
   {
+    id: "geo-south-america-all",
+    label: "South America (Brazil, Uruguay, Chile or Argentina)",
+    shortLabel: "South America",
+    category: "geography",
+    difficulty: "wset2",
+    tooltip: "Located in or signature to Brazil, Uruguay, Chile or Argentina.",
+    iconName: "Mountain",
+    predicate: (e) => inCountry(e, "Brazil", "Uruguay", "Chile", "Argentina"),
+  },
+  {
     id: "geo-old-world",
     label: "Old World Wine Tradition",
     shortLabel: "Old World",
@@ -411,13 +421,13 @@ export const CLUE_CATALOG: ClueDefinition[] = [
   },
   {
     id: "soil-granite",
-    label: "Decomposed Granite Bedrock",
-    shortLabel: "Granite Terroir",
+    label: "Granite or Gneiss (Crystalline Bedrock)",
+    shortLabel: "Granite / Gneiss",
     category: "soil",
     difficulty: "wset3",
-    tooltip: "Acidic, crystalline igneous bedrock (Northern Rhône, Beaujolais Crus, Rías Baixas, Vinho Verde, Alsace, Stellenbosch).",
+    tooltip: "Acidic, crystalline bedrock: granite or gneiss (Northern Rhône, Beaujolais Crus, Wachau, Muscadet, Rías Baixas, Vinho Verde, Alsace, Stellenbosch).",
     iconName: "Mountain",
-    predicate: (e) => e.soils.includes("granite"),
+    predicate: (e) => e.soils.includes("granite") || e.soils.includes("gneiss"),
   },
   {
     id: "soil-sand-phylloxera",
@@ -428,6 +438,17 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     tooltip: "High-sand soils where the phylloxera louse cannot construct tunnels (e.g., Château Rayas, Santorini, Barossa, Colares/Etna).",
     iconName: "Sparkles",
     predicate: (e) => e.soils.includes("sand_phylloxera_free"),
+  },
+
+  {
+    id: "soil-sandy",
+    label: "Sandy or Sandy-Loam Soil (Sandstone Included)",
+    shortLabel: "Sandy Soil",
+    category: "soil",
+    difficulty: "wset3",
+    tooltip: "Sand, sandy loam or sandstone is a defining vineyard soil (Barsac, Muscadet, Campanha Gaúcha, Colares, Rayas). Limestone, marl and clay do not count.",
+    iconName: "Sparkles",
+    predicate: (e) => e.soils.includes("sandy_soil") || e.soils.includes("sand_phylloxera_free"),
   },
 
   // ==========================================================================
@@ -502,6 +523,17 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     tooltip: "Protected by a mountain barrier or experiencing dramatic day-to-night temperature drops that preserve malic acid.",
     iconName: "SunMoon",
     predicate: (e) => e.climates.includes("diurnal_shift") || e.climates.includes("rain_shadow"),
+  },
+
+  {
+    id: "clim-tropical-double-pruning",
+    label: "Tropical Double Pruning (Two Harvests or Winter Harvest)",
+    shortLabel: "Double Pruning",
+    category: "climate",
+    difficulty: "master_somm",
+    tooltip: "Tropical viticulture with two prunings a year: two vintages a year in the Vale do São Francisco, or a reversed cycle that moves harvest into the dry winter in Brazil's Southeast.",
+    iconName: "SunMoon",
+    predicate: (e) => e.climates.includes("tropical_double_pruning"),
   },
 
   // ==========================================================================
@@ -604,6 +636,16 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     tooltip: "Traditional large-format casks (1,000L–10,000L) allowing gentle oxidative evolution without heavy oak lactones.",
     iconName: "Cylinder",
     predicate: (e) => e.vinification.includes("large_neutral_botte_foudre"),
+  },
+  {
+    id: "vin-used-large-oak",
+    label: "Raised in Used Barrels or Demi-Muids (Little or No New Oak)",
+    shortLabel: "Used / Large Oak",
+    category: "vinification",
+    difficulty: "master_somm",
+    tooltip: "Mostly old barrels (new oak about 20% or less) or 400–700 L demi-muids and tonneaux, e.g. Chave, Coulée de Serrant, Dagueneau, Huet, Rayas.",
+    iconName: "Cylinder",
+    predicate: (e) => e.vinification.includes("used_neutral_oak"),
   },
   {
     id: "vin-extended-aging-36m",

@@ -29,7 +29,9 @@ export type SoilType =
   | "sand_phylloxera_free"
   | "loess_silt"
   | "tuffeau"
-  | "iron_clay";
+  | "iron_clay"
+  | "sandy_soil"
+  | "gneiss";
 
 export type ClimateFeature =
   | "maritime"
@@ -40,7 +42,8 @@ export type ClimateFeature =
   | "cooling_fog_current"
   | "rain_shadow"
   | "diurnal_shift"
-  | "alpine_foothills";
+  | "alpine_foothills"
+  | "tropical_double_pruning";
 
 export type WaterInfluence =
   | "gironde_estuary"
@@ -74,7 +77,8 @@ export type VinificationMethod =
   | "extended_aging_36m"
   | "flor_yeast"
   | "co_fermentation"
-  | "amphora_concrete_unoaked";
+  | "amphora_concrete_unoaked"
+  | "used_neutral_oak";
 
 export type SensoryAttribute =
   | "high_tannin_high_acid"

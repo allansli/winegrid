@@ -589,7 +589,7 @@ export const ADDITIONAL_WINE_ENTITIES: WineEntity[] = [
     climates: ["continental"],
     waterBodies: ["major_river"],
     styles: ["dry_white"],
-    vinification: ["large_neutral_botte_foudre", "sur_lie_autolysis"],
+    vinification: ["large_neutral_botte_foudre", "sur_lie_autolysis", "used_neutral_oak"],
     sensory: ["laser_high_acid", "saline_mineral", "long_cellar_20yr"],
     varietalTraits: ["burgundy_family", "single_varietal_strict"],
     primaryGrapes: ["Chardonnay"],

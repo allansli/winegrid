@@ -89,6 +89,8 @@ export const SOIL_TAGS: readonly SoilType[] = [
   "loess_silt",
   "tuffeau",
   "iron_clay",
+  "sandy_soil",
+  "gneiss",
 ];
 
 export const CLIMATE_TAGS: readonly ClimateFeature[] = [
@@ -101,6 +103,7 @@ export const CLIMATE_TAGS: readonly ClimateFeature[] = [
   "rain_shadow",
   "diurnal_shift",
   "alpine_foothills",
+  "tropical_double_pruning",
 ];
 
 export const WATER_TAGS: readonly WaterInfluence[] = [
@@ -138,6 +141,7 @@ export const VINIFICATION_TAGS: readonly VinificationMethod[] = [
   "flor_yeast",
   "co_fermentation",
   "amphora_concrete_unoaked",
+  "used_neutral_oak",
 ];
 
 export const SENSORY_TAGS: readonly SensoryAttribute[] = [
@@ -239,12 +243,17 @@ export const CLUE_MINIMUM_ALLOWLIST: readonly string[] = [];
  * tag is filled in.
  */
 export const EMPTY_REQUIRED_TAG_ALLOWLIST: Readonly<Record<string, readonly (typeof REQUIRED_TAG_FIELDS)[number][]>> = {
-  // Rouge is about 10% new oak in 228 L barrels. That is not new-oak élevage, and it is not a foudre.
-  "prod-chave": ["vinification"],
-  // Fine lees and bâtonnage in 450–600 L barrels, not extended sur lie, and not a 1,000 L foudre.
-  "prod-dagueneau": ["vinification"],
-  // Six to eight months in oak, at most 5% new, with bâtonnage. Not sur lie and not new oak.
-  "prod-coulee-de-serrant": ["vinification"],
+  // Chave, Dagueneau and Coulée de Serrant left this list in the new-clues round:
+  // each now carries a sourced `used_neutral_oak` tag.
+  // The caderno sets no soil rule, and Embrapa/UFPE vineyard studies find sandy to clayey Argissolos,
+  // so no single soil tag fits. The caderno describes young reds as light to full-bodied, which fits no sensory tag.
+  "app-vale-do-sao-francisco": ["soils", "sensory"],
+  // No first-party soil data. Reds are either unoaked ("sem maturação") or 6–12 months in French oak
+  // with no new-oak share stated, so neither new_french_oak nor amphora_concrete_unoaked is stated directly.
+  "prod-rio-sol": ["soils", "vinification"],
+  // Embrapa classes the Campanha nights as temperate to warm, so diurnal_shift is not supported,
+  // and the first-party terroir page names no other climate feature.
+  "prod-salton": ["climates"],
 };
 
 export interface EntityValidationContext {

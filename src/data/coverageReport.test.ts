@@ -7,9 +7,9 @@ describe("data coverage report", () => {
   it("matches the committed report and leads with the thinnest pairs", () => {
     const gaps = coverageGaps(15);
     assert.equal(gaps.length, 15);
-    assert.equal(gaps[0].clueId, "geo-usa");
-    assert.equal(gaps[0].type, "producer");
-    assert.equal(gaps[0].count, 2);
+    assert.equal(gaps[0].clueId, "clim-tropical-double-pruning");
+    assert.equal(gaps[0].type, "grape");
+    assert.equal(gaps[0].count, 0);
     const committed = fs.readFileSync(new URL("../../docs/data-coverage.md", import.meta.url), "utf8");
     assert.equal(committed, buildCoverageReport());
   });
