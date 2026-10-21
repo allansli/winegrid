@@ -2,6 +2,7 @@
 
 import React from "react";
 import { ModalFrame } from "./ModalFrame";
+import { useI18n } from "@/i18n/I18nProvider";
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -20,12 +21,13 @@ export function ConfirmDialog({
   onConfirm,
   onClose,
 }: ConfirmDialogProps) {
+  const { t } = useI18n();
   return (
     <ModalFrame
       isOpen={isOpen}
       onClose={onClose}
       ariaLabel={title}
-      overlayClassName="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4"
+      overlayClassName="winegrid-modal-safe fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm"
       panelClassName="w-full max-w-md rounded-3xl border border-slate-200 bg-white shadow-modal p-6"
     >
       <h2 className="font-display text-lg font-bold text-slate-900">{title}</h2>
@@ -36,7 +38,7 @@ export function ConfirmDialog({
           onClick={onClose}
           className="rounded-xl bg-slate-100 hover:bg-slate-200/80 px-4 py-2 text-xs font-semibold text-slate-700 transition"
         >
-          Stay here
+          {t("confirm.stay")}
         </button>
         <button
           type="button"
