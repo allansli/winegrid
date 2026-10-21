@@ -11,13 +11,46 @@ const jakarta = Plus_Jakarta_Sans({
 const outfit = Outfit({
   subsets: ["latin"],
   variable: "--font-outfit",
-  weight: ["500", "600", "700"],
+  weight: ["500", "600", "600", "700"],
 });
 
+const SITE_URL = "https://winegrid.vercel.app";
+
 export const metadata: Metadata = {
-  title: "WineGrid — The Daily Wine Matrix Game",
+  metadataBase: new URL(SITE_URL),
+  title: "WineGrid — The Daily Sommelier Matrix",
   description:
-    "GeoGrid-style daily and unlimited 3x3 wine matrix. Match Appellations, Grape Varieties, and Iconic Estates across Terroir, Soil, Climate, and Style.",
+    "Test your wine knowledge on the daily 3×3 sommelier matrix. Match Appellations, Grape Varieties, and Iconic Estates across Terroir, Soil, Climate, and Classification.",
+  icons: {
+    icon: "/icon.svg",
+    shortcut: "/icon.svg",
+    apple: "/icon.svg",
+  },
+  openGraph: {
+    type: "website",
+    url: SITE_URL,
+    siteName: "WineGrid",
+    title: "WineGrid — The Daily Sommelier Matrix",
+    description:
+      "Can you solve today's 3×3 Wine Matrix? Match Regions, Grapes & Iconic Producers across Terroir, Soil, and Classification.",
+    images: [
+      {
+        url: `${SITE_URL}/og-image.jpg`,
+        secureUrl: `${SITE_URL}/og-image.jpg`,
+        width: 1200,
+        height: 630,
+        type: "image/jpeg",
+        alt: "WineGrid — The Daily Sommelier Matrix Game",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "WineGrid — The Daily Sommelier Matrix",
+    description:
+      "Can you solve today's 3×3 Wine Matrix? Match Regions, Grapes & Iconic Producers across Terroir, Soil, and Classification.",
+    images: [`${SITE_URL}/og-image.jpg`],
+  },
 };
 
 export default function RootLayout({

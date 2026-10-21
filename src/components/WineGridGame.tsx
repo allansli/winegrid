@@ -473,11 +473,13 @@ export function WineGridGame() {
       )
       .join("\n");
 
-    const shareText = `WineGrid ${
+    const shareText = `🍷 WineGrid ${
       board.mode === "daily"
         ? `Daily (${todayStr})`
+        : board.mode === "infinite"
+        ? "Infinite Mode"
         : `Unlimited (${board.difficulty.toUpperCase()})`
-    }\nScore: ${correctCount}/9 · Rarity: ${currentRarityScore}\n${rowsEmoji}`;
+    }\nScore: ${correctCount}/9 · Rarity: ${currentRarityScore}\n${rowsEmoji}\nhttps://winegrid.vercel.app`;
 
     try {
       await navigator.clipboard.writeText(shareText);
