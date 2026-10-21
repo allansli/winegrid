@@ -9,6 +9,9 @@ import {
 } from "@/types/wine";
 import { searchWineEntities } from "@/data/wineDatabase";
 import { movePickerIndex, pickerEnterAction } from "@/lib/pickerSelection";
+import { useI18n } from "@/i18n/I18nProvider";
+import { localizedClue } from "@/i18n/clues";
+import { MessageKey } from "@/i18n/messages";
 import { ModalFrame } from "./ModalFrame";
 import { Search, X, Wine, Grape, Castle, ArrowRight } from "lucide-react";
 
@@ -24,11 +27,15 @@ interface EntitySearchModalProps {
   onSelectEntity: (entity: WineEntity) => void;
 }
 
-const TYPE_LABELS: Record<WineEntityType, string> = {
-  appellation: "Region",
-  grape: "Grape",
-  producer: "Producer",
-};
+function typeMessage(type: WineEntityType, plural = false): MessageKey {
+  if (type === "appellation") return plural ? "type.regions" : "type.region";
+  if (type === "grape") return plural ? "type.grapes" : "type.grape";
+  return plural ? "type.producers" : "type.producer";
+}
+
+function categoryMessage(category: string): MessageKey {
+  return `category.${category}` as MessageKey;
+}
 
 const HINTS_STORAGE_KEY = "winegrid_picker_hints_v1";
 
@@ -43,6 +50,9 @@ export function EntitySearchModal({
   usedEntityIds,
   onSelectEntity,
 }: EntitySearchModalProps) {
+  const { locale, t } = useI18n();
+  const rowCopy = localizedClue(rowClue, locale);
+  const colCopy = localizedClue(colClue, locale);
   const [query, setQuery] = useState("");
   const [activeTypeTab, setActiveTypeTab] = useState<EntityFilterMode>("all");
   const [selectedIndex, setSelectedIndex] = useState(0);
@@ -143,16 +153,16 @@ export function EntitySearchModal({
     <ModalFrame
       isOpen={isOpen}
       onClose={onClose}
-      ariaLabel={`Pick an answer for ${rowClue.shortLabel} and ${colClue.shortLabel}`}
+      ariaLabel={t("picker.aria", { row: rowCopy.shortLabel, col: colCopy.shortLabel })}
       initialFocusRef={inputRef}
-      overlayClassName="fixed inset-0 z-50 flex items-start justify-center bg-slate-900/30 backdrop-blur-sm p-2.5 sm:p-4 pt-4 sm:pt-16"
+      overlayClassName="winegrid-modal-safe fixed inset-0 z-50 flex items-start justify-center bg-slate-900/30 backdrop-blur-sm"
       panelClassName="w-full max-w-xl max-h-[90dvh] flex flex-col rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white shadow-modal overflow-hidden"
     >
       <div className="bg-slate-50/80 px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-200/70 shrink-0">
         <div className="flex items-center justify-between gap-2 mb-2.5 sm:mb-3">
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-[11px] font-semibold text-slate-500 mr-1">
-              {validCount} possible · Accepts:
+              {t("picker.accepts", { n: validCount })}
             </span>
             {acceptedTypes.map((type) => (
               <span
@@ -162,7 +172,7 @@ export function EntitySearchModal({
                 {type === "appellation" && <Wine className="w-3 h-3 text-slate-500" />}
                 {type === "grape" && <Grape className="w-3 h-3 text-slate-500" />}
                 {type === "producer" && <Castle className="w-3 h-3 text-slate-500" />}
-                {TYPE_LABELS[type]}
+                {t(typeMessage(type))}
               </span>
             ))}
           </div>
@@ -170,7 +180,7 @@ export function EntitySearchModal({
             type="button"
             onClick={onClose}
             className="rounded-full p-1 text-slate-400 hover:bg-slate-200/60 hover:text-slate-700 transition"
-            aria-label="Close"
+            aria-label={t("action.close")}
           >
             <X className="w-4 h-4" />
           </button>
@@ -179,18 +189,18 @@ export function EntitySearchModal({
         <div className="grid grid-cols-2 gap-2 sm:gap-3">
           <div className="rounded-xl sm:rounded-2xl bg-white border border-slate-200/80 p-2.5 sm:p-3 shadow-sm">
             <div className="text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold text-slate-400 truncate">
-              Row · {rowClue.category.replace("_", " ")}
+              {t("picker.row", { category: t(categoryMessage(rowCopy.category)) })}
             </div>
             <div className="font-display text-xs sm:text-sm font-bold text-slate-900 mt-0.5 leading-snug">
-              {rowClue.shortLabel}
+              {rowCopy.shortLabel}
             </div>
           </div>
           <div className="rounded-xl sm:rounded-2xl bg-white border border-slate-200/80 p-2.5 sm:p-3 shadow-sm">
             <div className="text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold text-slate-400 truncate">
-              Col · {colClue.category.replace("_", " ")}
+              {t("picker.col", { category: t(categoryMessage(colCopy.category)) })}
             </div>
             <div className="font-display text-xs sm:text-sm font-bold text-slate-900 mt-0.5 leading-snug">
-              {colClue.shortLabel}
+              {colCopy.shortLabel}
             </div>
           </div>
         </div>
@@ -207,7 +217,7 @@ export function EntitySearchModal({
                 : "bg-slate-100 text-slate-600 hover:bg-slate-200/70"
             }`}
           >
-            All accepted
+            {t("picker.allAccepted")}
           </button>
           {acceptedTypes.map((type) => (
             <button
@@ -220,7 +230,7 @@ export function EntitySearchModal({
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200/70"
               }`}
             >
-              {TYPE_LABELS[type]}s
+              {t(typeMessage(type, true))}
             </button>
           ))}
         </div>
@@ -234,12 +244,15 @@ export function EntitySearchModal({
           value={query}
           onChange={(event) => setQuery(event.target.value)}
           onKeyDown={handleInputKeyDown}
-          placeholder={`Search ${acceptedTypes
-            .map((type) => TYPE_LABELS[type].toLowerCase())
-            .join(", ")}...`}
+          placeholder={t("picker.search", {
+            types: acceptedTypes.map((type) => t(typeMessage(type)).toLocaleLowerCase(locale)).join(", "),
+          })}
           className="w-full bg-transparent pl-8 sm:pl-9 pr-4 text-base text-slate-900 placeholder-slate-400 focus:outline-none"
           autoComplete="off"
           autoCorrect="off"
+          autoCapitalize="none"
+          enterKeyHint="search"
+          inputMode="search"
           spellCheck={false}
           aria-autocomplete="list"
         />
@@ -248,9 +261,10 @@ export function EntitySearchModal({
       <div className="flex-1 min-h-0 max-h-72 overflow-y-auto divide-y divide-slate-100">
         {results.length === 0 ? (
           <div className="py-12 text-center text-sm text-slate-400">
-            No matching{" "}
-            {acceptedTypes.map((type) => TYPE_LABELS[type].toLowerCase()).join(" / ")}{" "}
-            for “{query}”.
+            {t("picker.empty", {
+              types: acceptedTypes.map((type) => t(typeMessage(type)).toLocaleLowerCase(locale)).join(" / "),
+              query,
+            })}
           </div>
         ) : (
           results.map((entity, index) => {
@@ -282,11 +296,11 @@ export function EntitySearchModal({
                     >
                       {entity.name}
                     </span>
-                    <TypeBadge type={entity.entityType} muted={!selectable} />
+                    <TypeBadge type={entity.entityType} muted={!selectable} label={t(typeMessage(entity.entityType))} />
                   </div>
                   <div className="text-xs text-slate-500 mt-0.5">
                     {entity.country} · {entity.macroRegion}
-                    {!selectable ? " · doesn’t fit this cell" : ""}
+                    {!selectable ? ` · ${t("picker.noFit")}` : ""}
                   </div>
                 </div>
                 <ArrowRight
@@ -311,9 +325,9 @@ export function EntitySearchModal({
               : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
           }`}
         >
-          {hintsOn ? "Hints on" : "Hints off"}
+          {hintsOn ? t("picker.hintsOn") : t("picker.hintsOff")}
         </button>
-        <span className="hidden sm:inline">↑↓ Navigate · Enter selects the synced row</span>
+        <span className="hidden sm:inline">{t("picker.keys")}</span>
       </div>
     </ModalFrame>
   );
@@ -322,9 +336,11 @@ export function EntitySearchModal({
 function TypeBadge({
   type,
   muted,
+  label,
 }: {
   type: WineEntityType;
   muted: boolean;
+  label: string;
 }) {
   const className = muted
     ? "inline-flex items-center gap-1 rounded-full bg-slate-100 border border-slate-200 px-2.5 py-0.5 text-[11px] font-medium text-slate-400"
@@ -339,7 +355,7 @@ function TypeBadge({
     );
   return (
     <span className={className}>
-      {icon} {TYPE_LABELS[type]}
+      {icon} {label}
     </span>
   );
 }

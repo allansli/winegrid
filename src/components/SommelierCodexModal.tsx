@@ -5,6 +5,9 @@ import { ALL_WINE_ENTITIES } from "@/data/wineDatabase";
 import { CLUE_CATALOG } from "@/data/clueCatalog";
 import { EntityFilterMode } from "@/types/wine";
 import { ModalFrame } from "./ModalFrame";
+import { useI18n } from "@/i18n/I18nProvider";
+import { localizedClue } from "@/i18n/clues";
+import { MessageKey } from "@/i18n/messages";
 import { Search, X, Filter } from "lucide-react";
 
 interface SommelierCodexModalProps {
@@ -16,6 +19,7 @@ export function SommelierCodexModal({
   isOpen,
   onClose,
 }: SommelierCodexModalProps) {
+  const { locale, t } = useI18n();
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<EntityFilterMode>("all");
   const [selectedClueId, setSelectedClueId] = useState<string>("all");
@@ -46,7 +50,7 @@ export function SommelierCodexModal({
     <ModalFrame
       isOpen={isOpen}
       onClose={onClose}
-      ariaLabel="WineGrid Codex"
+      ariaLabel={t("codex.aria")}
       initialFocusRef={searchRef}
       panelClassName="w-full max-w-4xl max-h-[86vh] flex flex-col rounded-3xl border border-slate-200 bg-white shadow-modal overflow-hidden"
     >
@@ -54,17 +58,17 @@ export function SommelierCodexModal({
         <div className="bg-slate-50/80 px-6 py-5 border-b border-slate-200/80 flex items-center justify-between">
           <div>
             <div className="text-[11px] uppercase tracking-wider text-wine-600 font-semibold">
-              Knowledge Graph
+              {t("codex.kicker")}
             </div>
             <h2 className="font-display text-xl font-bold text-slate-900 mt-0.5">
-              WineGrid Codex ({filteredEntities.length} of {ALL_WINE_ENTITIES.length})
+              {t("codex.title", { shown: filteredEntities.length, total: ALL_WINE_ENTITIES.length })}
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="rounded-full p-2 text-slate-400 hover:bg-slate-200/60 hover:text-slate-700 transition"
-            aria-label="Close"
+            aria-label={t("action.close")}
           >
             <X className="w-5 h-5" />
           </button>
@@ -80,26 +84,35 @@ export function SommelierCodexModal({
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search region, grape, estate, or soil..."
-                className="w-full rounded-xl bg-slate-50 border border-slate-200/80 pl-9 pr-4 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-wine-400"
+                placeholder={t("codex.search")}
+                enterKeyHint="search"
+                inputMode="search"
+                autoCapitalize="none"
+                className="w-full rounded-xl bg-slate-50 border border-slate-200/80 pl-9 pr-4 py-2 text-base sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-wine-400"
               />
             </div>
 
             <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
               {(
                 ["all", "appellation", "grape", "producer"] as EntityFilterMode[]
-              ).map((t) => (
+              ).map((kind) => (
                 <button
-                  key={t}
+                  key={kind}
                   type="button"
-                  onClick={() => setTypeFilter(t)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition ${
-                    typeFilter === t
+                  onClick={() => setTypeFilter(kind)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition ${
+                    typeFilter === kind
                       ? "bg-white text-slate-900 shadow-sm"
                       : "text-slate-500 hover:text-slate-900"
                   }`}
                 >
-                  {t === "all" ? "All" : `${t}s`}
+                  {kind === "all"
+                    ? t("filter.all")
+                    : kind === "appellation"
+                    ? t("filter.regions")
+                    : kind === "grape"
+                    ? t("filter.grapes")
+                    : t("filter.estates")}
                 </button>
               ))}
             </div>
@@ -113,13 +126,16 @@ export function SommelierCodexModal({
               className="w-full rounded-xl bg-slate-50 border border-slate-200/80 px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-wine-400"
             >
               <option value="all">
-                Filter by any of the {CLUE_CATALOG.length} Matrix Criteria (All)
+                {t("codex.filterAll", { n: CLUE_CATALOG.length })}
               </option>
-              {CLUE_CATALOG.map((clue) => (
+              {CLUE_CATALOG.map((clue) => {
+                const copy = localizedClue(clue, locale);
+                return (
                 <option key={clue.id} value={clue.id}>
-                  [{clue.category.toUpperCase()}] {clue.label}
+                  [{t(`category.${copy.category}` as MessageKey)}] {copy.label}
                 </option>
-              ))}
+                );
+              })}
             </select>
           </div>
         </div>
@@ -141,8 +157,14 @@ export function SommelierCodexModal({
                       {entity.country} &bull; {entity.macroRegion}
                     </div>
                   </div>
-                  <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-600 capitalize">
-                    {entity.entityType}
+                  <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-600">
+                    {t(
+                      entity.entityType === "appellation"
+                        ? "type.region"
+                        : entity.entityType === "grape"
+                        ? "type.grape"
+                        : "type.producer"
+                    )}
                   </span>
                 </div>
 
