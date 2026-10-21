@@ -26,6 +26,7 @@ import {
   DAILY_DIFFICULTY,
   generateDailyBoard,
   generateWineGridBoard,
+  pickKeepsBoardSolvable,
 } from "@/lib/matrixGenerator";
 import {
   ECONOMY_VERSION,
@@ -564,6 +565,14 @@ export function WineGridGame() {
     const rowCopy = localizedClue(rowClue, locale);
     const colCopy = localizedClue(colClue, locale);
     const isValid = cell.validEntityIds.includes(entity.id);
+    if (isValid && !pickKeepsBoardSolvable(cells, cellIndex, entity.id)) {
+      setFeedback({
+        type: "info",
+        title: t("picker.blocks"),
+        detail: t("picker.blocksDetail", { name: entity.name }),
+      });
+      return;
+    }
     const nextBudget = applyPick(
       { missesRemaining: guessesRemaining, missesUsed: guessesUsedCount },
       isValid ? "correct" : "miss",
@@ -1379,7 +1388,9 @@ export function WineGridGame() {
                             cell.pickedRarityPct
                           )}`}
                         >
-                          {cell.pickedRarityPct}%
+                          {cell.pickedRarityPct === null
+                            ? "—"
+                            : `${formatDecimal(cell.pickedRarityPct, locale)}%`}
                         </span>
                       </div>
 

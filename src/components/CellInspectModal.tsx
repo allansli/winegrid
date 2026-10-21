@@ -7,6 +7,7 @@ import { ModalFrame } from "./ModalFrame";
 import { useI18n } from "@/i18n/I18nProvider";
 import { localizedNote } from "@/i18n/notesPt";
 import { placeLabel } from "@/i18n/places";
+import { formatDecimal } from "@/lib/shareScore";
 import { localizedClue } from "@/i18n/clues";
 import { X, Award, Sparkles } from "lucide-react";
 
@@ -78,7 +79,9 @@ export function CellInspectModal({
                 </div>
                 {cell.pickedRarityPct !== null && (
                   <span className="rounded-full bg-white border border-emerald-200 px-3 py-0.5 text-xs font-bold text-emerald-700">
-                    {t("inspect.pickRate", { pct: cell.pickedRarityPct })}
+                    {t("inspect.pickRate", {
+                      pct: formatDecimal(cell.pickedRarityPct, locale),
+                    })}
                   </span>
                 )}
               </div>

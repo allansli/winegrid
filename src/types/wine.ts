@@ -149,7 +149,10 @@ export interface WineEntity {
    * Country clues match the flagship, this list, and `alsoCountries`.
    */
   originCountries?: string[];
-  /** Other countries where the entity is defining enough to satisfy a country clue. */
+  /**
+   * Hand-curated countries where the entity is defining enough to satisfy a
+   * country clue. Each entry has a note in ALSO_COUNTRY_SOURCES.
+   */
   alsoCountries?: string[];
   /** Other macro-regions where the entity is important enough to satisfy a region clue. */
   alsoRegions?: string[];

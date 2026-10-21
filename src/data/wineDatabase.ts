@@ -1,3 +1,4 @@
+import { placeSearchLabels } from "@/i18n/places";
 import { EntityFilterMode, WineEntity, WineEntityType } from "@/types/wine";
 import { APPELLATION_ENTITIES } from "./entities/appellations";
 import { GRAPE_ENTITIES } from "./entities/grapes";
@@ -34,7 +35,10 @@ export function normalizeSearchText(text: string): string {
     .replace(/[-‐–—_.'’]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
-  return folded.replace(/\bste\b/g, "sainte").replace(/\bst\b/g, "saint");
+  const saint = folded.replace(/\bste\b/g, "sainte").replace(/\bst\b/g, "saint");
+  // ü/ö/ä already expanded to ue/oe/ae. Fold those digraphs too, so
+  // Spatburgunder matches Spätburgunder and Blaufrankisch matches Blaufränkisch.
+  return saint.replace(/ae/g, "a").replace(/oe/g, "o").replace(/ue/g, "u");
 }
 
 export interface WineEntitySearchOptions {
@@ -77,6 +81,10 @@ export function searchWineEntities(
       const canonNorm = normalizeSearchText(entity.canonicalName);
       const countryNorm = normalizeSearchText(entity.country);
       const regionNorm = normalizeSearchText(entity.macroRegion);
+      const placeNorms = [
+        ...placeSearchLabels(entity.country, "country"),
+        ...placeSearchLabels(entity.macroRegion, "region"),
+      ].map(normalizeSearchText);
       const aliasNorms = entity.aliases.map(normalizeSearchText);
       const grapeNorms = entity.primaryGrapes.map(normalizeSearchText);
       const subRegionNorm = entity.subRegion ? normalizeSearchText(entity.subRegion) : "";
@@ -88,7 +96,11 @@ export function searchWineEntities(
         score = 85;
       } else if (canonNorm.includes(q) || nameNorm.includes(q) || aliasNorms.some((a) => a.includes(q))) {
         score = 70;
-      } else if (regionNorm.includes(q) || countryNorm.includes(q)) {
+      } else if (
+        regionNorm.includes(q) ||
+        countryNorm.includes(q) ||
+        placeNorms.some((place) => place.includes(q))
+      ) {
         score = 50;
       } else if (grapeNorms.some((g) => g.includes(q))) {
         score = 40;

@@ -340,7 +340,7 @@ export const ADDITIONAL_WINE_ENTITIES: WineEntity[] = [
     subRegion: "Valpolicella / Amarone / Bardolino",
     world: "Old World",
     hemisphere: "Northern",
-    latitudeBand: "temperate_mid",
+    latitudeBand: "cool_north",
     coastalOrIsland: false,
     aliases: ["Corvina", "Corvina Veronese"],
     classifications: ["DOCG", "PDO_DO", "Autochthonous_Grape"],
@@ -515,6 +515,7 @@ export const ADDITIONAL_WINE_ENTITIES: WineEntity[] = [
     country: "France",
     countryCode: "FR",
     macroRegion: "Bordeaux",
+    alsoCountries: ["Australia"],
     subRegion: "Sauternes / Barsac / Pessac-Léognan / Hunter Valley",
     world: "Old World",
     hemisphere: "Northern",
@@ -654,7 +655,7 @@ export const ADDITIONAL_WINE_ENTITIES: WineEntity[] = [
     heritage: ["unesco_landscape"],
     baseRarity: 33,
     sommelierNote:
-      "The inventor of Brunello di Montalcino: Ferruccio Biondi-Santi bottled the first modern Brunello in 1888 at Tenuta Greppo. The BBS11 clone was selected later by Franco Biondi-Santi with the University of Florence and registered in 1978, aging it in massive Slavonian oak botti for decades of longevity.",
+      "The inventor of Brunello di Montalcino: Ferruccio Biondi-Santi bottled the first modern Brunello in 1888 at Tenuta Greppo. The BBS11 clone was selected later by Franco Biondi-Santi with the University of Florence and registered in 1978. The wines age in large Slavonian oak botti for decades.",
   },
   {
     id: "prod-quintarelli",

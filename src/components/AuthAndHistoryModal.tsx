@@ -13,6 +13,7 @@ import {
 import { identifyObservabilityUser, trackEvent } from "@/lib/observability";
 import { ModalFrame } from "./ModalFrame";
 import { useI18n } from "@/i18n/I18nProvider";
+import { formatDecimal } from "@/lib/shareScore";
 import { MessageKey } from "@/i18n/messages";
 import {
   Award,
@@ -53,7 +54,7 @@ export function AuthAndHistoryModal({
   stats,
   onAuthChanged,
 }: AuthAndHistoryModalProps) {
-  const { t } = useI18n();
+  const { locale, t } = useI18n();
   const rankLabel = (rank: string) => (RANK_KEYS[rank] ? t(RANK_KEYS[rank]) : rank);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -207,7 +208,9 @@ export function AuthAndHistoryModal({
               </div>
               <div>
                 <div className="font-display text-xl font-bold text-slate-900">
-                  {stats.bestRarityScore !== null ? stats.bestRarityScore : "—"}
+                  {stats.bestRarityScore !== null
+                    ? formatDecimal(stats.bestRarityScore, locale)
+                    : "—"}
                 </div>
                 <div className="text-[11px] text-slate-500">{t("profile.bestRarity")}</div>
               </div>
@@ -372,7 +375,9 @@ export function AuthAndHistoryModal({
                           {item.correctCells}/9
                         </div>
                         <div className="text-[11px] text-slate-400">
-                          Rarity {item.rarityScore.toFixed(1)}
+                          {t("history.rarity", {
+                            score: formatDecimal(item.rarityScore, locale),
+                          })}
                         </div>
                       </div>
                     </div>

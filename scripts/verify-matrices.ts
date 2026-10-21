@@ -2,7 +2,13 @@ import * as fs from "fs";
 import * as path from "path";
 import { ALL_WINE_ENTITIES, WINE_ENTITY_BY_ID } from "../src/data/wineDatabase";
 import { CLUE_CATALOG } from "../src/data/clueCatalog";
-import { generateDailyBoard, generateWineGridBoard, minimumValidAnswers } from "../src/lib/matrixGenerator";
+import {
+  createPrng,
+  generateDailyBoard,
+  generateWineGridBoard,
+  guardedPlaythroughSucceeds,
+  minimumValidAnswers,
+} from "../src/lib/matrixGenerator";
 import { DifficultyLevel, EntityFilterMode } from "../src/types/wine";
 
 function escapeSql(str: string): string {
@@ -62,6 +68,14 @@ function main() {
             );
           }
           sizesByLevel[diff].push(count);
+        }
+        if (
+          !guardedPlaythroughSucceeds(
+            board.cells.map((cell) => cell.validEntityIds),
+            createPrng(i + 1)
+          )
+        ) {
+          throw new Error(`Guarded playthrough dead-ended on ${board.boardId}`);
         }
         totalVerified++;
       }

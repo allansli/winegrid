@@ -492,7 +492,7 @@ export const PRODUCER_ENTITIES: WineEntity[] = [
     heritage: [],
     baseRarity: 24,
     sommelierNote:
-      "Screaming Eagle is a tiny Oakville Cabernet estate. Harlan Estate and Opus One are separate Napa properties and are not this wine.",
+      "A tiny Oakville AVA Cabernet estate in Napa Valley. The vines sit on volcanic rock and gravel, and the wine ages in new French oak.",
   },
   {
     id: "prod-chateau-musar",
@@ -513,7 +513,7 @@ export const PRODUCER_ENTITIES: WineEntity[] = [
     climates: ["mediterranean", "high_altitude", "diurnal_shift"],
     waterBodies: ["mediterranean_sea"],
     styles: ["dry_red", "dry_white", "rose_specialist"],
-    vinification: ["amphora_concrete_unoaked", "large_neutral_botte_foudre", "extended_aging_36m"],
+    vinification: ["large_neutral_botte_foudre", "extended_aging_36m"],
     sensory: ["full_bodied_high_abv", "earthy_truffle_tar", "long_cellar_20yr"],
     varietalTraits: ["bordeaux_family", "rhone_family", "multi_blend_tradition"],
     primaryGrapes: ["Cabernet Sauvignon", "Cinsault", "Carignan", "Obaideh", "Merwah"],

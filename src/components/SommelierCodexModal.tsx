@@ -3,7 +3,7 @@
 import React, { useMemo, useRef, useState } from "react";
 import { ALL_WINE_ENTITIES, normalizeSearchText } from "@/data/wineDatabase";
 import { localizedNote } from "@/i18n/notesPt";
-import { placeLabel } from "@/i18n/places";
+import { placeLabel, placeSearchLabels } from "@/i18n/places";
 import { CLUE_CATALOG } from "@/data/clueCatalog";
 import { EntityFilterMode } from "@/types/wine";
 import { ModalFrame } from "./ModalFrame";
@@ -43,6 +43,8 @@ export function SommelierCodexModal({
         e.canonicalName,
         e.country,
         e.macroRegion,
+        ...placeSearchLabels(e.country, "country"),
+        ...placeSearchLabels(e.macroRegion, "region"),
         e.subRegion ?? "",
         e.sommelierNote,
         localizedNote(e.id, e.sommelierNote, locale),

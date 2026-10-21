@@ -48,6 +48,19 @@ describe("cell-scoped entity search", () => {
     assert.ok(searchWineEntities("Gewuerztraminer").some((entity) => entity.id === "grape-gewurztraminer"));
     assert.ok(searchWineEntities("Château d’Yquem").some((entity) => entity.id === "prod-chateau-dyquem"));
     assert.ok(searchWineEntities("Xarello").some((entity) => entity.id === "app-cava"));
+    assert.equal(normalizeSearchText("Spätburgunder"), normalizeSearchText("Spatburgunder"));
+    assert.equal(normalizeSearchText("Blaufränkisch"), normalizeSearchText("Blaufrankisch"));
+    assert.equal(normalizeSearchText("Frühburgunder"), normalizeSearchText("Fruhburgunder"));
+    assert.equal(normalizeSearchText("Rüdesheim"), normalizeSearchText("Rudesheim"));
+    assert.equal(normalizeSearchText("Spätlese"), normalizeSearchText("Spatlese"));
+    assert.ok(searchWineEntities("Spatburgunder").some((entity) => entity.id === "grape-pinot-noir"));
+    assert.ok(searchWineEntities("Blaufrankisch").some((entity) => entity.id === "app-burgenland"));
+    assert.ok(searchWineEntities("Fruhburgunder").some((entity) => entity.id === "app-ahr"));
+    assert.ok(searchWineEntities("Borgonha").some((entity) => entity.macroRegion === "Burgundy"));
+    assert.ok(searchWineEntities("Itália").some((entity) => entity.country === "Italy"));
+    assert.ok(searchWineEntities("Alemanha").some((entity) => entity.country === "Germany"));
+    assert.ok(searchWineEntities("Piemonte").some((entity) => entity.macroRegion === "Piedmont"));
+    assert.ok(searchWineEntities("Galiza").some((entity) => entity.macroRegion === "Galicia"));
   });
 
   it("drops an entity that matches neither clue", () => {

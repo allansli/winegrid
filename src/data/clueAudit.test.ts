@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { CLUE_BY_ID } from "./clueCatalog";
-import { TAG_SOURCES } from "./tagSources";
+import { ALSO_COUNTRY_SOURCES, TAG_SOURCES } from "./tagSources";
 import { ALL_WINE_ENTITIES, WINE_ENTITY_BY_ID } from "./wineDatabase";
 
 const TAG_FIELDS = [
@@ -36,6 +36,26 @@ describe("attribute tag sources", () => {
       }
     }
     assert.deepEqual([...missing], []);
+  });
+
+  it("gives every curated alsoCountries entry its own source note", () => {
+    const missing: string[] = [];
+    const seen = new Set<string>();
+    for (const entity of ALL_WINE_ENTITIES) {
+      for (const country of entity.alsoCountries ?? []) {
+        const note = ALSO_COUNTRY_SOURCES[entity.id]?.[country]?.trim();
+        if (!note) missing.push(`${entity.id} ${country}`);
+        seen.add(`${entity.id}|${country}`);
+      }
+    }
+    const extras: string[] = [];
+    for (const [id, countries] of Object.entries(ALSO_COUNTRY_SOURCES)) {
+      for (const country of Object.keys(countries)) {
+        if (!seen.has(`${id}|${country}`)) extras.push(`${id} ${country}`);
+      }
+    }
+    assert.deepEqual(missing, []);
+    assert.deepEqual(extras, []);
   });
 });
 
@@ -90,11 +110,11 @@ describe("audit clue accept and reject cases", () => {
     ["cls-1855", "app-sauternes", true],
     ["cls-1855", "app-pomerol", false],
     ["cls-grand-cru", "grape-cabernet-franc", false],
-    // Classic blend is not a single grape, and not Barossa
+    // Classic blend is not a single grape. Barossa's GSM and Shiraz-Cab count.
     ["var-multi-blend", "grape-tempranillo", false],
     ["var-multi-blend", "grape-grenache", false],
     ["var-multi-blend", "grape-malbec", false],
-    ["var-multi-blend", "app-barossa-valley", false],
+    ["var-multi-blend", "app-barossa-valley", true],
     ["var-multi-blend", "app-pauillac", true],
     ["var-multi-blend", "app-champagne", true],
     // B many-to-many origin and region
@@ -126,7 +146,31 @@ describe("audit clue accept and reject cases", () => {
     ["soil-sand-phylloxera", "app-stellenbosch", false],
     ["soil-sand-phylloxera", "app-swartland-constantia", false],
     ["vin-no-mlf-unoaked", "prod-chateau-petrus", false],
+    ["vin-no-mlf-unoaked", "prod-chateau-musar", false],
+    ["vin-no-mlf-unoaked", "app-bekaa-valley", false],
     ["her-bush-vines", "app-soave-classico", false],
+    // Secondary countries and flagship latitude
+    ["geo-oceania", "grape-syrah", true],
+    ["geo-oceania", "grape-sauvignon-blanc", true],
+    ["geo-oceania", "grape-pinot-noir", true],
+    ["geo-oceania", "grape-riesling", true],
+    ["geo-oceania", "grape-cabernet-sauvignon", true],
+    ["geo-usa", "grape-chardonnay", true],
+    ["geo-oceania", "grape-chardonnay", true],
+    ["geo-oceania", "grape-grenache", true],
+    ["geo-oceania", "grape-semillon", true],
+    ["geo-usa", "grape-cabernet-sauvignon", true],
+    ["geo-usa", "grape-pinot-noir", true],
+    ["geo-south-america", "grape-cabernet-sauvignon", true],
+    ["geo-cool-latitude", "grape-corvina", true],
+    ["geo-cool-latitude", "grape-viognier", true],
+    ["geo-cool-latitude", "grape-syrah", true],
+    ["geo-cool-latitude", "grape-cabernet-sauvignon", true],
+    ["her-unesco-monastic", "app-pauillac", false],
+    ["clim-high-altitude", "app-naoussa", false],
+    ["clim-high-altitude", "app-napa-valley", false],
+    ["clim-high-altitude", "prod-ridge", true],
+    ["cls-new-world-ava-gi", "app-maipo-colchagua", true],
   ];
 
   for (const [clueId, entityId, expected] of cases) {
