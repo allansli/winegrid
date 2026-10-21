@@ -22,6 +22,8 @@ export const COUNTRY_LABELS: Record<string, Record<Locale, string>> = {
   Greece: { en: "Greece", "pt-BR": "Grécia" },
   Lebanon: { en: "Lebanon", "pt-BR": "Líbano" },
   Croatia: { en: "Croatia", "pt-BR": "Croácia" },
+  Brazil: { en: "Brazil", "pt-BR": "Brasil" },
+  Uruguay: { en: "Uruguay", "pt-BR": "Uruguai" },
 };
 
 export const REGION_LABELS: Record<string, Record<Locale, string>> = {
@@ -91,7 +93,18 @@ export const REGION_LABELS: Record<string, Record<Locale, string>> = {
   Marlborough: { en: "Marlborough", "pt-BR": "Marlborough" },
   "Monção e Melgaço": { en: "Monção e Melgaço", "pt-BR": "Monção e Melgaço" },
   Puglia: { en: "Puglia", "pt-BR": "Puglia" },
-  "Willamette Valley": { en: "Willamette Valley", "pt-BR": "Willamette Valley" },
+  "Willamette Valley": { en: "Willamette Valley", "pt-BR": "Willamette Valley" },  // South America and Brazil batch: parent regions for the new cards.
+  "Serra Gaúcha": { en: "Serra Gaúcha", "pt-BR": "Serra Gaúcha" },
+  "Campanha Gaúcha": { en: "Campanha Gaúcha", "pt-BR": "Campanha Gaúcha" },
+  "Santa Catarina Highlands": { en: "Santa Catarina Highlands", "pt-BR": "Planalto Catarinense" },
+  "Southeast Brazil": { en: "Southeast Brazil", "pt-BR": "Sudeste do Brasil" },
+  Patagonia: { en: "Patagonia", "pt-BR": "Patagônia" },
+  Aconcagua: { en: "Aconcagua", "pt-BR": "Aconcágua" },
+  Coquimbo: { en: "Coquimbo", "pt-BR": "Coquimbo" },
+  "Southern Chile": { en: "Southern Chile", "pt-BR": "Sul do Chile" },
+  Canelones: { en: "Canelones", "pt-BR": "Canelones" },
+  Maldonado: { en: "Maldonado", "pt-BR": "Maldonado" },
+  Montevideo: { en: "Montevideo", "pt-BR": "Montevidéu" },
 };
 
 const REGION_SEARCH_ALIASES: Record<string, string[]> = {

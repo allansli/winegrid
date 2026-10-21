@@ -25,6 +25,8 @@ export const COUNTRY_REGION_GROUP: Record<
   Australia: { world: "New World", hemisphere: "Southern" },
   "New Zealand": { world: "New World", hemisphere: "Southern" },
   "South Africa": { world: "New World", hemisphere: "Southern" },
+  Brazil: { world: "New World", hemisphere: "Southern" },
+  Uruguay: { world: "New World", hemisphere: "Southern" },
 };
 
 /**

@@ -72,10 +72,11 @@ describe("picker and the dead-end guard share one answer set", () => {
     assert.ok(firstUsed > 0);
     assert.deepEqual(
       shown.slice(0, firstUsed).map((entity) => entity.id).sort(),
-      ["grape-mourvedre", "prod-alvaro-palacios"]
+      // grape-pais (Listán Prieto, origin Spain, Burgundy-slope bottle) joined with the South America batch.
+      ["grape-mourvedre", "grape-pais", "prod-alvaro-palacios"]
     );
     assert.ok(shown.slice(firstUsed).every((entity) => used.has(entity.id)));
-    for (const id of ["grape-mourvedre", "prod-alvaro-palacios"]) {
+    for (const id of ["grape-mourvedre", "grape-pais", "prod-alvaro-palacios"]) {
       assert.equal(entityFitsCell(id, ids), true);
       assert.equal(evaluatePick(play, iberianBottle, id) === "miss", false);
     }
