@@ -33,6 +33,8 @@ Add the country and the parent region to `places.ts` before the entity. Both loc
 
 Use only the values listed in `src/data/entitySchema.ts`. Empty required groups fail as missing tags. `classifications`, `waterBodies`, and `heritage` may be empty. Tag the estate for the clues it should answer, using the same vocabulary as the region it sits in.
 
+The card must answer at least `MINIMUM_ANSWERED_CLUES` (3) distinct clues in the live catalog. Entity-type clues do not count. If an existing card is short, add its id to `CLUE_MINIMUM_ALLOWLIST` with a comment. Do not lower the minimum.
+
 | Field | Required | Notes |
 | --- | --- | --- |
 | `classifications` | optional | Law and cru tags the estate actually holds. |

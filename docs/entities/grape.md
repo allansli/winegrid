@@ -35,6 +35,8 @@ Add the country and the parent region to `places.ts` before the entity. Both loc
 
 Use only the values listed in `src/data/entitySchema.ts`. Empty required groups fail as missing tags. `classifications`, `waterBodies`, and `heritage` may be empty. Grapes do not satisfy classification clues or Classic Blend. Those exclusions are by design.
 
+The card must answer at least `MINIMUM_ANSWERED_CLUES` (3) distinct clues in the live catalog. Entity-type clues do not count. If an existing card is short, add its id to `CLUE_MINIMUM_ALLOWLIST` with a comment. Do not lower the minimum.
+
 | Field | Required | Notes |
 | --- | --- | --- |
 | `classifications` | optional | `Noble_Grape`, `Autochthonous_Grape`, and any law tags that really apply. |

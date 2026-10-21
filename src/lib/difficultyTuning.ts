@@ -56,3 +56,12 @@ export function clueSupportFloor(difficulty: DifficultyLevel): number {
 export function allowedClueDifficulties(difficulty: DifficultyLevel): Set<DifficultyLevel> {
   return new Set(DIFFICULTY_TUNING[difficulty].clueDifficulties);
 }
+
+/**
+ * Personal Sommelier catalog rule. Every entity must answer at least this
+ * many distinct clues in the live catalog. Entity-type clues do not count:
+ * they only say that the card is a grape, a region, or a producer.
+ * Do not lower this when a card falls short. Grandfather that id in
+ * CLUE_MINIMUM_ALLOWLIST instead.
+ */
+export const MINIMUM_ANSWERED_CLUES = 3;

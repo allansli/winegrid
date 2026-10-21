@@ -1,12 +1,14 @@
-import { COUNTRY_REGION_GROUP } from "@/data/clueCatalog";
+import { CLUE_CATALOG, COUNTRY_REGION_GROUP } from "@/data/clueCatalog";
 import { ALSO_COUNTRY_SOURCES, AlsoCountrySource, alsoCountryNote, alsoCountrySynonym } from "@/data/tagSources";
 import { normalizeSearchText } from "@/data/wineDatabase";
+import { MINIMUM_ANSWERED_CLUES } from "@/lib/difficultyTuning";
 import { PT_NOTES } from "@/i18n/notesPt";
 import { COUNTRY_LABELS, REGION_LABELS } from "@/i18n/places";
 import {
   BottleShape,
   ClassificationTier,
   ClimateFeature,
+  ClueDefinition,
   HeritageTrait,
   SensoryAttribute,
   SoilType,
@@ -222,10 +224,29 @@ const ID_PREFIX: Record<WineEntityType, string> = {
   producer: "prod-",
 };
 
+/**
+ * Existing cards below MINIMUM_ANSWERED_CLUES. Do not lower the minimum
+ * to clear a card. Add the id here, with a comment naming the shortfall,
+ * and list it in the PR so the tags can be fixed.
+ * Empty: the current catalog already answers at least three non-type clues.
+ */
+export const CLUE_MINIMUM_ALLOWLIST: readonly string[] = [];
+
 export interface EntityValidationContext {
   entities: WineEntity[];
   ptNotes: Record<string, string>;
   sources: Record<string, Record<string, AlsoCountrySource>>;
+  clueMinimumAllowlist?: readonly string[];
+}
+
+/** Distinct live clue ids this card answers, excluding entity-type clues. */
+export function answeredClueIds(entity: WineEntity, clues: readonly ClueDefinition[] = CLUE_CATALOG): string[] {
+  const ids: string[] = [];
+  for (const clue of clues) {
+    if (clue.category === "entity_type") continue;
+    if (clue.predicate(entity)) ids.push(clue.id);
+  }
+  return ids;
 }
 
 function placePair(value: string, kind: "country" | "region"): { en: string; "pt-BR": string } | undefined {
@@ -329,6 +350,16 @@ export function validateEntity(entity: WineEntity, context: EntityValidationCont
     const synonym = alsoCountrySynonym(source);
     if (synonym && !entity.aliases.some((alias) => normalizeSearchText(alias) === normalizeSearchText(synonym))) {
       issues.push(`alsoCountries synonym ${synonym} is not an alias`);
+    }
+  }
+
+  const allowlist = context.clueMinimumAllowlist ?? CLUE_MINIMUM_ALLOWLIST;
+  if (!allowlist.includes(entity.id)) {
+    const answered = answeredClueIds(entity);
+    if (answered.length < MINIMUM_ANSWERED_CLUES) {
+      issues.push(
+        `answers ${answered.length} clues, need at least ${MINIMUM_ANSWERED_CLUES} (entity-type clues do not count)`
+      );
     }
   }
 
