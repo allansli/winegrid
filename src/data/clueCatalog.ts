@@ -1,5 +1,5 @@
 import { ClueDefinition, WineEntity } from "@/types/wine";
-import { ALSO_COUNTRY_SOURCES } from "./tagSources";
+import { ALSO_COUNTRY_SOURCES, alsoCountryNote } from "./tagSources";
 
 /**
  * Explicit country → world and hemisphere for region-group clues.
@@ -34,7 +34,7 @@ export const COUNTRY_REGION_GROUP: Record<
 export function sourcedAlsoCountries(entity: WineEntity): string[] {
   const notes = ALSO_COUNTRY_SOURCES[entity.id];
   if (!notes) return [];
-  return (entity.alsoCountries ?? []).filter((country) => Boolean(notes[country]?.trim()));
+  return (entity.alsoCountries ?? []).filter((country) => Boolean(alsoCountryNote(notes[country])));
 }
 
 /**

@@ -191,6 +191,8 @@ const en = {
   "telemetry.ready": "Ready",
   "telemetry.connected": "Connected",
   "telemetry.local": "Local",
+  "card.alsoBenchmark": "Also a benchmark in: {places}",
+  "card.alsoAs": "as {name}",
 } as const;
 
 export type MessageKey = keyof typeof en;
@@ -386,6 +388,8 @@ const ptBR: Record<MessageKey, string> = {
   "telemetry.ready": "Pronto",
   "telemetry.connected": "Conectado",
   "telemetry.local": "Local",
+  "card.alsoBenchmark": "Também é referência em: {places}",
+  "card.alsoAs": "como {name}",
 };
 
 export function translate(

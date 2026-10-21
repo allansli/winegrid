@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import confetti from "canvas-confetti";
 import {
   ClueDefinition,
@@ -23,6 +23,8 @@ import { buildShareText, deliverShareText, formatDecimal, shareCellForPick } fro
 import { WINE_ENTITY_BY_ID } from "@/data/wineDatabase";
 import { boardClueHash, reconcileSavedBoard } from "@/lib/boardClueHash";
 import { clientVercelEnv, parseDailyQuery, searchWithoutRejectedFuture } from "@/lib/dailyDate";
+import { futureNoticeVisible } from "@/lib/futureNotice";
+import { overflowMenuEscape } from "@/lib/hotkeys";
 import { localizedEntityName } from "@/lib/entityName";
 import {
   DAILY_DIFFICULTY,
@@ -80,6 +82,7 @@ import { HowToPlayModal } from "./HowToPlayModal";
 import {
   Activity,
   BookOpen,
+  Calendar,
   Castle,
   CheckCircle2,
   Clock,
@@ -92,6 +95,7 @@ import {
   Info,
   Plus,
   RefreshCw,
+  Repeat,
   Share2,
   Sparkles,
   User,
@@ -155,6 +159,10 @@ export function WineGridGame() {
   const [futureNotice, setFutureNotice] = useState(false);
   const [navOpen, setNavOpen] = useState(false);
   const navRef = useRef<HTMLDivElement>(null);
+  const navButtonRef = useRef<HTMLButtonElement>(null);
+  const actionBarRef = useRef<HTMLDivElement>(null);
+  const noticeBoardRef = useRef<string | null>(null);
+  const [toastBottom, setToastBottom] = useState(16);
   const dailyReplayRef = useRef(false);
   const [nextDailyCountdown, setNextDailyCountdown] = useState<string>("");
   const [mode, setMode] = useState<GameMode>("daily");
@@ -332,9 +340,47 @@ export function WineGridGame() {
     const onPointer = (event: PointerEvent) => {
       if (!navRef.current?.contains(event.target as Node)) setNavOpen(false);
     };
+    const onKey = (event: KeyboardEvent) => {
+      if (!overflowMenuEscape(event.key, true)) return;
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      setNavOpen(false);
+      navButtonRef.current?.focus();
+    };
     document.addEventListener("pointerdown", onPointer);
-    return () => document.removeEventListener("pointerdown", onPointer);
+    document.addEventListener("keydown", onKey, true);
+    return () => {
+      document.removeEventListener("pointerdown", onPointer);
+      document.removeEventListener("keydown", onKey, true);
+    };
   }, [navOpen]);
+
+  useEffect(() => {
+    const next = board?.boardId ?? null;
+    setFutureNotice((showing) => futureNoticeVisible(showing, noticeBoardRef.current, next));
+    if (next) noticeBoardRef.current = next;
+  }, [board?.boardId]);
+
+  useLayoutEffect(() => {
+    const bar = actionBarRef.current;
+    if (!bar) return;
+    const update = () => {
+      const rect = bar.getBoundingClientRect();
+      const visible = rect.bottom > 0 && rect.top < window.innerHeight;
+      setToastBottom(visible ? Math.round(window.innerHeight - rect.top + 12) : 16);
+    };
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(bar);
+    window.addEventListener("scroll", update, true);
+    window.addEventListener("resize", update);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("scroll", update, true);
+      window.removeEventListener("resize", update);
+    };
+  }, [board, feedback]);
 
   useEffect(() => {
     if (justFilledIndex === null) return;
@@ -821,6 +867,7 @@ export function WineGridGame() {
     if (change.kind === "mode" && change.mode === mode) return;
     if (change.kind === "difficulty" && change.difficulty === difficulty) return;
     if (change.kind === "filter" && change.filter === entityFilter) return;
+    setFutureNotice(false);
 
     if (change.kind === "new-board") {
       if (board) clearActiveBoardState(board.boardId);
@@ -868,6 +915,7 @@ export function WineGridGame() {
 
   const resumePractice = () => {
     if (!resumeOffer || (mode !== "unlimited" && mode !== "infinite")) return;
+    setFutureNotice(false);
     const boardId = `${mode}-${resumeOffer.seed}-${resumeOffer.difficulty}-${resumeOffer.entityFilter}`;
     saveActiveBoardState(boardId, {
       sessionId: resumeOffer.sessionId,
@@ -1010,7 +1058,7 @@ export function WineGridGame() {
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col">
       {/* Clean Minimal Big-Tech Navigation Bar (Mobile + Desktop Responsive) */}
       <header className="winegrid-safe-top static lg:sticky lg:top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/70">
-        <div className="max-w-6xl mx-auto px-2.5 sm:px-8 h-12 lg:h-16 flex items-center gap-1.5 sm:gap-3 min-w-0">
+        <div className="max-w-6xl mx-auto px-1.5 min-[360px]:px-2.5 sm:px-8 h-12 lg:h-16 flex items-center gap-1 min-[360px]:gap-1.5 sm:gap-3 min-w-0">
           <div className="flex items-center gap-2 shrink-0">
             <div className="w-8 h-8 lg:w-9 lg:h-9 rounded-xl bg-wine-600 flex items-center justify-center shadow-sm">
               <Wine className="w-4 h-4 lg:w-5 lg:h-5 text-white" />
@@ -1020,40 +1068,48 @@ export function WineGridGame() {
             </span>
           </div>
 
-          <div className="flex min-w-0 flex-1 lg:flex-none items-center justify-center bg-slate-100 p-0.5 lg:p-1 rounded-full border border-slate-200/60">
+          <div className="flex min-w-0 flex-1 lg:flex-none items-center justify-center overflow-hidden bg-slate-100 p-0.5 lg:p-1 rounded-full border border-slate-200/60">
             <button
               type="button"
               onClick={() => requestBoardChange({ kind: "mode", mode: "daily" })}
-              className={`winegrid-mode-tab shrink-0 px-2 sm:px-2.5 lg:px-3.5 py-1 lg:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold text-center transition-all ${
+              aria-label={t("mode.daily")}
+              title={t("mode.daily")}
+              className={`winegrid-mode-tab inline-flex shrink-0 items-center justify-center gap-1 px-2 sm:px-2.5 lg:px-3.5 py-1 lg:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold text-center transition-all ${
                 mode === "daily"
                   ? "bg-white text-slate-900 shadow-sm"
                   : "text-slate-500 hover:text-slate-800"
               }`}
             >
-              {t("mode.daily")}
+              <Calendar className="w-3.5 h-3.5 shrink-0 min-[360px]:hidden" />
+              <span className="hidden min-[360px]:inline">{t("mode.daily")}</span>
             </button>
             <button
               type="button"
               onClick={() => requestBoardChange({ kind: "mode", mode: "unlimited" })}
-              className={`winegrid-mode-tab shrink-0 px-2 sm:px-2.5 lg:px-3.5 py-1 lg:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold text-center transition-all ${
+              aria-label={t("mode.unlimited")}
+              title={t("mode.unlimited")}
+              className={`winegrid-mode-tab inline-flex shrink-0 items-center justify-center gap-1 px-2 sm:px-2.5 lg:px-3.5 py-1 lg:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold text-center transition-all ${
                 mode === "unlimited"
                   ? "bg-white text-slate-900 shadow-sm"
                   : "text-slate-500 hover:text-slate-800"
               }`}
             >
-              {t("mode.unlimited")}
+              <Repeat className="w-3.5 h-3.5 shrink-0 min-[360px]:hidden" />
+              <span className="hidden min-[360px]:inline">{t("mode.unlimited")}</span>
             </button>
             <button
               type="button"
               onClick={() => requestBoardChange({ kind: "mode", mode: "infinite" })}
-              className={`winegrid-mode-tab shrink-0 inline-flex items-center justify-center gap-1 px-2 sm:px-2.5 lg:px-3.5 py-1 lg:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold transition-all ${
+              aria-label={t("mode.infinite")}
+              title={t("mode.infinite")}
+              className={`winegrid-mode-tab inline-flex shrink-0 items-center justify-center gap-1 px-2 sm:px-2.5 lg:px-3.5 py-1 lg:py-1.5 rounded-full text-[11px] sm:text-xs font-semibold transition-all ${
                 mode === "infinite"
                   ? "bg-white text-slate-900 shadow-sm"
                   : "text-slate-500 hover:text-slate-800"
               }`}
             >
               <InfinityIcon className="w-3.5 h-3.5 shrink-0" />
-              <span>{t("mode.infinite")}</span>
+              <span className="hidden min-[360px]:inline">{t("mode.infinite")}</span>
             </button>
           </div>
 
@@ -1102,11 +1158,13 @@ export function WineGridGame() {
 
           <div ref={navRef} className="relative lg:hidden shrink-0">
             <button
+              ref={navButtonRef}
               type="button"
               onClick={() => setNavOpen((open) => !open)}
               className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-600 transition shadow-sm"
               aria-label={t("nav.more")}
               aria-expanded={navOpen}
+              aria-haspopup="menu"
             >
               <MoreHorizontal className="w-4 h-4" />
             </button>
@@ -1587,7 +1645,7 @@ export function WineGridGame() {
         </div>
 
         {/* Sleek Bottom Floating Status & Controls Bar (Responsive on Mobile & Desktop) */}
-        <div className="winegrid-safe-bottom bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-card flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
+        <div ref={actionBarRef} className="winegrid-safe-bottom bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-card flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
           <div className="grid grid-cols-3 sm:flex items-center gap-3 sm:gap-10 w-full sm:w-auto text-center sm:text-left">
             <div>
               <div className="text-[10px] sm:text-[11px] font-medium text-slate-400 uppercase tracking-wider">
@@ -1710,7 +1768,10 @@ export function WineGridGame() {
       <HowToPlayModal isOpen={howToOpen} onClose={closeHowTo} />
 
       {feedback && (
-        <div className="pointer-events-none fixed z-40 bottom-4 left-3 right-3 sm:left-auto sm:right-6 sm:bottom-6 sm:max-w-md flex justify-end">
+        <div
+          className="pointer-events-none fixed z-40 left-3 right-3 sm:left-auto sm:right-6 sm:max-w-md flex justify-end"
+          style={{ bottom: toastBottom }}
+        >
           <div
             role="status"
             aria-live="polite"

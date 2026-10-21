@@ -6,6 +6,8 @@
  *
  * `alsoCountries` is hand-curated. Every country on an entity has a sentence
  * in `ALSO_COUNTRY_SOURCES`, and that sentence cites an external source.
+ * A note may also name a local synonym. That synonym has to be one of the
+ * entity's aliases; the card does not invent one.
  * Region-group clues read only those sourced entries, looked up in an explicit
  * country table. They do not infer a group from the clue text, from
  * `originCountries`, or from a country that has no note.
@@ -16,11 +18,26 @@
  * Cabernet Sauvignon follows Pauillac. Other regions do not average the band down.
  */
 
+/** A cited sentence, optionally with the local synonym used in that country. */
+export type AlsoCountrySource = string | { note: string; synonym?: string };
+
+export function alsoCountryNote(source: AlsoCountrySource | undefined): string {
+  if (!source) return "";
+  return (typeof source === "string" ? source : source.note).trim();
+}
+
+/** Local synonym stored next to a note, if the curator set one. */
+export function alsoCountrySynonym(source: AlsoCountrySource | undefined): string | undefined {
+  if (!source || typeof source === "string") return undefined;
+  const synonym = source.synonym?.trim();
+  return synonym || undefined;
+}
+
 /**
  * Why each curated `alsoCountries` entry is on the card.
  * Keys are entity id, then country name, matching `WineEntity.alsoCountries`.
  */
-export const ALSO_COUNTRY_SOURCES: Record<string, Record<string, string>> = {
+export const ALSO_COUNTRY_SOURCES: Record<string, Record<string, AlsoCountrySource>> = {
   "grape-cabernet-sauvignon": {
     "United States":
       "Wine Institute: Cabernet Sauvignon is California's most widely planted red wine grape, with the most acreage in Napa County. https://wineinstitute.org/our-industry/statistics/wine-fact-sheets/cabernet-sauvignon/",
@@ -34,8 +51,10 @@ export const ALSO_COUNTRY_SOURCES: Record<string, Record<string, string>> = {
       "Oregon Wine Board: Pinot noir is the Willamette Valley's flagship grape and Oregon's flagship variety. https://www.oregonwine.org/regions/willamette-valley/",
     "New Zealand":
       "New Zealand Wine: Pinot Noir is Central Otago's flagship variety. https://www.nzwine.com/en/regions/centralotago/",
-    Germany:
-      "Wines of Germany (Deutsches Weininstitut): Spätburgunder is Germany's most planted red grape. https://www.winesofgermany.com/our-wine/grape-varieties/grape-variety/94/sp%C3%A4tburgunder-pinot-noir",
+    Germany: {
+      note: "Wines of Germany (Deutsches Weininstitut): Spätburgunder is Germany's most planted red grape. https://www.winesofgermany.com/our-wine/grape-varieties/grape-variety/94/sp%C3%A4tburgunder-pinot-noir",
+      synonym: "Spätburgunder",
+    },
   },
   "grape-chardonnay": {
     "United States":
@@ -84,8 +103,10 @@ export const ALSO_COUNTRY_SOURCES: Record<string, Record<string, string>> = {
       "Vins de Bandol: Mourvèdre is the appellation's emblematic grape and 50–95% of Bandol red. https://vinsdebandol.com/vins-vignobles-cepages",
   },
   "grape-zinfandel": {
-    Italy:
-      "Consorzio di Tutela del Primitivo di Manduria: the DOC is at least 85% Primitivo (https://www.consorziotutelaprimitivo.com/disciplinare-doc/). Primitivo and Zinfandel are the same variety (Vitis 44, 2005, https://doi.org/10.5073/vitis.2005.44.147-148).",
+    Italy: {
+      note: "Consorzio di Tutela del Primitivo di Manduria: the DOC is at least 85% Primitivo (https://www.consorziotutelaprimitivo.com/disciplinare-doc/). Primitivo and Zinfandel are the same variety (Vitis 44, 2005, https://doi.org/10.5073/vitis.2005.44.147-148).",
+      synonym: "Primitivo",
+    },
   },
   "grape-malbec": {
     France:

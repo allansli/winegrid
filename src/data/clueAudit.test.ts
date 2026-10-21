@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { CLUE_BY_ID, COUNTRY_REGION_GROUP } from "./clueCatalog";
-import { ALSO_COUNTRY_SOURCES, TAG_SOURCES } from "./tagSources";
+import { ALSO_COUNTRY_SOURCES, TAG_SOURCES, alsoCountryNote } from "./tagSources";
 import { ALL_WINE_ENTITIES, WINE_ENTITY_BY_ID } from "./wineDatabase";
 import { WineEntity } from "../types/wine";
 
@@ -44,7 +44,7 @@ describe("attribute tag sources", () => {
     const seen = new Set<string>();
     for (const entity of ALL_WINE_ENTITIES) {
       for (const country of entity.alsoCountries ?? []) {
-        const note = ALSO_COUNTRY_SOURCES[entity.id]?.[country]?.trim();
+        const note = alsoCountryNote(ALSO_COUNTRY_SOURCES[entity.id]?.[country]);
         if (!note) missing.push(`${entity.id} ${country}`);
         seen.add(`${entity.id}|${country}`);
       }
@@ -61,7 +61,8 @@ describe("attribute tag sources", () => {
 
   it("cites an external page for every alsoCountries note", () => {
     for (const [id, countries] of Object.entries(ALSO_COUNTRY_SOURCES)) {
-      for (const [country, note] of Object.entries(countries)) {
+      for (const [country, source] of Object.entries(countries)) {
+        const note = alsoCountryNote(source);
         assert.match(note, /https?:\/\//, `${id} ${country}`);
         assert.doesNotMatch(note, /codex|this grape's|subRegion/i, `${id} ${country}`);
       }
@@ -266,21 +267,21 @@ describe("audit clue accept and reject cases", () => {
     assert.ok(sauvignon.includes("New Zealand"));
     assert.ok(sauvignon.includes("Australia"));
     assert.ok(chardonnay.includes("Australia"));
-    assert.match(ALSO_COUNTRY_SOURCES["grape-sauvignon-blanc"].Australia, /Margaret River/);
-    assert.match(ALSO_COUNTRY_SOURCES["grape-chardonnay"].Australia, /Margaret River/);
-    assert.match(ALSO_COUNTRY_SOURCES["grape-sauvignon-blanc"]["New Zealand"], /Marlborough/);
-    assert.match(ALSO_COUNTRY_SOURCES["grape-chardonnay"]["New Zealand"], /Marlborough|Hawke's Bay/);
-    assert.doesNotMatch(ALSO_COUNTRY_SOURCES["grape-chardonnay"]["New Zealand"], /Central Otago/);
-    assert.match(ALSO_COUNTRY_SOURCES["grape-chenin-blanc"]["South Africa"], /most planted/i);
-    assert.match(ALSO_COUNTRY_SOURCES["grape-chenin-blanc"]["South Africa"], /SAWIS/);
+    assert.match(alsoCountryNote(ALSO_COUNTRY_SOURCES["grape-sauvignon-blanc"].Australia), /Margaret River/);
+    assert.match(alsoCountryNote(ALSO_COUNTRY_SOURCES["grape-chardonnay"].Australia), /Margaret River/);
+    assert.match(alsoCountryNote(ALSO_COUNTRY_SOURCES["grape-sauvignon-blanc"]["New Zealand"]), /Marlborough/);
+    assert.match(alsoCountryNote(ALSO_COUNTRY_SOURCES["grape-chardonnay"]["New Zealand"]), /Marlborough|Hawke's Bay/);
+    assert.doesNotMatch(alsoCountryNote(ALSO_COUNTRY_SOURCES["grape-chardonnay"]["New Zealand"]), /Central Otago/);
+    assert.match(alsoCountryNote(ALSO_COUNTRY_SOURCES["grape-chenin-blanc"]["South Africa"]), /most planted/i);
+    assert.match(alsoCountryNote(ALSO_COUNTRY_SOURCES["grape-chenin-blanc"]["South Africa"]), /SAWIS/);
     assert.match(
-      ALSO_COUNTRY_SOURCES["grape-cabernet-sauvignon"].Chile,
+      alsoCountryNote(ALSO_COUNTRY_SOURCES["grape-cabernet-sauvignon"].Chile),
       /https:\/\/www\.winesofchile\.org\/wine-regions-map\//
     );
-    assert.doesNotMatch(ALSO_COUNTRY_SOURCES["grape-cabernet-sauvignon"].Chile, /\/zh\//);
+    assert.doesNotMatch(alsoCountryNote(ALSO_COUNTRY_SOURCES["grape-cabernet-sauvignon"].Chile), /\/zh\//);
     const malbec = WINE_ENTITY_BY_ID["grape-malbec"];
     assert.ok(malbec.alsoCountries?.includes("France"));
-    assert.match(ALSO_COUNTRY_SOURCES["grape-malbec"].France, /Cahors/);
+    assert.match(alsoCountryNote(ALSO_COUNTRY_SOURCES["grape-malbec"].France), /Cahors/);
     assert.equal(CLUE_BY_ID["geo-old-world"].predicate(malbec), true);
     const grenache = WINE_ENTITY_BY_ID["grape-grenache"];
     const mourvedre = WINE_ENTITY_BY_ID["grape-mourvedre"];
