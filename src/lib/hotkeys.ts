@@ -29,6 +29,12 @@ export function overflowMenuEscape(key: string, open: boolean, dialogOpen = fals
   return open && (key === "Escape" || key === "Esc");
 }
 
+/** Escape closes a pinned or hovered clue tooltip when no dialog is open. */
+export function clueTooltipEscape(key: string, open: boolean, dialogOpen = false): boolean {
+  if (dialogOpen) return false;
+  return open && (key === "Escape" || key === "Esc");
+}
+
 export type EscapeAction = "ignore" | "close-layer" | "close-dialog";
 
 /** Escape closes the topmost dialog, or only its open nested layer. */

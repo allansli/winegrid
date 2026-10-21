@@ -530,7 +530,7 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     label: "Tropical Double Pruning (Two Harvests or Winter Harvest)",
     shortLabel: "Double Pruning",
     category: "climate",
-    difficulty: "master_somm",
+    difficulty: "wset3",
     tooltip: "Tropical viticulture with two prunings a year: two vintages a year in the Vale do São Francisco, or a reversed cycle that moves harvest into the dry winter in Brazil's Southeast.",
     iconName: "SunMoon",
     predicate: (e) => e.climates.includes("tropical_double_pruning"),

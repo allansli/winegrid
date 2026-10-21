@@ -59,7 +59,7 @@ export const GLOBAL_PRODUCER_ENTITIES: WineEntity[] = [
     climates: ["maritime"],
     waterBodies: ["loire_river", "major_river"],
     styles: ["dry_white", "botrytis_sweet"],
-    vinification: ["large_neutral_botte_foudre", "used_neutral_oak"],
+    vinification: ["used_neutral_oak"],
     sensory: ["long_cellar_20yr"],
     varietalTraits: ["single_varietal_strict", "thin_skin_early_ripening"],
     primaryGrapes: ["Chenin Blanc"],
