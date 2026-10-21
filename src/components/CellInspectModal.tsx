@@ -6,7 +6,7 @@ import { WINE_ENTITY_BY_ID } from "@/data/wineDatabase";
 import { ModalFrame } from "./ModalFrame";
 import { useI18n } from "@/i18n/I18nProvider";
 import { localizedNote } from "@/i18n/notesPt";
-import { placeLabel } from "@/i18n/places";
+import { originLine } from "@/i18n/places";
 import { validEntityIds } from "@/lib/pickerList";
 import { formatDecimal } from "@/lib/shareScore";
 import { localizedClue } from "@/i18n/clues";
@@ -90,7 +90,7 @@ export function CellInspectModal({
                 {pickedEntity.name}
               </div>
               <div className="text-xs text-slate-500 mt-0.5">
-                {placeLabel(pickedEntity.country, locale, "country")} &bull; {placeLabel(pickedEntity.macroRegion, locale, "region")} &bull;{" "}
+                {originLine(pickedEntity.country, pickedEntity.macroRegion, locale)} &bull;{" "}
                 {pickedEntity.primaryGrapes.join(", ")}
               </div>
               <p className="text-sm text-slate-700 mt-3 leading-relaxed">
@@ -123,7 +123,7 @@ export function CellInspectModal({
                           {entity.name}
                         </span>
                         <span className="ml-2 text-xs text-slate-500">
-                          {placeLabel(entity.country, locale, "country")} &bull; {placeLabel(entity.macroRegion, locale, "region")}
+                          {originLine(entity.country, entity.macroRegion, locale)}
                         </span>
                       </div>
                       <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full capitalize">

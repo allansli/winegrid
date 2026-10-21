@@ -8,7 +8,7 @@ import {
   WineEntityType,
 } from "@/types/wine";
 import { searchWineEntities, WINE_ENTITY_BY_ID } from "@/data/wineDatabase";
-import { placeLabel } from "@/i18n/places";
+import { originLine } from "@/i18n/places";
 import { localizedEntityName } from "@/lib/entityName";
 import { readHintsOn, writeHintsOn } from "@/lib/hintsPreference";
 import { buildPickerResults, entityFitsCell, validEntities, validEntityIds } from "@/lib/pickerList";
@@ -84,16 +84,16 @@ export function EntitySearchModal({
 
   const searchOptions = {
     acceptedTypes,
-    matchesCell: (entity: WineEntity) => rowClue.predicate(entity) || colClue.predicate(entity),
+    locale,
   };
 
   const extraEntities = useMemo(() => {
-    // Misses only. Fitting answers come from answerSource and are not sliced.
+    // Same alias search as the Codex. Hints on does not use this ranking.
     return searchWineEntities(query, activeTypeTab, new Set(), searchOptions);
     // Predicates are stable for a cell. Depending on the clue objects would
     // rebuild the list on every parent render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, activeTypeTab, acceptedKey, cellKey]);
+  }, [query, activeTypeTab, acceptedKey, locale]);
 
   const results = useMemo(
     () =>
@@ -341,11 +341,11 @@ export function EntitySearchModal({
                     <TypeBadge type={entity.entityType} muted={!selectable} label={t(typeMessage(entity.entityType))} />
                   </div>
                   <div className="text-xs text-slate-500 mt-0.5">
-                    {placeLabel(entity.country, locale, "country")} · {placeLabel(entity.macroRegion, locale, "region")}
+                    {originLine(entity.country, entity.macroRegion, locale, " · ")}
                     {used
                       ? ` · ${t("picker.used")}`
-                      : !fits
-                      ? ` · ${t("picker.noFit")}`
+                      : hintsOn
+                      ? ` · ${t(fits ? "picker.fits" : "picker.noFit")}`
                       : ""}
                   </div>
                 </div>
@@ -365,10 +365,10 @@ export function EntitySearchModal({
           type="button"
           onClick={toggleHints}
           aria-pressed={hintsOn}
-          className={`rounded-full px-3 py-1 font-semibold transition ${
+          className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
             hintsOn
-              ? "bg-slate-900 text-white"
-              : "bg-white text-slate-600 border border-slate-200 hover:bg-slate-100"
+              ? "bg-wine-600 text-white"
+              : "bg-white text-slate-800 border border-slate-300 shadow-sm hover:bg-slate-50"
           }`}
         >
           {hintsOn ? t("picker.hintsOn") : t("picker.hintsOff")}

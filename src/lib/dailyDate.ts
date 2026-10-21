@@ -18,6 +18,8 @@ export interface DailyQuery {
   date: string;
   /** Past or non-production future. Does not write streaks or saves. */
   replay: boolean;
+  /** Production ignored a future ?date= and the URL should drop it. */
+  futureRejected: boolean;
 }
 
 /**
@@ -31,11 +33,25 @@ export function parseDailyQuery(
 ): DailyQuery {
   const requested = new URLSearchParams(search).get("date");
   if (!requested || !isIsoDate(requested) || requested === today) {
-    return { date: today, replay: false };
+    return { date: today, replay: false, futureRejected: false };
   }
-  if (requested < today) return { date: requested, replay: true };
-  if (vercelEnv === "production") return { date: today, replay: false };
-  return { date: requested, replay: true };
+  if (requested < today) return { date: requested, replay: true, futureRejected: false };
+  if (vercelEnv === "production") return { date: today, replay: false, futureRejected: true };
+  return { date: requested, replay: true, futureRejected: false };
+}
+
+/** Search string to put back in the URL. A rejected future date is removed. */
+export function searchWithoutRejectedFuture(
+  search: string,
+  today: string,
+  vercelEnv: string | undefined
+): string {
+  const query = parseDailyQuery(search, today, vercelEnv);
+  if (!query.futureRejected) return search;
+  const params = new URLSearchParams(search);
+  params.delete("date");
+  const next = params.toString();
+  return next ? `?${next}` : "";
 }
 
 /** Inlined at build time so a static export can tell production from preview. */

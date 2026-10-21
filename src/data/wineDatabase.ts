@@ -1,3 +1,5 @@
+import { localizedNote } from "@/i18n/notesPt";
+import { Locale } from "@/i18n/locale";
 import { placeSearchLabels } from "@/i18n/places";
 import { EntityFilterMode, WineEntity, WineEntityType } from "@/types/wine";
 import { APPELLATION_ENTITIES } from "./entities/appellations";
@@ -61,12 +63,36 @@ export function fieldsMatchSearch(fields: readonly string[], rawQuery: string): 
   return fields.some((field) => normalizeSearchText(field).includes(q));
 }
 
+/** Fields the Codex and the picker both search, including aliases. */
+export function entitySearchFields(entity: WineEntity, locale?: Locale): string[] {
+  return [
+    entity.name,
+    entity.canonicalName,
+    entity.country,
+    entity.macroRegion,
+    ...placeSearchLabels(entity.country, "country"),
+    ...placeSearchLabels(entity.macroRegion, "region"),
+    entity.subRegion ?? "",
+    entity.sommelierNote,
+    localizedNote(entity.id, entity.sommelierNote, locale ?? "en"),
+    ...entity.aliases,
+    ...entity.primaryGrapes,
+  ];
+}
+
+/** The one normalized/alias match used by the Codex and the picker. */
+export function entityMatchesSearch(entity: WineEntity, rawQuery: string, locale?: Locale): boolean {
+  return fieldsMatchSearch(entitySearchFields(entity, locale), rawQuery);
+}
+
 export interface WineEntitySearchOptions {
   /** Cell-level type constraint. Applied before ranking so the list cannot leak other types. */
   acceptedTypes?: WineEntityType[];
   /** Keep entities that match at least one of the cell's clues. Drops the clearly irrelevant ones. */
   matchesCell?: (entity: WineEntity) => boolean;
   limit?: number;
+  /** Same locale the Codex uses when it overlays a tasting note. */
+  locale?: Locale;
 }
 
 export function searchWineEntities(
@@ -109,6 +135,9 @@ export function searchWineEntities(
       const aliasNorms = entity.aliases.map(normalizeSearchText);
       const grapeNorms = entity.primaryGrapes.map(normalizeSearchText);
       const subRegionNorm = entity.subRegion ? normalizeSearchText(entity.subRegion) : "";
+      const noteNorm = normalizeSearchText(
+        `${entity.sommelierNote} ${localizedNote(entity.id, entity.sommelierNote, options.locale ?? "en")}`
+      );
 
       let score = 0;
       if (canonNorm === q || nameNorm === q || aliasNorms.includes(q)) {
@@ -127,7 +156,10 @@ export function searchWineEntities(
         score = 40;
       } else if (subRegionNorm.includes(q)) {
         score = 30;
+      } else if (noteNorm.includes(q)) {
+        score = 20;
       }
+      if (score === 0 && entityMatchesSearch(entity, query, options.locale)) score = 10;
 
       return { entity, score };
     })

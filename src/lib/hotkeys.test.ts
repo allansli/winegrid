@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { shouldIgnoreHotkey } from "./hotkeys";
+import { consumeModalEscape, modalEscapeAction, shouldIgnoreHotkey } from "./hotkeys";
 
 describe("hotkeys", () => {
   it("ignores keys while typing, in a dialog, or with a modifier", () => {
@@ -19,6 +19,54 @@ describe("hotkeys", () => {
       }),
       true
     );
+    assert.equal(
+      shouldIgnoreHotkey({
+        metaKey: false,
+        ctrlKey: false,
+        altKey: false,
+        shiftKey: false,
+        target: { tagName: "DIV", isContentEditable: false } as HTMLElement,
+        dialogOpen: true,
+      }),
+      true
+    );
+  });
+
+  it("closes the topmost dialog on Escape and does not fall through", () => {
+    assert.equal(modalEscapeAction({ key: "Escape", topmost: true }), "close-dialog");
+    assert.equal(
+      modalEscapeAction({ key: "Escape", topmost: true, nestedLayerOpen: true }),
+      "close-layer"
+    );
+    assert.equal(modalEscapeAction({ key: "Escape", topmost: false }), "ignore");
+    assert.equal(modalEscapeAction({ key: "Enter", topmost: true }), "ignore");
+
+    const calls: string[] = [];
+    const action = consumeModalEscape(
+      {
+        key: "Escape",
+        preventDefault: () => calls.push("prevent"),
+        stopPropagation: () => calls.push("stop"),
+        stopImmediatePropagation: () => calls.push("immediate"),
+      },
+      { topmost: true }
+    );
+    assert.equal(action, "close-dialog");
+    assert.deepEqual(calls, ["prevent", "stop", "immediate"]);
+
+    const ignored: string[] = [];
+    assert.equal(
+      consumeModalEscape(
+        {
+          key: "n",
+          preventDefault: () => ignored.push("prevent"),
+          stopPropagation: () => ignored.push("stop"),
+        },
+        { topmost: true }
+      ),
+      "ignore"
+    );
+    assert.deepEqual(ignored, []);
     assert.equal(
       shouldIgnoreHotkey({
         metaKey: false,
