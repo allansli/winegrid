@@ -1,6 +1,7 @@
 import { localizedNote } from "@/i18n/notesPt";
 import { Locale } from "@/i18n/locale";
 import { placeSearchLabels } from "@/i18n/places";
+import { CLUE_CATALOG } from "@/data/clueCatalog";
 import { EntityFilterMode, WineEntity, WineEntityType } from "@/types/wine";
 import { APPELLATION_ENTITIES } from "./entities/appellations";
 import { GRAPE_ENTITIES } from "./entities/grapes";
@@ -70,8 +71,9 @@ export function fieldsMatchSearch(fields: readonly string[], rawQuery: string): 
 /**
  * `identity` is the hints-off picker: name, aliases, and place
  * (country, region, subregion, and localized exonyms).
- * `full` is the Codex and the hints-on picker: those fields plus the
- * English note, the note for the active locale, and the primary grapes.
+ * `full` is the hints-on picker: those fields plus the English note,
+ * the note for the active locale, and the primary grapes.
+ * The Codex does not use either scope. It matches names and aliases only.
  */
 export type EntitySearchScope = "full" | "identity";
 
@@ -144,7 +146,44 @@ export function entitySearchScore(
   return 0;
 }
 
-/** Codex list: full-text matches, with name and alias hits ahead of place and notes. */
+/**
+ * Codex criteria dropdown. `"all"` clears the filter. Any other id is the
+ * clue whose predicate the catalog array is filtered with. There is no
+ * separate index.
+ */
+export function codexClueMatcher(clueId: string): ((entity: WineEntity) => boolean) | undefined {
+  if (!clueId || clueId === "all") return undefined;
+  const clue = CLUE_CATALOG.find((item) => item.id === clueId);
+  if (!clue) return undefined;
+  return (entity) => clue.predicate(entity);
+}
+
+function codexNameTokens(value: string): string[] {
+  return normalizeSearchText(value).split(/[^a-z0-9]+/).filter(Boolean);
+}
+
+/**
+ * Codex search reads the card name, the canonical name, and aliases.
+ * A query matches a whole field, the start of a field, or a word in the
+ * card's own name. A later word inside a longer alias does not match, so
+ * "País" does not hit the Tempranillo alias "Tinta del País". Notes, place,
+ * and grape lists are not searched.
+ */
+export function entityMatchesCodexQuery(entity: WineEntity, rawQuery: string): boolean {
+  const q = searchQuery(rawQuery);
+  if (q === "") return true;
+  if (q === null) return false;
+  const named = [entity.name, entity.canonicalName].some((field) =>
+    codexNameTokens(field).some((token) => token === q || token.startsWith(q))
+  );
+  if (named) return true;
+  return entity.aliases.some((alias) => {
+    const norm = normalizeSearchText(alias);
+    return norm === q || norm.startsWith(`${q} `);
+  });
+}
+
+/** Codex list: name and alias matches, then the optional criteria predicate. */
 export function filterCodexEntities(
   entities: readonly WineEntity[],
   input: {
@@ -157,14 +196,14 @@ export function filterCodexEntities(
   const matched = entities.filter((entity) => {
     if (input.type && input.type !== "all" && entity.entityType !== input.type) return false;
     if (input.matchesClue && !input.matchesClue(entity)) return false;
-    return entityMatchesSearch(entity, input.query, input.locale, "full");
+    return entityMatchesCodexQuery(entity, input.query);
   });
   const q = searchQuery(input.query);
   if (!q) return matched;
   return [...matched].sort((a, b) => {
     const delta =
-      entitySearchScore(b, input.query, input.locale, "full") -
-      entitySearchScore(a, input.query, input.locale, "full");
+      entitySearchScore(b, input.query, input.locale, "identity") -
+      entitySearchScore(a, input.query, input.locale, "identity");
     if (delta !== 0) return delta;
     return a.baseRarity - b.baseRarity || a.canonicalName.localeCompare(b.canonicalName);
   });

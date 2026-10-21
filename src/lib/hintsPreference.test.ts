@@ -18,4 +18,19 @@ describe("hints preference", () => {
     writeHintsOn(storage, false);
     assert.equal(readHintsOn(storage), false);
   });
+
+  it("stays on when the locale key changes", () => {
+    const saved = new Map<string, string>();
+    const storage = {
+      getItem: (key: string) => saved.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        saved.set(key, value);
+      },
+    };
+    writeHintsOn(storage, true);
+    storage.setItem("winegrid_locale_v1", "pt-BR");
+    assert.equal(readHintsOn(storage), true);
+    storage.setItem("winegrid_locale_v1", "en");
+    assert.equal(readHintsOn(storage), true);
+  });
 });

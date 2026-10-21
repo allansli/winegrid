@@ -145,6 +145,11 @@ export interface WineEntity {
   countryCode: string; // ISO-2 for flag display
   macroRegion: string;
   /**
+   * Location line only. Region clues still read `macroRegion` and `alsoRegions`.
+   * The string is shown as written, in both locales.
+   */
+  displayRegion?: string;
+  /**
    * Historical origin when it is not the flagship country printed on the card.
    * Country clues match the flagship, this list, and `alsoCountries`.
    */

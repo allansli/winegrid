@@ -141,10 +141,15 @@ function categorySection(): string {
 
 function floorNote(count: number): string {
   const notes: string[] = [];
-  if (count < DIFFICULTY_TUNING.wset2.clueSupportFloor) notes.push("below Standard support");
-  else if (count <= DIFFICULTY_TUNING.wset2.minimumValidAnswers) notes.push("at the Standard cell floor");
-  if (count < DIFFICULTY_TUNING.master_somm.clueSupportFloor) notes.push("below Master support");
-  else if (count <= DIFFICULTY_TUNING.master_somm.minimumValidAnswers) notes.push("at the Master cell floor");
+  const standardFloor = DIFFICULTY_TUNING.wset2.minimumValidAnswers;
+  const standardSupport = DIFFICULTY_TUNING.wset2.clueSupportFloor;
+  if (count < standardSupport) notes.push("below Standard support");
+  else if (count < standardFloor) notes.push("below the Standard cell floor");
+  else if (count === standardFloor) notes.push("at the Standard cell floor");
+  const masterFloor = DIFFICULTY_TUNING.master_somm.minimumValidAnswers;
+  const masterSupport = DIFFICULTY_TUNING.master_somm.clueSupportFloor;
+  if (count < masterSupport) notes.push("below Master support");
+  else if (count === masterFloor) notes.push("at the Master cell floor");
   return notes.join("; ") || "above the floors";
 }
 
@@ -158,7 +163,7 @@ function gapSection(): string {
   );
   lines.push("");
   lines.push(
-    `Floors come from \`difficultyTuning.ts\`: Standard and Sommelier cells ${DIFFICULTY_TUNING.wset2.minimumValidAnswers}, clue support ${DIFFICULTY_TUNING.wset2.clueSupportFloor}. Master cells ${DIFFICULTY_TUNING.master_somm.minimumValidAnswers}, clue support ${DIFFICULTY_TUNING.master_somm.clueSupportFloor}.`
+    `Floors come from \`difficultyTuning.ts\`: Standard cells ${DIFFICULTY_TUNING.wset2.minimumValidAnswers}, clue support ${DIFFICULTY_TUNING.wset2.clueSupportFloor}. Sommelier cells ${DIFFICULTY_TUNING.wset3.minimumValidAnswers}, clue support ${DIFFICULTY_TUNING.wset3.clueSupportFloor}. Master cells ${DIFFICULTY_TUNING.master_somm.minimumValidAnswers}, clue support ${DIFFICULTY_TUNING.master_somm.clueSupportFloor}.`
   );
   lines.push("");
   lines.push("| Rank | Clue | Type | Matches | Difficulty | Why it binds |");

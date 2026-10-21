@@ -7,7 +7,7 @@ import { ModalFrame } from "./ModalFrame";
 import { useI18n } from "@/i18n/I18nProvider";
 import { localizedNote } from "@/i18n/notesPt";
 import { alsoTraditionalLine } from "@/data/alsoTraditional";
-import { originLine } from "@/i18n/places";
+import { entityOriginLine } from "@/i18n/places";
 import { displayEntityName } from "@/lib/entityName";
 import { validEntityIds } from "@/lib/pickerList";
 import { formatDecimal } from "@/lib/shareScore";
@@ -103,7 +103,7 @@ export function CellInspectModal({
                 </span>
               </div>
               <div className="text-xs text-slate-500 mt-0.5">
-                {originLine(pickedEntity.country, pickedEntity.macroRegion, locale)} &bull;{" "}
+                {entityOriginLine(pickedEntity, locale)} &bull;{" "}
                 {pickedEntity.primaryGrapes.join(", ")}
               </div>
               {alsoTraditionalLine(pickedEntity, locale) && (
@@ -141,7 +141,7 @@ export function CellInspectModal({
                           {displayEntityName(entity.name, entity.entityType)}
                         </span>
                         <span className="ml-2 text-xs text-slate-500">
-                          {originLine(entity.country, entity.macroRegion, locale)}
+                          {entityOriginLine(entity, locale)}
                         </span>
                         {alsoTraditionalLine(entity, locale) && (
                           <div className="text-xs text-slate-500 mt-1 leading-snug">

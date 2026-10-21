@@ -76,7 +76,7 @@ describe("board difficulty floors", () => {
     assert.equal(clueSupportFloor("wset2"), DIFFICULTY_TUNING.wset2.clueSupportFloor);
     assert.equal(clueSupportFloor("wset3"), DIFFICULTY_TUNING.wset3.clueSupportFloor);
     assert.equal(clueSupportFloor("master_somm"), DIFFICULTY_TUNING.master_somm.clueSupportFloor);
-    assert.equal(DIFFICULTY_TUNING.wset2.minimumValidAnswers, 3);
+    assert.equal(DIFFICULTY_TUNING.wset2.minimumValidAnswers, 5);
     assert.equal(DIFFICULTY_TUNING.wset3.minimumValidAnswers, 3);
     assert.equal(DIFFICULTY_TUNING.master_somm.minimumValidAnswers, 2);
     assert.equal(DIFFICULTY_TUNING.wset2.clueSupportFloor, 3);

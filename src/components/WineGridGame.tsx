@@ -16,7 +16,7 @@ import { useI18n } from "@/i18n/I18nProvider";
 import { localizedClue } from "@/i18n/clues";
 import { MessageKey } from "@/i18n/messages";
 import { localizedNote } from "@/i18n/notesPt";
-import { placeLabel } from "@/i18n/places";
+import { entityRegionLabel, placeLabel } from "@/i18n/places";
 import { readDailyStreak, recordDailyResult, writeDailyStreak, EMPTY_DAILY_STREAK } from "@/lib/dailyStreak";
 import { leaderboard } from "@/lib/leaderboard";
 import { buildShareText, deliverShareText, formatDecimal, shareCellForPick } from "@/lib/shareScore";
@@ -1584,7 +1584,7 @@ export function WineGridGame() {
                           {pickedEntity.canonicalName}
                         </div>
                         <div className="winegrid-card-meta text-xs text-slate-500 mt-1 hidden sm:block">
-                          {placeLabel(pickedEntity.macroRegion, locale, "region")}
+                          {entityRegionLabel(pickedEntity, locale)}
                         </div>
                       </div>
 
@@ -1613,7 +1613,7 @@ export function WineGridGame() {
                         </div>
                         <div className="winegrid-card-meta text-xs text-slate-500 mt-1 hidden sm:block">
                           {placeLabel(sampleSolutionEntity.country, locale, "country")} &bull;{" "}
-                          {placeLabel(sampleSolutionEntity.macroRegion, locale, "region")}
+                          {entityRegionLabel(sampleSolutionEntity, locale)}
                         </div>
                       </div>
                       <span className="text-[10px] sm:text-xs font-medium text-amber-800">
