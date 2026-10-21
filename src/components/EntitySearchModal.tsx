@@ -7,8 +7,11 @@ import {
   WineEntity,
   WineEntityType,
 } from "@/types/wine";
-import { searchWineEntities } from "@/data/wineDatabase";
+import { searchWineEntities, WINE_ENTITY_BY_ID } from "@/data/wineDatabase";
 import { placeLabel } from "@/i18n/places";
+import { localizedEntityName } from "@/lib/entityName";
+import { readHintsOn, writeHintsOn } from "@/lib/hintsPreference";
+import { buildPickerResults, entityFitsCell, validEntities, validEntityIds } from "@/lib/pickerList";
 import { movePickerIndex, pickerEnterAction } from "@/lib/pickerSelection";
 import { useI18n } from "@/i18n/I18nProvider";
 import { localizedClue } from "@/i18n/clues";
@@ -22,8 +25,7 @@ interface EntitySearchModalProps {
   rowClue: ClueDefinition;
   colClue: ClueDefinition;
   acceptedTypes: WineEntityType[];
-  validEntityIds: string[];
-  validCount: number;
+  validEntityIds: readonly string[];
   usedEntityIds: Set<string>;
   onSelectEntity: (entity: WineEntity) => void;
 }
@@ -38,16 +40,13 @@ function categoryMessage(category: string): MessageKey {
   return `category.${category}` as MessageKey;
 }
 
-const HINTS_STORAGE_KEY = "winegrid_picker_hints_v1";
-
 export function EntitySearchModal({
   isOpen,
   onClose,
   rowClue,
   colClue,
   acceptedTypes,
-  validEntityIds,
-  validCount,
+  validEntityIds: answerIds,
   usedEntityIds,
   onSelectEntity,
 }: EntitySearchModalProps) {
@@ -57,20 +56,14 @@ export function EntitySearchModal({
   const [query, setQuery] = useState("");
   const [activeTypeTab, setActiveTypeTab] = useState<EntityFilterMode>("all");
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [hintsOn, setHintsOn] = useState(false);
+  const [hintsOn, setHintsOn] = useState(() =>
+    typeof window === "undefined" ? false : readHintsOn(window.localStorage)
+  );
   const inputRef = useRef<HTMLInputElement>(null);
   const renderedQueryRef = useRef("");
 
   const cellKey = `${rowClue.id}:${colClue.id}`;
   const acceptedKey = acceptedTypes.join(",");
-
-  useEffect(() => {
-    try {
-      setHintsOn(window.localStorage.getItem(HINTS_STORAGE_KEY) === "1");
-    } catch {
-      setHintsOn(false);
-    }
-  }, []);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -82,20 +75,37 @@ export function EntitySearchModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, cellKey, acceptedKey]);
 
-  const validIdSet = useMemo(() => new Set(validEntityIds), [validEntityIds]);
+  const answerSource = useMemo(() => validEntityIds({ validEntityIds: answerIds }), [answerIds]);
+
+  const fittingEntities = useMemo(
+    () => validEntities({ validEntityIds: answerSource }, WINE_ENTITY_BY_ID),
+    [answerSource]
+  );
 
   const searchOptions = {
     acceptedTypes,
     matchesCell: (entity: WineEntity) => rowClue.predicate(entity) || colClue.predicate(entity),
-    limit: query.trim() ? 25 : 40,
   };
 
-  const results = useMemo(() => {
+  const extraEntities = useMemo(() => {
+    // Misses only. Fitting answers come from answerSource and are not sliced.
     return searchWineEntities(query, activeTypeTab, new Set(), searchOptions);
     // Predicates are stable for a cell. Depending on the clue objects would
     // rebuild the list on every parent render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [query, activeTypeTab, acceptedKey, cellKey]);
+
+  const results = useMemo(
+    () =>
+      buildPickerResults({
+        query,
+        hintsOn,
+        validEntities: fittingEntities,
+        usedIds: usedEntityIds,
+        extraEntities,
+      }),
+    [query, hintsOn, fittingEntities, usedEntityIds, extraEntities]
+  );
 
   renderedQueryRef.current = query;
 
@@ -104,7 +114,8 @@ export function EntitySearchModal({
   useEffect(() => {
     const firstSelectable = results.findIndex(
       (entity) =>
-        !usedEntityIds.has(entity.id) && (!hintsOn || validIdSet.has(entity.id))
+        !usedEntityIds.has(entity.id) &&
+        (!hintsOn || entityFitsCell(entity.id, answerSource))
     );
     setSelectedIndex(firstSelectable >= 0 ? firstSelectable : 0);
     // Reset the highlight when the query, hint mode, or used set changes.
@@ -114,18 +125,16 @@ export function EntitySearchModal({
   const toggleHints = () => {
     setHintsOn((current) => {
       const next = !current;
-      try {
-        window.localStorage.setItem(HINTS_STORAGE_KEY, next ? "1" : "0");
-      } catch {
-        // Ignore private mode
-      }
+      writeHintsOn(window.localStorage, next);
       return next;
     });
   };
 
   const rowFor = (entity: WineEntity) => ({
     id: entity.id,
-    selectable: !usedEntityIds.has(entity.id) && (!hintsOn || validIdSet.has(entity.id)),
+    selectable:
+      !usedEntityIds.has(entity.id) &&
+      (!hintsOn || entityFitsCell(entity.id, answerSource)),
   });
 
   const rows = results.map(rowFor);
@@ -134,7 +143,7 @@ export function EntitySearchModal({
     const entity = results[index];
     if (!entity) return;
     if (usedEntityIds.has(entity.id)) return;
-    if (hintsOn && !validIdSet.has(entity.id)) return;
+    if (hintsOn && !entityFitsCell(entity.id, answerSource)) return;
     onSelectEntity(entity);
   };
 
@@ -150,9 +159,12 @@ export function EntitySearchModal({
     event.preventDefault();
     const typed = event.currentTarget.value;
     if (typed !== renderedQueryRef.current) {
-      const live = searchWineEntities(typed, activeTypeTab, new Set(), {
-        ...searchOptions,
-        limit: typed.trim() ? 25 : 40,
+      const live = buildPickerResults({
+        query: typed,
+        hintsOn,
+        validEntities: fittingEntities,
+        usedIds: usedEntityIds,
+        extraEntities: searchWineEntities(typed, activeTypeTab, new Set(), searchOptions),
       });
       const decision = pickerEnterAction({
         inputValue: typed,
@@ -186,7 +198,7 @@ export function EntitySearchModal({
         <div className="flex items-center justify-between gap-2 mb-2.5 sm:mb-3">
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-[11px] font-semibold text-slate-500 mr-1">
-              {t("picker.accepts", { n: validCount })}
+              {t("picker.accepts", { n: answerSource.length })}
             </span>
             {acceptedTypes.map((type) => (
               <span
@@ -293,7 +305,8 @@ export function EntitySearchModal({
         ) : (
           results.map((entity, index) => {
             const used = usedEntityIds.has(entity.id);
-            const selectable = !used && (!hintsOn || validIdSet.has(entity.id));
+            const fits = entityFitsCell(entity.id, answerSource);
+            const selectable = !used && (!hintsOn || fits);
             const isSelected = index === selectedIndex && selectable;
             return (
               <button
@@ -319,13 +332,21 @@ export function EntitySearchModal({
                         selectable ? "text-slate-900" : "text-slate-400"
                       }`}
                     >
-                      {entity.name}
+                      {localizedEntityName(
+                        entity.name,
+                        entity.entityType,
+                        t(typeMessage(entity.entityType))
+                      )}
                     </span>
                     <TypeBadge type={entity.entityType} muted={!selectable} label={t(typeMessage(entity.entityType))} />
                   </div>
                   <div className="text-xs text-slate-500 mt-0.5">
                     {placeLabel(entity.country, locale, "country")} · {placeLabel(entity.macroRegion, locale, "region")}
-                    {used ? ` · ${t("picker.used")}` : !selectable ? ` · ${t("picker.noFit")}` : ""}
+                    {used
+                      ? ` · ${t("picker.used")}`
+                      : !fits
+                      ? ` · ${t("picker.noFit")}`
+                      : ""}
                   </div>
                 </div>
                 <ArrowRight

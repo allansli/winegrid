@@ -39,6 +39,84 @@ export interface SavedClueBoard {
  * Restore a saved game only when it was written for this exact clue layout.
  * Saves from before clue hashes existed are stale and are discarded.
  */
+export interface ReconcileCell {
+  rowClueId: string;
+  colClueId: string;
+  validEntityIds: readonly string[];
+  pickedEntityId?: string | null;
+  pickedRarityPct?: number | null;
+  isLocked?: boolean;
+}
+
+/**
+ * A hash mismatch is not enough to throw a game away. Clue ids that differ
+ * are a different puzzle, so the save goes. Otherwise keep every placement
+ * that still fits. A finished same-day daily whose clues did not change is
+ * kept whole, including answers the new data would no longer accept.
+ */
+export function reconcileSavedBoard<T extends ReconcileCell>(
+  saved: { cells?: unknown; isCompleted?: boolean } | null | undefined,
+  generatedCells: readonly T[],
+  options: { keepCompletedDaily: boolean }
+):
+  | { action: "discard" }
+  | {
+      action: "restore";
+      cells: Array<T & { pickedEntityId: string | null; pickedRarityPct: number | null; isLocked: boolean }>;
+      isCompleted: boolean;
+    } {
+  if (!saved || !Array.isArray(saved.cells) || saved.cells.length !== generatedCells.length) {
+    return { action: "discard" };
+  }
+  const savedCells = saved.cells as Array<Record<string, unknown>>;
+  for (let index = 0; index < generatedCells.length; index++) {
+    if (
+      savedCells[index]?.rowClueId !== generatedCells[index].rowClueId ||
+      savedCells[index]?.colClueId !== generatedCells[index].colClueId
+    ) {
+      return { action: "discard" };
+    }
+  }
+
+  const restorePick = (index: number) => {
+    const raw = savedCells[index]?.pickedEntityId;
+    const picked = typeof raw === "string" ? raw : null;
+    const rarity = savedCells[index]?.pickedRarityPct;
+    return { picked, rarity: typeof rarity === "number" ? rarity : null };
+  };
+
+  if (options.keepCompletedDaily && saved.isCompleted === true) {
+    const cells = generatedCells.map((cell, index) => {
+      const { picked, rarity } = restorePick(index);
+      return {
+        ...cell,
+        pickedEntityId: picked,
+        pickedRarityPct: rarity,
+        isLocked: Boolean(picked),
+      };
+    });
+    return { action: "restore", cells, isCompleted: true };
+  }
+
+  const used = new Set<string>();
+  const cells = generatedCells.map((cell, index) => {
+    const { picked, rarity } = restorePick(index);
+    const keep = Boolean(picked && cell.validEntityIds.includes(picked) && !used.has(picked));
+    if (keep && picked) used.add(picked);
+    return {
+      ...cell,
+      pickedEntityId: keep ? picked : null,
+      pickedRarityPct: keep ? rarity : null,
+      isLocked: keep,
+    };
+  });
+  return {
+    action: "restore",
+    cells,
+    isCompleted: cells.every((cell) => Boolean(cell.pickedEntityId)),
+  };
+}
+
 export function savedBoardMatchesClues(
   saved: SavedClueBoard | null | undefined,
   generated: ClueHashBoard

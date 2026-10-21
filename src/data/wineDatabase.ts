@@ -41,6 +41,26 @@ export function normalizeSearchText(text: string): string {
   return saint.replace(/ae/g, "a").replace(/oe/g, "o").replace(/ue/g, "u");
 }
 
+/**
+ * Query shared by the picker and the Codex.
+ * "" keeps the default list. null matches nothing: the raw query was not
+ * empty, but folding left fewer than two characters (so "ue", "oe", and
+ * "ae" cannot match on the single letter they fold into).
+ */
+export function searchQuery(raw: string): string | null {
+  if (!raw.trim()) return "";
+  const q = normalizeSearchText(raw);
+  return q.length >= 2 ? q : null;
+}
+
+/** True when `fields` match `rawQuery` under the same rule as the picker. */
+export function fieldsMatchSearch(fields: readonly string[], rawQuery: string): boolean {
+  const q = searchQuery(rawQuery);
+  if (q === "") return true;
+  if (q === null) return false;
+  return fields.some((field) => normalizeSearchText(field).includes(q));
+}
+
 export interface WineEntitySearchOptions {
   /** Cell-level type constraint. Applied before ranking so the list cannot leak other types. */
   acceptedTypes?: WineEntityType[];
@@ -65,7 +85,8 @@ export function searchWineEntities(
     return true;
   });
   const limit = options.limit ?? 40;
-  const q = normalizeSearchText(query);
+  const q = searchQuery(query);
+  if (q === null) return [];
   if (!q) {
     return [...pool]
       .sort(

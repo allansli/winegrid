@@ -27,8 +27,10 @@ const EMOJI: Record<ShareCell, string> = {
 };
 
 export function formatDecimal(value: number, locale: Locale): string {
-  const text = Number(value.toFixed(1)).toString();
-  return locale === "pt-BR" ? text.replace(".", ",") : text;
+  return new Intl.NumberFormat(locale, {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 1,
+  }).format(value);
 }
 
 export interface ShareScoreInput {
@@ -48,8 +50,8 @@ export function buildShareText(input: ShareScoreInput): string {
   const rarity = formatDecimal(input.rarity, input.locale);
   const score =
     input.locale === "pt-BR"
-      ? `Placar: ${input.correct}/9 · Raridade: ${rarity} · ❌×${input.missesUsed} · Sequência ${input.streak}`
-      : `Score: ${input.correct}/9 · Rarity: ${rarity} · ❌×${input.missesUsed} · Streak ${input.streak}`;
+      ? `Placar: ${input.correct}/9 · Raridade: ${rarity}\n❌×${input.missesUsed} · Sequência ${input.streak}`
+      : `Score: ${input.correct}/9 · Rarity: ${rarity}\n❌×${input.missesUsed} · Streak ${input.streak}`;
   let title: string;
   if (input.locale === "pt-BR") {
     title =

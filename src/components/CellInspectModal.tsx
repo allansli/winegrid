@@ -7,6 +7,7 @@ import { ModalFrame } from "./ModalFrame";
 import { useI18n } from "@/i18n/I18nProvider";
 import { localizedNote } from "@/i18n/notesPt";
 import { placeLabel } from "@/i18n/places";
+import { validEntityIds } from "@/lib/pickerList";
 import { formatDecimal } from "@/lib/shareScore";
 import { localizedClue } from "@/i18n/clues";
 import { X, Award, Sparkles } from "lucide-react";
@@ -35,9 +36,9 @@ export function CellInspectModal({
     ? WINE_ENTITY_BY_ID[cell.pickedEntityId]
     : null;
 
-  const validEntities = cell.validEntityIds
+  const validEntities = validEntityIds(cell)
     .map((id) => WINE_ENTITY_BY_ID[id])
-    .filter(Boolean)
+    .filter((entity) => Boolean(entity))
     .sort((a, b) => b.baseRarity - a.baseRarity);
 
   return (

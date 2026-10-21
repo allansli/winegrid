@@ -132,9 +132,12 @@ const en = {
   "picker.allAccepted": "All accepted",
   "picker.search": "Search a region, grape, or producer...",
   "picker.used": "Already used on this board",
-  "picker.blocks": "Valid, but it would block the board",
-  "picker.blocksDetail":
-    "{name} fits this cell, but the other cells could not be finished. No miss is spent.",
+  "picker.blocks": "Choose another answer",
+  "picker.blocksDetail": "{name} isn't available for this cell. No miss is spent.",
+  "board.stuckTitle": "This board can't be finished",
+  "board.stuckDetail":
+    "An open cell has no answer left. Reveal the solution, or start a new board.",
+  "replay.detail": "Playing {date}. Streaks and saved games stay as they are.",
   "history.rarity": "Rarity {score}",
   "picker.empty": "No matching {types} for “{query}”.",
   "picker.noFit": "doesn’t fit this cell",
@@ -321,9 +324,12 @@ const ptBR: Record<MessageKey, string> = {
   "picker.allAccepted": "Todos aceitos",
   "picker.search": "Buscar região, uva ou produtor...",
   "picker.used": "Já usado neste tabuleiro",
-  "picker.blocks": "Válida, mas travaria o tabuleiro",
-  "picker.blocksDetail":
-    "{name} cabe nesta casa, mas as outras ficariam sem solução. Nenhum erro é gasto.",
+  "picker.blocks": "Escolha outra resposta",
+  "picker.blocksDetail": "{name} não está disponível nesta casa. Nenhum erro é gasto.",
+  "board.stuckTitle": "Este tabuleiro não tem como terminar",
+  "board.stuckDetail":
+    "Uma casa aberta ficou sem resposta. Revele a solução ou comece um tabuleiro novo.",
+  "replay.detail": "Jogando {date}. A sequência e os jogos salvos não mudam.",
   "history.rarity": "Raridade {score}",
   "picker.empty": "Nenhum {types} para “{query}”.",
   "picker.noFit": "não serve nesta casa",

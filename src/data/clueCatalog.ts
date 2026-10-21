@@ -1,8 +1,58 @@
 import { ClueDefinition, WineEntity } from "@/types/wine";
+import { ALSO_COUNTRY_SOURCES } from "./tagSources";
 
-/** Flagship country, historical origin, and other countries where the entity is defining. */
+/**
+ * Explicit country → world and hemisphere for region-group clues.
+ * A country that is not in this map does not grant a group.
+ */
+export const COUNTRY_REGION_GROUP: Record<
+  string,
+  { world: "Old World" | "New World"; hemisphere: "Northern" | "Southern" }
+> = {
+  France: { world: "Old World", hemisphere: "Northern" },
+  Italy: { world: "Old World", hemisphere: "Northern" },
+  Spain: { world: "Old World", hemisphere: "Northern" },
+  Portugal: { world: "Old World", hemisphere: "Northern" },
+  Germany: { world: "Old World", hemisphere: "Northern" },
+  Austria: { world: "Old World", hemisphere: "Northern" },
+  Hungary: { world: "Old World", hemisphere: "Northern" },
+  Greece: { world: "Old World", hemisphere: "Northern" },
+  Lebanon: { world: "Old World", hemisphere: "Northern" },
+  Croatia: { world: "Old World", hemisphere: "Northern" },
+  "United States": { world: "New World", hemisphere: "Northern" },
+  Chile: { world: "New World", hemisphere: "Southern" },
+  Argentina: { world: "New World", hemisphere: "Southern" },
+  Australia: { world: "New World", hemisphere: "Southern" },
+  "New Zealand": { world: "New World", hemisphere: "Southern" },
+  "South Africa": { world: "New World", hemisphere: "Southern" },
+};
+
+/**
+ * Curated `alsoCountries` that also have a non-empty note in
+ * `ALSO_COUNTRY_SOURCES`. An entry with no source does not count.
+ */
+export function sourcedAlsoCountries(entity: WineEntity): string[] {
+  const notes = ALSO_COUNTRY_SOURCES[entity.id];
+  if (!notes) return [];
+  return (entity.alsoCountries ?? []).filter((country) => Boolean(notes[country]?.trim()));
+}
+
+/**
+ * Flagship country, historical origin, and sourced `alsoCountries`.
+ * Region-group clues do not use `originCountries`; named country clues do.
+ */
 export function entityCountries(entity: WineEntity): string[] {
-  return [entity.country, ...(entity.originCountries ?? []), ...(entity.alsoCountries ?? [])];
+  return [entity.country, ...(entity.originCountries ?? []), ...sourcedAlsoCountries(entity)];
+}
+
+function sourcedAlsoCountryMatches(
+  entity: WineEntity,
+  match: (group: { world: "Old World" | "New World"; hemisphere: "Northern" | "Southern" }) => boolean
+): boolean {
+  return sourcedAlsoCountries(entity).some((country) => {
+    const group = COUNTRY_REGION_GROUP[country];
+    return group ? match(group) : false;
+  });
 }
 
 /** Flagship region plus other regions where the entity is important. */
@@ -117,7 +167,9 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     difficulty: "wset2",
     tooltip: "European or Near Eastern classical viticultural origin.",
     iconName: "Landmark",
-    predicate: (e) => e.world === "Old World",
+    predicate: (e) =>
+      e.world === "Old World" ||
+      sourcedAlsoCountryMatches(e, (group) => group.world === "Old World"),
   },
   {
     id: "geo-new-world",
@@ -127,7 +179,9 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     difficulty: "wset2",
     tooltip: "Americas, South Africa, Australia, or New Zealand.",
     iconName: "Compass",
-    predicate: (e) => e.world === "New World",
+    predicate: (e) =>
+      e.world === "New World" ||
+      sourcedAlsoCountryMatches(e, (group) => group.world === "New World"),
   },
   {
     id: "geo-southern-hemisphere",
@@ -137,7 +191,9 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     difficulty: "wset2",
     tooltip: "Located south of the Equator (Argentina, Chile, South Africa, Australia, New Zealand).",
     iconName: "Globe",
-    predicate: (e) => e.hemisphere === "Southern",
+    predicate: (e) =>
+      e.hemisphere === "Southern" ||
+      sourcedAlsoCountryMatches(e, (group) => group.hemisphere === "Southern"),
   },
   {
     id: "geo-cool-latitude",

@@ -151,7 +151,8 @@ export interface WineEntity {
   originCountries?: string[];
   /**
    * Hand-curated countries where the entity is defining enough to satisfy a
-   * country clue. Each entry has a note in ALSO_COUNTRY_SOURCES.
+   * country or region-group clue. Each entry needs a note in
+   * ALSO_COUNTRY_SOURCES; an entry with no note does not count.
    */
   alsoCountries?: string[];
   /** Other macro-regions where the entity is important enough to satisfy a region clue. */

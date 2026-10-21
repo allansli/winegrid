@@ -5,8 +5,10 @@
  * are places where the entity is important enough to satisfy that clue.
  *
  * `alsoCountries` is hand-curated. Every country on an entity has a sentence
- * in `ALSO_COUNTRY_SOURCES`. A country is added when that grape is a defining
- * part of the country's wine, and the note names the place and the reason.
+ * in `ALSO_COUNTRY_SOURCES`, and that sentence cites an external source.
+ * Region-group clues read only those sourced entries, looked up in an explicit
+ * country table. They do not infer a group from the clue text, from
+ * `originCountries`, or from a country that has no note.
  * The order of `primaryGrapes` on an appellation is not a reason to add one.
  *
  * A grape's `latitudeBand` is the band of its flagship appellation. Corvina
@@ -21,65 +23,73 @@
 export const ALSO_COUNTRY_SOURCES: Record<string, Record<string, string>> = {
   "grape-cabernet-sauvignon": {
     "United States":
-      "Napa Valley's note is the Judgment of Paris, and this grape's subRegion names Napa Valley.",
+      "Wine Institute: Cabernet Sauvignon is California's most widely planted red wine grape, with the most acreage in Napa County. https://wineinstitute.org/our-industry/statistics/wine-fact-sheets/cabernet-sauvignon/",
     Chile:
-      "Maipo Valley names Cabernet Sauvignon together with Carménère and Syrah.",
+      "Wines of Chile: Cabernet Sauvignon is the main variety planted in the Maipo Valley. https://www.winesofchile.org/zh/wine-regions-map/",
     Australia:
-      "Coonawarra's note is terra rossa Cabernet Sauvignon, and Margaret River names the grape as well.",
+      "Wine Australia: Cabernet Sauvignon leads Coonawarra and is one of Margaret River's main varieties. https://www.wineaustralia.com/market-insights/regions-and-varieties/south-australia-wines/coonawarra",
   },
   "grape-pinot-noir": {
     "United States":
-      "Willamette Valley and the Sonoma Coast both name Pinot Noir among their grapes.",
+      "Oregon Wine Board: Pinot noir is the Willamette Valley's flagship grape and Oregon's flagship variety. https://www.oregonwine.org/regions/willamette-valley/",
     "New Zealand":
-      "Central Otago's note calls it one of the world's southernmost commercial Pinot Noir regions, and Marlborough names Pinot Noir too.",
+      "New Zealand Wine: Pinot Noir is Central Otago's flagship variety. https://www.nzwine.com/en/regions/centralotago/",
+    Germany:
+      "Wines of Germany (Deutsches Weininstitut): Spätburgunder is Germany's most planted red grape. https://www.winesofgermany.com/our-wine/grape-varieties/grape-variety/94/sp%C3%A4tburgunder-pinot-noir",
   },
   "grape-chardonnay": {
     "United States":
-      "Napa Valley, the Sonoma Coast, and Willamette Valley all name Chardonnay, and this grape's subRegion already includes Sonoma.",
+      "Wine Institute: Chardonnay is California's most planted white wine grape, and Sonoma County leads the acreage. https://wineinstitute.org/our-industry/statistics/wine-fact-sheets/chardonnay/",
     "New Zealand":
-      "Marlborough names Chardonnay with Sauvignon Blanc and Pinot Noir, and Central Otago names it with Pinot Noir and Riesling.",
+      "New Zealand Wine: Central Otago is renowned for Chardonnay, and Marlborough offers intense Chardonnay. https://www.nzwine.com/en/regions/centralotago/",
+    Australia:
+      "Wine Australia: Chardonnay is one of Margaret River's main varieties. https://www.wineaustralia.com/market-insights/regions-and-varieties/western-australia-wines/margaret-river",
   },
   "grape-sauvignon-blanc": {
     "New Zealand":
-      "Marlborough's note is Sauvignon Blanc thiols on greywacke gravels, the textbook New Zealand home.",
+      "New Zealand Wine: Sauvignon Blanc put Marlborough on the map and is New Zealand's most widely planted variety. https://www.nzwine.com/en/winestyles/sauvignonblanc/",
+    Australia:
+      "Wine Australia: Sauvignon Blanc is one of Margaret River's main varieties. https://www.wineaustralia.com/market-insights/regions-and-varieties/western-australia-wines/margaret-river",
   },
   "grape-riesling": {
     Australia:
-      "Clare Valley names Riesling, and this grape's subRegion already includes Clare Valley.",
+      "Wine Australia: Riesling is synonymous with the Clare Valley. https://www.wineaustralia.com/market-insights/regions-and-varieties/south-australia-wines/clare-valley",
+    France:
+      "Vins d'Alsace (CIVA): Riesling d'Alsace is a noble Alsace grape, and AOC Alsace may name Riesling when the wine is 100% Riesling. https://www.vinsalsace.com/en/gouts-et-couleurs/cepages/riesling-dalsace/riesling-dalsace/",
   },
   "grape-syrah": {
     Australia:
-      "Shiraz is this grape's Australian name, and Barossa's note is the ungrafted Shiraz bush vines there.",
+      "Wine Australia: Shiraz is the Barossa's main variety, about half of plantings, with vines back to the 1840s. https://www.wineaustralia.com/market-insights/regions-and-varieties/south-australia-wines/barossa",
   },
   "grape-tempranillo": {
     Portugal:
-      "Tinta Roriz and Aragonez are the Portuguese names in the alias list, and the subRegion includes the Douro.",
+      "IVDP: Tinta Roriz (Aragonez, Tempranillo) is a recommended Douro variety and the region's second-most planted red. https://www.ivdp.pt/pt/vinha/castas/",
   },
   "grape-grenache": {
     France:
-      "The card's region is the Rhône Valley, and Châteauneuf-du-Pape names Grenache. The printed country stays Spain.",
+      "Vins Rhône: Grenache noir is the dominant grape of Châteauneuf-du-Pape. https://www.vins-rhone.com/en/cotes-du-rhone-cru-aoc-chateauneuf-du-pape",
     Australia:
-      "Barossa's note records its old ungrafted Grenache bush vines, with Shiraz and Mourvèdre, and this grape's subRegion already names Barossa.",
+      "Wine Australia: Grenache is one of the Barossa's main varieties, often in GSM blends. https://www.wineaustralia.com/market-insights/regions-and-varieties/south-australia-wines/barossa",
   },
   "grape-chenin-blanc": {
     "South Africa":
-      "Steen is the South African alias, and both Stellenbosch and Swartland name Chenin Blanc.",
+      "Wines of South Africa: Chenin Blanc (Steen) is an approved Wine of Origin cultivar. https://www.wosa.co.za/The-Industry/Wines-Of-Origin/The-Role-Of-Cultivar/",
   },
   "grape-albarino": {
     Portugal:
-      "Alvarinho is the Portuguese alias, and the subRegion names Monção e Melgaço in Vinho Verde.",
+      "Comissão de Viticultura da Região dos Vinhos Verdes: Alvarinho is the reference variety of the Monção e Melgaço sub-region. https://www.vinhoverde.pt/fotos/documentacao/moncyayo_e_melgacyo_press_kit_en_930971045686e9255567ad.pdf",
   },
   "grape-mourvedre": {
     France:
-      "Bandol is the French home named on this grape. The printed country stays Spain.",
+      "Vins de Bandol: Mourvèdre is the appellation's emblematic grape and 50–95% of Bandol red. https://vinsdebandol.com/vins-vignobles-cepages",
   },
   "grape-zinfandel": {
     Italy:
-      "The subRegion names Puglia (Manduria), where the same variety is Primitivo.",
+      "Consorzio di Tutela del Primitivo di Manduria: the DOC is at least 85% Primitivo (https://www.consorziotutelaprimitivo.com/disciplinare-doc/). Primitivo and Zinfandel are the same variety (Vitis 44, 2005, https://doi.org/10.5073/vitis.2005.44.147-148).",
   },
   "grape-semillon": {
     Australia:
-      "This grape's note gives Hunter Valley Sémillon as its second classic role, and Margaret River names Sémillon among its grapes.",
+      "Wine Australia: Hunter Valley Semillon is the region's stellar white, and Sémillon is one of Margaret River's main varieties. https://www.wineaustralia.com/market-insights/regions-and-varieties/new-south-wales-wines/hunter-valley",
   },
 };
 
