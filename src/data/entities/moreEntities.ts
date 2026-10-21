@@ -515,6 +515,7 @@ export const ADDITIONAL_WINE_ENTITIES: WineEntity[] = [
     country: "France",
     countryCode: "FR",
     macroRegion: "Bordeaux",
+    alsoCountries: ["Australia"],
     subRegion: "Sauternes / Barsac / Pessac-Léognan / Hunter Valley",
     world: "Old World",
     hemisphere: "Northern",

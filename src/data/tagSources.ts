@@ -4,23 +4,85 @@
  * `originCountries` is the historical home, and `alsoCountries` / `alsoRegions`
  * are places where the entity is important enough to satisfy that clue.
  *
- * A grape gains `alsoCountries` when a Codex appellation in that country lists
- * it first in `primaryGrapes` (Shiraz counts as Syrah). The review's textbook
- * homes are included even when another grape is listed first: Syrah in
- * Australia, Sauvignon Blanc in New Zealand, Chenin Blanc in South Africa,
- * Tempranillo and Albariño in Portugal, Cabernet Sauvignon in the United
- * States. The same first-listed rule also adds Cabernet Sauvignon in Chile
- * and Australia, Pinot Noir in the United States and New Zealand, and Riesling
- * in Australia (Clare Valley). Chardonnay is not added for the USA or New
- * Zealand, Grenache is not added for Australia, and Sémillon is not added for
- * Australia: none is the first grape of a Codex appellation there, and Hunter
- * is not in the Codex.
+ * `alsoCountries` is hand-curated. Every country on an entity has a sentence
+ * in `ALSO_COUNTRY_SOURCES`. A country is added when that grape is a defining
+ * part of the country's wine, and the note names the place and the reason.
+ * The order of `primaryGrapes` on an appellation is not a reason to add one.
  *
- * A grape's `latitudeBand` is the band of its flagship appellation, the place
- * named by the home-country appellation that lists it first. Corvina follows
- * Amarone, Viognier follows Condrieu, Syrah follows Côte-Rôtie, and Cabernet
- * Sauvignon follows Pauillac. Other regions do not average the band down.
+ * A grape's `latitudeBand` is the band of its flagship appellation. Corvina
+ * follows Amarone, Viognier follows Condrieu, Syrah follows Côte-Rôtie, and
+ * Cabernet Sauvignon follows Pauillac. Other regions do not average the band down.
  */
+
+/**
+ * Why each curated `alsoCountries` entry is on the card.
+ * Keys are entity id, then country name, matching `WineEntity.alsoCountries`.
+ */
+export const ALSO_COUNTRY_SOURCES: Record<string, Record<string, string>> = {
+  "grape-cabernet-sauvignon": {
+    "United States":
+      "Napa Valley's note is the Judgment of Paris, and this grape's subRegion names Napa Valley.",
+    Chile:
+      "Maipo Valley names Cabernet Sauvignon together with Carménère and Syrah.",
+    Australia:
+      "Coonawarra's note is terra rossa Cabernet Sauvignon, and Margaret River names the grape as well.",
+  },
+  "grape-pinot-noir": {
+    "United States":
+      "Willamette Valley and the Sonoma Coast both name Pinot Noir among their grapes.",
+    "New Zealand":
+      "Central Otago's note calls it one of the world's southernmost commercial Pinot Noir regions, and Marlborough names Pinot Noir too.",
+  },
+  "grape-chardonnay": {
+    "United States":
+      "Napa Valley, the Sonoma Coast, and Willamette Valley all name Chardonnay, and this grape's subRegion already includes Sonoma.",
+    "New Zealand":
+      "Marlborough names Chardonnay with Sauvignon Blanc and Pinot Noir, and Central Otago names it with Pinot Noir and Riesling.",
+  },
+  "grape-sauvignon-blanc": {
+    "New Zealand":
+      "Marlborough's note is Sauvignon Blanc thiols on greywacke gravels, the textbook New Zealand home.",
+  },
+  "grape-riesling": {
+    Australia:
+      "Clare Valley names Riesling, and this grape's subRegion already includes Clare Valley.",
+  },
+  "grape-syrah": {
+    Australia:
+      "Shiraz is this grape's Australian name, and Barossa's note is the ungrafted Shiraz bush vines there.",
+  },
+  "grape-tempranillo": {
+    Portugal:
+      "Tinta Roriz and Aragonez are the Portuguese names in the alias list, and the subRegion includes the Douro.",
+  },
+  "grape-grenache": {
+    France:
+      "The card's region is the Rhône Valley, and Châteauneuf-du-Pape names Grenache. The printed country stays Spain.",
+    Australia:
+      "Barossa's note records its old ungrafted Grenache bush vines, with Shiraz and Mourvèdre, and this grape's subRegion already names Barossa.",
+  },
+  "grape-chenin-blanc": {
+    "South Africa":
+      "Steen is the South African alias, and both Stellenbosch and Swartland name Chenin Blanc.",
+  },
+  "grape-albarino": {
+    Portugal:
+      "Alvarinho is the Portuguese alias, and the subRegion names Monção e Melgaço in Vinho Verde.",
+  },
+  "grape-mourvedre": {
+    France:
+      "Bandol is the French home named on this grape. The printed country stays Spain.",
+  },
+  "grape-zinfandel": {
+    Italy:
+      "The subRegion names Puglia (Manduria), where the same variety is Primitivo.",
+  },
+  "grape-semillon": {
+    Australia:
+      "This grape's note gives Hunter Valley Sémillon as its second classic role, and Margaret River names Sémillon among its grapes.",
+  },
+};
+
 export const TAG_SOURCES: Record<string, string> = {
   DOCG: "Italian Denominazione di Origine Controllata e Garantita, the top DOC tier.",
   AOC: "French Appellation d'Origine Contrôlée / AOP.",

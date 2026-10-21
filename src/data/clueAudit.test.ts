@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { CLUE_BY_ID } from "./clueCatalog";
-import { TAG_SOURCES } from "./tagSources";
+import { ALSO_COUNTRY_SOURCES, TAG_SOURCES } from "./tagSources";
 import { ALL_WINE_ENTITIES, WINE_ENTITY_BY_ID } from "./wineDatabase";
 
 const TAG_FIELDS = [
@@ -36,6 +36,26 @@ describe("attribute tag sources", () => {
       }
     }
     assert.deepEqual([...missing], []);
+  });
+
+  it("gives every curated alsoCountries entry its own source note", () => {
+    const missing: string[] = [];
+    const seen = new Set<string>();
+    for (const entity of ALL_WINE_ENTITIES) {
+      for (const country of entity.alsoCountries ?? []) {
+        const note = ALSO_COUNTRY_SOURCES[entity.id]?.[country]?.trim();
+        if (!note) missing.push(`${entity.id} ${country}`);
+        seen.add(`${entity.id}|${country}`);
+      }
+    }
+    const extras: string[] = [];
+    for (const [id, countries] of Object.entries(ALSO_COUNTRY_SOURCES)) {
+      for (const country of Object.keys(countries)) {
+        if (!seen.has(`${id}|${country}`)) extras.push(`${id} ${country}`);
+      }
+    }
+    assert.deepEqual(missing, []);
+    assert.deepEqual(extras, []);
   });
 });
 
@@ -135,6 +155,10 @@ describe("audit clue accept and reject cases", () => {
     ["geo-oceania", "grape-pinot-noir", true],
     ["geo-oceania", "grape-riesling", true],
     ["geo-oceania", "grape-cabernet-sauvignon", true],
+    ["geo-usa", "grape-chardonnay", true],
+    ["geo-oceania", "grape-chardonnay", true],
+    ["geo-oceania", "grape-grenache", true],
+    ["geo-oceania", "grape-semillon", true],
     ["geo-usa", "grape-cabernet-sauvignon", true],
     ["geo-usa", "grape-pinot-noir", true],
     ["geo-south-america", "grape-cabernet-sauvignon", true],
