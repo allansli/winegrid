@@ -492,6 +492,7 @@ export const GRAPE_ENTITIES: WineEntity[] = [
     countryCode: "AR",
     macroRegion: "Cuyo",
     originCountries: ["France"],
+    alsoCountries: ["France"],
     alsoRegions: ["Bordeaux"],
     subRegion: "Mendoza (Uco Valley / Luján) & Cahors AOC",
     world: "New World",

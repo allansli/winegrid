@@ -276,7 +276,7 @@ export const ADDITIONAL_WINE_ENTITIES: WineEntity[] = [
     entityType: "grape",
     country: "Spain",
     countryCode: "ES",
-    macroRegion: "Valencia",
+    macroRegion: "Murcia (Jumilla)",
     alsoCountries: ["France"],
     alsoRegions: ["Provence", "Rhône Valley"],
     subRegion: "Bandol AOC / Jumilla DO / Châteauneuf-du-Pape / Barossa",
