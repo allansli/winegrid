@@ -12,7 +12,11 @@ import {
   WineEntityType,
 } from "@/types/wine";
 import { WINE_ENTITY_BY_ID } from "@/data/wineDatabase";
-import { generateWineGridBoard } from "@/lib/matrixGenerator";
+import {
+  DAILY_DIFFICULTY,
+  generateDailyBoard,
+  generateWineGridBoard,
+} from "@/lib/matrixGenerator";
 import {
   ECONOMY_VERSION,
   MISS_BUDGET,
@@ -255,17 +259,19 @@ export function WineGridGame() {
       targetFilter: EntityFilterMode,
       targetSeed: string
     ) => {
-      const seedToUse = targetMode === "daily" ? todayStr : targetSeed;
-      const effDiff = targetMode === "daily" ? "wset3" : targetDiff;
+      const effDiff = targetMode === "daily" ? DAILY_DIFFICULTY : targetDiff;
       const effFilter = targetMode === "daily" ? "all" : targetFilter;
 
-      const generated = generateWineGridBoard({
-        seed: seedToUse,
-        mode: targetMode,
-        difficulty: effDiff,
-        entityFilter: effFilter,
-        boardDate: todayStr,
-      });
+      const generated =
+        targetMode === "daily"
+          ? generateDailyBoard(todayStr)
+          : generateWineGridBoard({
+              seed: targetSeed,
+              mode: targetMode,
+              difficulty: effDiff,
+              entityFilter: effFilter,
+              boardDate: todayStr,
+            });
 
       const saved = loadActiveBoardState<PersistedActiveState>(
         generated.boardId
@@ -909,11 +915,11 @@ export function WineGridGame() {
               <div className="winegrid-clue-title font-display text-xs sm:text-xl font-bold text-slate-900 mt-1.5 sm:mt-2">
                 {board.mode === "daily" ? todayStr : "Custom 3×3"}
               </div>
-              {board.mode !== "daily" && (
-                <div className="text-[10px] sm:text-xs font-semibold text-slate-500 mt-1">
-                  {difficultyLabel(board.difficulty)} · {filterLabel(board.entityFilter)}
-                </div>
-              )}
+              <div className="text-[10px] sm:text-xs font-semibold text-slate-500 mt-1">
+                {board.mode === "daily"
+                  ? "Standard"
+                  : `${difficultyLabel(board.difficulty)} · ${filterLabel(board.entityFilter)}`}
+              </div>
             </div>
             {board.mode === "daily" && nextDailyCountdown && (
               <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1.5 text-[10px] sm:text-xs font-medium text-slate-500 mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-slate-200/70">

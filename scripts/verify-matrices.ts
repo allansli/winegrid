@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { ALL_WINE_ENTITIES, WINE_ENTITY_BY_ID } from "../src/data/wineDatabase";
 import { CLUE_CATALOG } from "../src/data/clueCatalog";
-import { generateWineGridBoard } from "../src/lib/matrixGenerator";
+import { generateDailyBoard, generateWineGridBoard } from "../src/lib/matrixGenerator";
 import { DifficultyLevel, EntityFilterMode } from "../src/types/wine";
 
 function escapeSql(str: string): string {
@@ -56,13 +56,7 @@ function main() {
   console.log(`Successfully generated & verified ${totalVerified} 3x3 boards across all modes & difficulties (100% solvable with 9 distinct answers)!`);
 
   // Sample board printout
-  const sample = generateWineGridBoard({
-    seed: "2026-10-20",
-    mode: "daily",
-    difficulty: "wset3",
-    entityFilter: "all",
-    boardDate: "2026-10-20",
-  });
+  const sample = generateDailyBoard("2026-10-20");
   console.log("\nSample Daily Challenge Board (2026-10-20):");
   console.log("Rows:", sample.rowClues.map((r) => `[${r.category}] ${r.shortLabel}`).join(" | "));
   console.log("Cols:", sample.colClues.map((c) => `[${c.category}] ${c.shortLabel}`).join(" | "));
