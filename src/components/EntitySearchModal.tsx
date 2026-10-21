@@ -108,25 +108,25 @@ export function EntitySearchModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-slate-900/30 backdrop-blur-sm p-4 pt-12 sm:pt-16"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-slate-900/30 backdrop-blur-sm p-2.5 sm:p-4 pt-4 sm:pt-16"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-xl rounded-3xl border border-slate-200/90 bg-white shadow-modal overflow-hidden"
+        className="w-full max-w-xl max-h-[90dvh] flex flex-col rounded-2xl sm:rounded-3xl border border-slate-200/90 bg-white shadow-modal overflow-hidden"
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDown}
       >
         {/* Clean Intersection Header */}
-        <div className="bg-slate-50/80 px-6 py-4 border-b border-slate-200/70">
-          <div className="flex items-center justify-between gap-2 mb-3">
+        <div className="bg-slate-50/80 px-4 sm:px-6 py-3 sm:py-4 border-b border-slate-200/70 shrink-0">
+          <div className="flex items-center justify-between gap-2 mb-2.5 sm:mb-3">
             <div className="flex items-center gap-1.5 flex-wrap">
               <span className="text-[11px] font-semibold text-slate-500 mr-1">
-                {validCount} possible answers &bull; Accepts:
+                {validCount} possible &bull; Accepts:
               </span>
               {acceptedTypes.map((t) => (
                 <span
                   key={t}
-                  className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-medium bg-slate-200/70 text-slate-700 border border-slate-300/80"
+                  className="inline-flex items-center gap-1 rounded-full px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-[11px] font-medium bg-slate-200/70 text-slate-700 border border-slate-300/80"
                 >
                   {t === "appellation" && (
                     <Wine className="w-3 h-3 text-slate-500" />
@@ -150,20 +150,20 @@ export function EntitySearchModal({
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="rounded-2xl bg-white border border-slate-200/80 p-3 shadow-sm">
-              <div className="text-[10px] uppercase tracking-wider font-semibold text-slate-400">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
+            <div className="rounded-xl sm:rounded-2xl bg-white border border-slate-200/80 p-2.5 sm:p-3 shadow-sm">
+              <div className="text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold text-slate-400 truncate">
                 Row &bull; {rowClue.category.replace("_", " ")}
               </div>
-              <div className="font-display text-sm font-bold text-slate-900 mt-0.5">
+              <div className="font-display text-xs sm:text-sm font-bold text-slate-900 mt-0.5 leading-snug">
                 {rowClue.shortLabel}
               </div>
             </div>
-            <div className="rounded-2xl bg-white border border-slate-200/80 p-3 shadow-sm">
-              <div className="text-[10px] uppercase tracking-wider font-semibold text-slate-400">
-                Column &bull; {colClue.category.replace("_", " ")}
+            <div className="rounded-xl sm:rounded-2xl bg-white border border-slate-200/80 p-2.5 sm:p-3 shadow-sm">
+              <div className="text-[9px] sm:text-[10px] uppercase tracking-wider font-semibold text-slate-400 truncate">
+                Col &bull; {colClue.category.replace("_", " ")}
               </div>
-              <div className="font-display text-sm font-bold text-slate-900 mt-0.5">
+              <div className="font-display text-xs sm:text-sm font-bold text-slate-900 mt-0.5 leading-snug">
                 {colClue.shortLabel}
               </div>
             </div>
@@ -172,11 +172,11 @@ export function EntitySearchModal({
 
         {/* Type Filter Pills (when multiple types are accepted) */}
         {acceptedTypes.length > 1 && (
-          <div className="px-6 pt-3 pb-1 bg-white flex items-center gap-1.5">
+          <div className="px-4 sm:px-6 pt-2.5 sm:pt-3 pb-1 bg-white flex items-center gap-1.5 overflow-x-auto shrink-0">
             <button
               type="button"
               onClick={() => setActiveTypeTab("all")}
-              className={`px-3 py-1 rounded-full text-xs font-semibold transition ${
+              className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition ${
                 activeTypeTab === "all"
                   ? "bg-slate-900 text-white"
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200/70"
@@ -189,7 +189,7 @@ export function EntitySearchModal({
                 key={t}
                 type="button"
                 onClick={() => setActiveTypeTab(t)}
-                className={`px-3 py-1 rounded-full text-xs font-semibold transition ${
+                className={`px-3 py-1 rounded-full text-xs font-semibold whitespace-nowrap transition ${
                   activeTypeTab === t
                     ? "bg-slate-900 text-white"
                     : "bg-slate-100 text-slate-600 hover:bg-slate-200/70"
@@ -202,8 +202,8 @@ export function EntitySearchModal({
         )}
 
         {/* Spotlight Search Input */}
-        <div className="relative border-b border-slate-200/70 bg-white px-6 py-3.5">
-          <Search className="w-5 h-5 text-slate-400 absolute left-6 top-1/2 -translate-y-1/2" />
+        <div className="relative border-b border-slate-200/70 bg-white px-4 sm:px-6 py-3 sm:py-3.5 shrink-0">
+          <Search className="w-5 h-5 text-slate-400 absolute left-4 sm:left-6 top-1/2 -translate-y-1/2" />
           <input
             ref={inputRef}
             type="text"
@@ -212,12 +212,12 @@ export function EntitySearchModal({
             placeholder={`Search ${acceptedTypes
               .map((t) => TYPE_LABELS[t].toLowerCase())
               .join(", ")}...`}
-            className="w-full bg-transparent pl-9 pr-4 text-sm sm:text-base text-slate-900 placeholder-slate-400 focus:outline-none"
+            className="w-full bg-transparent pl-8 sm:pl-9 pr-4 text-base text-slate-900 placeholder-slate-400 focus:outline-none"
           />
         </div>
 
         {/* Results List */}
-        <div className="max-h-72 overflow-y-auto divide-y divide-slate-100">
+        <div className="flex-1 min-h-0 max-h-72 overflow-y-auto divide-y divide-slate-100">
           {results.length === 0 ? (
             <div className="py-12 text-center text-sm text-slate-400">
               No matching{" "}

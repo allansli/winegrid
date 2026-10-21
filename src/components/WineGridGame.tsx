@@ -536,25 +536,71 @@ export function WineGridGame() {
 
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col">
-      {/* Clean Minimal Big-Tech Navigation Bar */}
-      <header className="sticky top-0 z-30 bg-white/85 backdrop-blur-md border-b border-slate-200/70">
-        <div className="max-w-6xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between gap-4">
-          {/* Brand Logo */}
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-wine-600 flex items-center justify-center shadow-sm">
-              <Wine className="w-5 h-5 text-white" />
+      {/* Clean Minimal Big-Tech Navigation Bar (Mobile + Desktop Responsive) */}
+      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/70">
+        <div className="max-w-6xl mx-auto px-3 sm:px-8 py-2.5 sm:py-0 sm:h-16 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-4">
+          {/* Top Row on Mobile: Brand Logo + Right Action Pills */}
+          <div className="flex items-center justify-between w-full sm:w-auto">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-wine-600 flex items-center justify-center shadow-sm">
+                <Wine className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+              </div>
+              <span className="font-display text-lg sm:text-xl font-bold tracking-tight text-slate-900">
+                WineGrid
+              </span>
             </div>
-            <span className="font-display text-xl font-bold tracking-tight text-slate-900">
-              WineGrid
-            </span>
+
+            {/* Right Action Pills (Mobile Position) */}
+            <div className="flex sm:hidden items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setCodexOpen(true);
+                  trackEvent("codex_opened");
+                }}
+                className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-600 transition shadow-sm"
+                title="Browse Wine Knowledge Graph"
+              >
+                <BookOpen className="w-4 h-4 text-slate-500" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setObservabilityOpen(true)}
+                className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-600 transition shadow-sm"
+                title="Live Telemetry & Usage"
+              >
+                <Activity className="w-4 h-4" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setAuthHistoryOpen(true);
+                  trackEvent("auth_history_modal_opened");
+                }}
+                className="inline-flex items-center gap-1.5 rounded-full bg-slate-900 hover:bg-slate-800 px-3 py-1.5 text-[11px] font-semibold text-white transition shadow-sm"
+              >
+                <User className="w-3 h-3" />
+                <span className="max-w-[76px] truncate">
+                  {currentUser ? currentUser.email.split("@")[0] : "Sign In"}
+                </span>
+                {playerStats.currentStreak > 0 && (
+                  <span className="inline-flex items-center gap-0.5 text-amber-300 font-bold">
+                    <Flame className="w-3 h-3 fill-amber-400" />
+                    {playerStats.currentStreak}
+                  </span>
+                )}
+              </button>
+            </div>
           </div>
 
-          {/* Center Segmented Mode Pill */}
-          <div className="flex items-center bg-slate-100 p-1 rounded-full border border-slate-200/60">
+          {/* Center Segmented Mode Pill (Full width on mobile, centered pill on desktop) */}
+          <div className="grid grid-cols-3 sm:flex items-center bg-slate-100 p-1 rounded-full border border-slate-200/60 w-full sm:w-auto">
             <button
               type="button"
               onClick={() => setMode("daily")}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+              className={`px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs font-semibold text-center transition-all ${
                 mode === "daily"
                   ? "bg-white text-slate-900 shadow-sm"
                   : "text-slate-500 hover:text-slate-800"
@@ -565,7 +611,7 @@ export function WineGridGame() {
             <button
               type="button"
               onClick={() => setMode("unlimited")}
-              className={`px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+              className={`px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs font-semibold text-center transition-all ${
                 mode === "unlimited"
                   ? "bg-white text-slate-900 shadow-sm"
                   : "text-slate-500 hover:text-slate-800"
@@ -576,18 +622,18 @@ export function WineGridGame() {
             <button
               type="button"
               onClick={() => setMode("infinite")}
-              className={`inline-flex items-center gap-1 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
+              className={`inline-flex items-center justify-center gap-1 px-2.5 sm:px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
                 mode === "infinite"
                   ? "bg-white text-slate-900 shadow-sm"
                   : "text-slate-500 hover:text-slate-800"
               }`}
             >
-              <InfinityIcon className="w-3.5 h-3.5" /> Infinite
+              <InfinityIcon className="w-3.5 h-3.5 shrink-0" /> Infinite
             </button>
           </div>
 
-          {/* Right Action Pills */}
-          <div className="flex items-center gap-2">
+          {/* Right Action Pills (Desktop Position) */}
+          <div className="hidden sm:flex items-center gap-2">
             <button
               type="button"
               onClick={() => {
@@ -598,7 +644,7 @@ export function WineGridGame() {
               title="Browse Wine Knowledge Graph"
             >
               <BookOpen className="w-4 h-4 text-slate-500" />
-              <span className="hidden sm:inline">Codex</span>
+              <span>Codex</span>
             </button>
 
             <button
@@ -634,12 +680,12 @@ export function WineGridGame() {
       </header>
 
       {/* Spacious Wide Main Content */}
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-8 py-8 sm:py-10 space-y-6">
+      <main className="flex-1 max-w-6xl w-full mx-auto px-2.5 sm:px-8 py-4 sm:py-10 space-y-4 sm:space-y-6">
         {/* Unlimited / Infinite Mode Filter Bar */}
         {(mode === "unlimited" || mode === "infinite") && (
-          <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-soft flex flex-wrap items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-4">
-              <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+          <div className="bg-white rounded-2xl border border-slate-200/80 p-3 sm:p-4 shadow-soft flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-2 sm:gap-4">
+              <div className="grid grid-cols-3 sm:flex items-center gap-1 bg-slate-100 p-1 rounded-xl w-full sm:w-auto">
                 {(
                   [
                     { id: "wset2", label: "Standard" },
@@ -651,7 +697,7 @@ export function WineGridGame() {
                     key={d.id}
                     type="button"
                     onClick={() => setDifficulty(d.id)}
-                    className={`px-3 py-1 rounded-lg text-xs font-medium transition ${
+                    className={`px-2.5 sm:px-3 py-1 rounded-lg text-xs font-medium transition ${
                       difficulty === d.id
                         ? "bg-white text-slate-900 shadow-sm"
                         : "text-slate-500 hover:text-slate-900"
@@ -662,7 +708,7 @@ export function WineGridGame() {
                 ))}
               </div>
 
-              <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+              <div className="grid grid-cols-4 sm:flex items-center gap-1 bg-slate-100 p-1 rounded-xl w-full sm:w-auto">
                 {(
                   [
                     { id: "all", label: "All" },
@@ -675,7 +721,7 @@ export function WineGridGame() {
                     key={f.id}
                     type="button"
                     onClick={() => setEntityFilter(f.id)}
-                    className={`px-3 py-1 rounded-lg text-xs font-medium transition ${
+                    className={`px-2 sm:px-3 py-1 rounded-lg text-xs font-medium transition ${
                       entityFilter === f.id
                         ? "bg-white text-slate-900 shadow-sm"
                         : "text-slate-500 hover:text-slate-900"
@@ -690,7 +736,7 @@ export function WineGridGame() {
             <button
               type="button"
               onClick={handleNewUnlimitedBoard}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-wine-600 hover:bg-wine-700 px-4 py-2 text-xs font-semibold text-white shadow-sm transition"
+              className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-wine-600 hover:bg-wine-700 px-4 py-2 text-xs font-semibold text-white shadow-sm transition w-full sm:w-auto"
             >
               <RefreshCw className="w-3.5 h-3.5" /> New Board
             </button>
@@ -700,7 +746,7 @@ export function WineGridGame() {
         {/* Toast Feedback Banner */}
         {feedback && (
           <div
-            className={`rounded-2xl border p-4 flex items-start justify-between gap-4 shadow-soft transition-all ${
+            className={`rounded-2xl border p-3.5 sm:p-4 flex items-start justify-between gap-3 shadow-soft transition-all ${
               feedback.type === "success"
                 ? "bg-emerald-50/90 border-emerald-200 text-emerald-950"
                 : feedback.type === "error"
@@ -708,7 +754,7 @@ export function WineGridGame() {
                 : "bg-slate-100 border-slate-200 text-slate-900"
             }`}
           >
-            <div className="flex items-start gap-3">
+            <div className="flex items-start gap-2.5 sm:gap-3">
               {feedback.type === "success" && (
                 <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
               )}
@@ -719,7 +765,7 @@ export function WineGridGame() {
                 <Info className="w-5 h-5 text-slate-600 shrink-0 mt-0.5" />
               )}
               <div>
-                <div className="font-display font-semibold text-sm">
+                <div className="font-display font-semibold text-xs sm:text-sm">
                   {feedback.title}
                 </div>
                 <p className="text-xs sm:text-sm text-slate-600 mt-0.5 leading-relaxed">
@@ -737,92 +783,112 @@ export function WineGridGame() {
           </div>
         )}
 
-        {/* THE 3x3 MATRIX GRID */}
-        <div className="grid grid-cols-4 lg:grid-cols-[240px_1fr_1fr_1fr] gap-3 sm:gap-5">
+        {/* THE 3x3 MATRIX GRID (Responsive via @media .winegrid-matrix) */}
+        <div className="winegrid-matrix">
           {/* Top-Left Corner Info */}
-          <div className="rounded-3xl bg-slate-100/70 border border-slate-200/70 p-4 sm:p-6 flex flex-col justify-between">
+          <div className="winegrid-corner-card bg-slate-100/70 border border-slate-200/70 flex flex-col justify-between">
             <div>
-              <span className="inline-flex items-center rounded-full bg-wine-50 border border-wine-200/70 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-wine-700">
+              <span className="winegrid-clue-category inline-flex items-center rounded-full bg-wine-50 border border-wine-200/70 px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-wine-700">
                 {board.mode === "daily"
-                  ? "Daily Grid"
+                  ? "Daily"
                   : board.mode === "infinite"
-                  ? "Infinite Mode"
+                  ? "Infinite"
                   : "Practice"}
               </span>
-              <div className="font-display text-base sm:text-xl font-bold text-slate-900 mt-2">
+              <div className="winegrid-clue-title font-display text-xs sm:text-xl font-bold text-slate-900 mt-1.5 sm:mt-2">
                 {board.mode === "daily" ? todayStr : "Custom 3×3"}
               </div>
             </div>
             {board.mode === "daily" && nextDailyCountdown && (
-              <div className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 mt-3 pt-3 border-t border-slate-200/70">
-                <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                <span>Next in</span>
-                <span className="font-mono font-semibold text-slate-800">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1.5 text-[10px] sm:text-xs font-medium text-slate-500 mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-slate-200/70">
+                <div className="inline-flex items-center gap-1">
+                  <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400 shrink-0 hidden sm:inline" />
+                  <span>Next in</span>
+                </div>
+                <span className="font-mono font-semibold text-slate-800 text-[10px] sm:text-xs">
                   {nextDailyCountdown}
                 </span>
               </div>
             )}
           </div>
 
-          {/* 3 Column Headers */}
+          {/* 3 Column Headers (Tap on mobile or hover on desktop to inspect clue) */}
           {board.colClues.map((colClue) => (
-            <div
+            <button
               key={colClue.id}
-              className="group relative rounded-3xl bg-white border border-slate-200/90 p-4 sm:p-6 flex flex-col justify-between shadow-soft hover:border-slate-300 transition"
+              type="button"
+              onClick={() =>
+                setFeedback({
+                  type: "info",
+                  title: `${colClue.shortLabel} (${colClue.category.replace("_", " ")})`,
+                  detail: `${colClue.label} — ${colClue.tooltip}`,
+                })
+              }
+              className="winegrid-clue-card group relative bg-white border border-slate-200/90 flex flex-col justify-between text-left shadow-soft hover:border-slate-300 transition"
             >
-              <div className="flex items-center justify-between gap-2">
-                <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              <div className="flex items-center justify-between gap-1 w-full">
+                <span className="winegrid-clue-category inline-flex items-center rounded-full bg-slate-100 px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500 truncate max-w-full">
                   {colClue.category.replace("_", " ")}
                 </span>
-                <HelpCircle className="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition shrink-0" />
+                <HelpCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-300 group-hover:text-slate-500 transition shrink-0 hidden sm:inline" />
               </div>
-              <div className="mt-3">
-                <div className="font-display font-bold text-sm sm:text-lg text-slate-900 leading-snug">
+              <div className="mt-1.5 sm:mt-3 w-full">
+                <div className="winegrid-clue-title font-display font-bold text-xs sm:text-lg text-slate-900 leading-snug">
                   {colClue.shortLabel}
                 </div>
-                <p className="text-xs text-slate-500 mt-1 leading-relaxed hidden md:block">
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed hidden lg:block">
                   {colClue.label}
                 </p>
               </div>
 
-              {/* Clean Light Tooltip */}
-              <div className="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity absolute left-1/2 -translate-x-1/2 bottom-full mb-2.5 w-72 z-40 rounded-2xl bg-slate-900 p-4 text-xs text-white shadow-xl">
+              {/* Clean Light Tooltip (Desktop Hover) */}
+              <div className="hidden sm:block pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity absolute left-1/2 -translate-x-1/2 bottom-full mb-2.5 w-72 z-40 rounded-2xl bg-slate-900 p-4 text-xs text-white shadow-xl">
                 <div className="font-semibold text-rose-300 mb-1">
                   {colClue.label}
                 </div>
                 <p className="text-slate-200 leading-relaxed">{colClue.tooltip}</p>
               </div>
-            </div>
+            </button>
           ))}
 
           {/* 3 Rows */}
           {board.rowClues.map((rowClue, rIdx) => (
             <React.Fragment key={rowClue.id}>
-              {/* Row Header */}
-              <div className="group relative rounded-3xl bg-white border border-slate-200/90 p-4 sm:p-6 flex flex-col justify-between shadow-soft hover:border-slate-300 transition">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              {/* Row Header (Tap on mobile or hover on desktop to inspect clue) */}
+              <button
+                type="button"
+                onClick={() =>
+                  setFeedback({
+                    type: "info",
+                    title: `${rowClue.shortLabel} (${rowClue.category.replace("_", " ")})`,
+                    detail: `${rowClue.label} — ${rowClue.tooltip}`,
+                  })
+                }
+                className="winegrid-clue-card group relative bg-white border border-slate-200/90 flex flex-col justify-between text-left shadow-soft hover:border-slate-300 transition"
+              >
+                <div className="flex items-center justify-between gap-1 w-full">
+                  <span className="winegrid-clue-category inline-flex items-center rounded-full bg-slate-100 px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500 truncate max-w-full">
                     {rowClue.category.replace("_", " ")}
                   </span>
-                  <HelpCircle className="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition shrink-0" />
+                  <HelpCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-300 group-hover:text-slate-500 transition shrink-0 hidden sm:inline" />
                 </div>
-                <div className="mt-3">
-                  <div className="font-display font-bold text-sm sm:text-lg text-slate-900 leading-snug">
+                <div className="mt-1.5 sm:mt-3 w-full">
+                  <div className="winegrid-clue-title font-display font-bold text-xs sm:text-lg text-slate-900 leading-snug">
                     {rowClue.shortLabel}
                   </div>
-                  <p className="text-xs text-slate-500 mt-1 leading-relaxed hidden md:block">
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed hidden lg:block">
                     {rowClue.label}
                   </p>
                 </div>
 
-                {/* Clean Light Tooltip */}
-                <div className="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity absolute left-0 bottom-full mb-2.5 w-72 z-40 rounded-2xl bg-slate-900 p-4 text-xs text-white shadow-xl">
+                {/* Clean Light Tooltip (Desktop Hover) */}
+                <div className="hidden sm:block pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity absolute left-0 bottom-full mb-2.5 w-72 z-40 rounded-2xl bg-slate-900 p-4 text-xs text-white shadow-xl">
                   <div className="font-semibold text-rose-300 mb-1">
                     {rowClue.label}
                   </div>
                   <p className="text-slate-200 leading-relaxed">{rowClue.tooltip}</p>
                 </div>
-              </div>
+              </button>
 
               {/* 3 Interactive Cells */}
               {[0, 1, 2].map((cIdx) => {
@@ -843,15 +909,14 @@ export function WineGridGame() {
                       key={cellIndex}
                       type="button"
                       onClick={() => setInspectCellIndex(cellIndex)}
-                      className="min-h-[140px] sm:min-h-[172px] rounded-3xl bg-emerald-50/70 hover:bg-emerald-50 border-2 border-emerald-500/40 p-4 sm:p-6 flex flex-col justify-between text-left transition-all shadow-soft"
+                      className="winegrid-cell bg-emerald-50/70 hover:bg-emerald-50 border-2 border-emerald-500/40 flex flex-col justify-between text-left transition-all shadow-soft"
                     >
-                      <div className="flex items-center justify-between gap-2 w-full">
-                        <span className="text-[11px] font-semibold uppercase tracking-wider text-emerald-700">
-                          {pickedEntity.country} &bull;{" "}
-                          {formatEntityTypeLabel(pickedEntity.entityType)}
+                      <div className="flex items-center justify-between gap-1 w-full flex-wrap">
+                        <span className="text-[9px] sm:text-[11px] font-semibold uppercase tracking-wider text-emerald-700 truncate">
+                          {pickedEntity.country}
                         </span>
                         <span
-                          className={`text-xs font-bold px-2.5 py-0.5 rounded-full shrink-0 ${getRarityPillStyle(
+                          className={`text-[10px] sm:text-xs font-bold px-1.5 sm:px-2.5 py-0.5 rounded-full shrink-0 ${getRarityPillStyle(
                             cell.pickedRarityPct
                           )}`}
                         >
@@ -859,8 +924,8 @@ export function WineGridGame() {
                         </span>
                       </div>
 
-                      <div className="my-2">
-                        <div className="font-display font-bold text-sm sm:text-lg text-slate-900 leading-snug">
+                      <div className="my-1 sm:my-2">
+                        <div className="winegrid-clue-title font-display font-bold text-xs sm:text-lg text-slate-900 leading-snug">
                           {pickedEntity.canonicalName}
                         </div>
                         <div className="text-xs text-slate-500 mt-1 hidden sm:block">
@@ -868,8 +933,9 @@ export function WineGridGame() {
                         </div>
                       </div>
 
-                      <div className="text-xs font-medium text-emerald-700">
-                        View tasting note &rarr;
+                      <div className="text-[10px] sm:text-xs font-medium text-emerald-700">
+                        <span className="hidden sm:inline">View tasting note &rarr;</span>
+                        <span className="sm:hidden">Notes &rarr;</span>
                       </div>
                     </button>
                   );
@@ -881,23 +947,22 @@ export function WineGridGame() {
                       key={cellIndex}
                       type="button"
                       onClick={() => setInspectCellIndex(cellIndex)}
-                      className="min-h-[140px] sm:min-h-[172px] rounded-3xl bg-amber-50/60 hover:bg-amber-50 border border-amber-300/80 p-4 sm:p-6 flex flex-col justify-between text-left transition-all shadow-soft"
+                      className="winegrid-cell bg-amber-50/60 hover:bg-amber-50 border border-amber-300/80 flex flex-col justify-between text-left transition-all shadow-soft"
                     >
-                      <span className="text-[11px] font-semibold uppercase tracking-wider text-amber-700">
-                        Revealed &bull;{" "}
+                      <span className="text-[9px] sm:text-[11px] font-semibold uppercase tracking-wider text-amber-700 truncate">
                         {formatEntityTypeLabel(sampleSolutionEntity.entityType)}
                       </span>
-                      <div className="my-2">
-                        <div className="font-display font-bold text-sm sm:text-lg text-slate-900 leading-snug">
+                      <div className="my-1 sm:my-2">
+                        <div className="winegrid-clue-title font-display font-bold text-xs sm:text-lg text-slate-900 leading-snug">
                           {sampleSolutionEntity.canonicalName}
                         </div>
-                        <div className="text-xs text-slate-500 mt-1">
+                        <div className="text-xs text-slate-500 mt-1 hidden sm:block">
                           {sampleSolutionEntity.country} &bull;{" "}
                           {sampleSolutionEntity.macroRegion}
                         </div>
                       </div>
-                      <span className="text-xs font-medium text-amber-800">
-                        +{cell.validEntityIds.length} valid options &rarr;
+                      <span className="text-[10px] sm:text-xs font-medium text-amber-800">
+                        +{cell.validEntityIds.length} valid &rarr;
                       </span>
                     </button>
                   );
@@ -909,31 +974,31 @@ export function WineGridGame() {
                     type="button"
                     disabled={isCompleted}
                     onClick={() => setActiveCellIndex(cellIndex)}
-                    className="group min-h-[140px] sm:min-h-[172px] rounded-3xl bg-white hover:bg-slate-50/70 border border-slate-200/90 hover:border-slate-300 p-4 sm:p-6 flex flex-col items-center justify-between text-center transition-all duration-200 shadow-soft hover:shadow-card hover:-translate-y-0.5 disabled:opacity-50"
+                    className="winegrid-cell group bg-white hover:bg-slate-50/70 border border-slate-200/90 hover:border-slate-300 flex flex-col items-center justify-between text-center transition-all duration-200 shadow-soft hover:shadow-card sm:hover:-translate-y-0.5 disabled:opacity-50"
                   >
-                    <div className="text-xs font-semibold text-slate-400 group-hover:text-slate-600 transition">
+                    <div className="winegrid-possible-label text-[10px] sm:text-xs font-semibold text-slate-400 group-hover:text-slate-600 transition">
                       {cell?.validEntityIds.length ?? 0} possible
                     </div>
 
-                    <div className="w-11 h-11 rounded-full bg-slate-50 group-hover:bg-slate-900 border border-slate-200/80 group-hover:border-slate-900 flex items-center justify-center transition">
-                      <Plus className="w-5 h-5 text-slate-400 group-hover:text-white transition" />
+                    <div className="winegrid-plus-btn w-8 h-8 sm:w-11 sm:h-11 rounded-full bg-slate-50 group-hover:bg-slate-900 border border-slate-200/80 group-hover:border-slate-900 flex items-center justify-center transition my-1">
+                      <Plus className="w-4 h-4 sm:w-5 sm:h-5 text-slate-400 group-hover:text-white transition" />
                     </div>
 
                     {/* Neutral Gray Accepted Answer Type Badges */}
-                    <div className="flex flex-wrap items-center justify-center gap-1.5 w-full">
+                    <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-1.5 w-full">
                       {acceptedTypes.map((t) => (
                         <span
                           key={t}
-                          className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-medium bg-slate-100 text-slate-600 border border-slate-200/80"
+                          className="winegrid-type-pill inline-flex items-center gap-1 rounded-full px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-[11px] font-medium bg-slate-100 text-slate-600 border border-slate-200/80"
                         >
                           {t === "appellation" && (
-                            <Wine className="w-3 h-3 text-slate-500 shrink-0" />
+                            <Wine className="winegrid-type-pill-icon w-3 h-3 text-slate-500 shrink-0" />
                           )}
                           {t === "grape" && (
-                            <Grape className="w-3 h-3 text-slate-500 shrink-0" />
+                            <Grape className="winegrid-type-pill-icon w-3 h-3 text-slate-500 shrink-0" />
                           )}
                           {t === "producer" && (
-                            <Castle className="w-3 h-3 text-slate-500 shrink-0" />
+                            <Castle className="winegrid-type-pill-icon w-3 h-3 text-slate-500 shrink-0" />
                           )}
                           {formatEntityTypeLabel(t)}
                         </span>
@@ -946,25 +1011,25 @@ export function WineGridGame() {
           ))}
         </div>
 
-        {/* Sleek Bottom Floating Status & Controls Bar */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-card flex flex-wrap items-center justify-between gap-6">
-          <div className="flex items-center gap-6 sm:gap-10">
+        {/* Sleek Bottom Floating Status & Controls Bar (Responsive on Mobile & Desktop) */}
+        <div className="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-card flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
+          <div className="grid grid-cols-3 sm:flex items-center gap-3 sm:gap-10 w-full sm:w-auto text-center sm:text-left">
             <div>
-              <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
-                {board.mode === "infinite" ? "Guesses Limit" : "Guesses Left"}
+              <div className="text-[10px] sm:text-[11px] font-medium text-slate-400 uppercase tracking-wider">
+                {board.mode === "infinite" ? "Guesses" : "Guesses Left"}
               </div>
-              <div className="font-display text-2xl font-bold text-slate-900 mt-0.5 flex items-center gap-1.5">
+              <div className="font-display text-xl sm:text-2xl font-bold text-slate-900 mt-0.5 flex items-center justify-center sm:justify-start gap-1">
                 {board.mode === "infinite" ? (
                   <>
-                    <InfinityIcon className="w-6 h-6 text-slate-900" />
-                    <span className="text-xs font-normal text-slate-400">
-                      ({guessesUsedCount} used)
+                    <InfinityIcon className="w-5 h-5 sm:w-6 sm:h-6 text-slate-900" />
+                    <span className="text-[11px] sm:text-xs font-normal text-slate-400">
+                      ({guessesUsedCount})
                     </span>
                   </>
                 ) : (
                   <>
                     {guessesRemaining}
-                    <span className="text-sm font-normal text-slate-400">
+                    <span className="text-xs sm:text-sm font-normal text-slate-400">
                       {" "}
                       / 10
                     </span>
@@ -973,38 +1038,38 @@ export function WineGridGame() {
               </div>
             </div>
 
-            <div className="h-8 w-px bg-slate-200" />
+            <div className="hidden sm:block h-8 w-px bg-slate-200" />
 
             <div>
-              <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
+              <div className="text-[10px] sm:text-[11px] font-medium text-slate-400 uppercase tracking-wider">
                 Solved
               </div>
-              <div className="font-display text-2xl font-bold text-emerald-600 mt-0.5">
+              <div className="font-display text-xl sm:text-2xl font-bold text-emerald-600 mt-0.5">
                 {correctCount}
-                <span className="text-sm font-normal text-slate-400"> / 9</span>
+                <span className="text-xs sm:text-sm font-normal text-slate-400"> / 9</span>
               </div>
             </div>
 
-            <div className="h-8 w-px bg-slate-200" />
+            <div className="hidden sm:block h-8 w-px bg-slate-200" />
 
             <div>
-              <div className="text-[11px] font-medium text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-amber-500" /> Rarity Score
+              <div className="text-[10px] sm:text-[11px] font-medium text-slate-400 uppercase tracking-wider flex items-center justify-center sm:justify-start gap-1">
+                <Sparkles className="w-3 h-3 text-amber-500 shrink-0" /> Rarity
               </div>
-              <div className="font-display text-2xl font-bold text-slate-900 mt-0.5">
+              <div className="font-display text-xl sm:text-2xl font-bold text-slate-900 mt-0.5">
                 {currentRarityScore}
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5">
+          <div className="grid grid-cols-2 sm:flex items-center gap-2.5 w-full sm:w-auto">
             {!isRevealed && (
               <button
                 type="button"
                 onClick={handleRevealSolutions}
-                className="inline-flex items-center gap-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 px-4 py-2.5 text-xs font-semibold text-slate-700 transition"
+                className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 px-3.5 sm:px-4 py-2.5 text-xs font-semibold text-slate-700 transition"
               >
-                <Eye className="w-4 h-4 text-slate-500" />
+                <Eye className="w-4 h-4 text-slate-500 shrink-0" />
                 Reveal Answers
               </button>
             )}
@@ -1012,9 +1077,11 @@ export function WineGridGame() {
             <button
               type="button"
               onClick={handleShareResults}
-              className="inline-flex items-center gap-2 rounded-xl bg-wine-600 hover:bg-wine-700 px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition"
+              className={`inline-flex items-center justify-center gap-2 rounded-xl bg-wine-600 hover:bg-wine-700 px-4 sm:px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition ${
+                isRevealed ? "col-span-2" : ""
+              }`}
             >
-              <Share2 className="w-4 h-4" />
+              <Share2 className="w-4 h-4 shrink-0" />
               {copiedShare ? "Copied!" : "Share Score"}
             </button>
           </div>
