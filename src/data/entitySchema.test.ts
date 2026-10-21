@@ -7,6 +7,7 @@ import { PT_NOTES } from "../i18n/notesPt";
 import { MINIMUM_ANSWERED_CLUES } from "../lib/difficultyTuning";
 import {
   CLUE_MINIMUM_ALLOWLIST,
+  EMPTY_REQUIRED_TAG_ALLOWLIST,
   ENTITY_FIELDS,
   answeredClueIds,
   validateCatalog,
@@ -100,6 +101,17 @@ describe("entity schema", () => {
     const allowed = validateEntity(thin, contextFor(thin, { clueMinimumAllowlist: [thin.id] })).join("\n");
     assert.doesNotMatch(allowed, /need at least 3/);
     assert.match(allowed, /missing tags: soils/);
+  });
+
+  it("leaves a required group empty only when no sourced tag fits, and still clears three clues", () => {
+    for (const [id, fields] of Object.entries(EMPTY_REQUIRED_TAG_ALLOWLIST)) {
+      const entity = WINE_ENTITY_BY_ID[id];
+      assert.ok(entity, id);
+      for (const field of fields) {
+        assert.deepEqual(entity[field], [], `${id} ${field} is filled; drop the allowlist entry`);
+      }
+      assert.ok(answeredClueIds(entity).length >= MINIMUM_ANSWERED_CLUES, id);
+    }
   });
 
   it("documents every required field on each entity template", () => {

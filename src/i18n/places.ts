@@ -105,6 +105,9 @@ export const REGION_LABELS: Record<string, Record<Locale, string>> = {
   Canelones: { en: "Canelones", "pt-BR": "Canelones" },
   Maldonado: { en: "Maldonado", "pt-BR": "Maldonado" },
   Montevideo: { en: "Montevideo", "pt-BR": "Montevidéu" },
+  // Batch 2 (global producers): parent regions for Keller and Dönnhoff.
+  Rheinhessen: { en: "Rheinhessen", "pt-BR": "Rheinhessen" },
+  Nahe: { en: "Nahe", "pt-BR": "Nahe" },
 };
 
 const REGION_SEARCH_ALIASES: Record<string, string[]> = {

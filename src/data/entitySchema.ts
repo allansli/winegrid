@@ -232,6 +232,21 @@ const ID_PREFIX: Record<WineEntityType, string> = {
  */
 export const CLUE_MINIMUM_ALLOWLIST: readonly string[] = [];
 
+/**
+ * Required groups left empty because no enum value matches the sources.
+ * A nearby tag would make the card a wrong answer. Do not add an id here
+ * to skip a fact the sources do state, and remove the entry once a real
+ * tag is filled in.
+ */
+export const EMPTY_REQUIRED_TAG_ALLOWLIST: Readonly<Record<string, readonly (typeof REQUIRED_TAG_FIELDS)[number][]>> = {
+  // Rouge is about 10% new oak in 228 L barrels. That is not new-oak élevage, and it is not a foudre.
+  "prod-chave": ["vinification"],
+  // Fine lees and bâtonnage in 450–600 L barrels, not extended sur lie, and not a 1,000 L foudre.
+  "prod-dagueneau": ["vinification"],
+  // Six to eight months in oak, at most 5% new, with bâtonnage. Not sur lie and not new oak.
+  "prod-coulee-de-serrant": ["vinification"],
+};
+
 export interface EntityValidationContext {
   entities: WineEntity[];
   ptNotes: Record<string, string>;
@@ -313,6 +328,8 @@ export function validateEntity(entity: WineEntity, context: EntityValidationCont
 
   for (const field of REQUIRED_TAG_FIELDS) {
     const values = entity[field] as string[] | undefined;
+    const waived = EMPTY_REQUIRED_TAG_ALLOWLIST[entity.id]?.includes(field) && (!values || values.length === 0);
+    if (waived) continue;
     if (!Array.isArray(values) || values.length === 0 || values.some((value) => !value.trim())) {
       issues.push(`missing tags: ${field}`);
       continue;

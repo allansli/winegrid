@@ -310,6 +310,55 @@ export const PT_NOTES: Record<string, string> = {
     "Propriedade em Maldonado a 18 km do oceano Atlântico, cuja brisa constante refresca as vinhas, sobre rocha alterada do antigo embasamento cristalino do Uruguai (o 'balasto'), com granito exposto. O Albariño passa de 3 a 6 meses sobre borras finas e é fresco e mineral, enquanto os Tannat de topo amadurecem de 12 a 18 meses em grandes tonéis relativamente neutros de 1.500 a 2.500 litros.",
   "prod-bouza":
     "Vinícola familiar de raízes galegas que começou em 1998 com um vinhedo de 35 anos em Las Violetas, Canelones, e em 2001 restaurou uma vinícola dos anos 1950 em Melilla, Montevidéu, em clima temperado com influência atlântica. Plantou Albariño e Tempranillo ao lado das Chardonnay, Merlot e Tannat herdadas; o Albariño passa 4 meses sobre as borras, e o Tannat de parcela única B6 amadurece 12 meses em carvalho francês e americano novo.",
+  // Batch 2: global producers.
+  "prod-clos-rougeard":
+    "Propriedade em Chacé, Saumur-Champigny, com história que remonta a 1664 e oito gerações da família Foucault. Cabernet Franc de cultivo orgânico sobre tuffeau turoniano e argilo-calcário; o Le Bourg faz a malolática em barricas novas e fica nelas de 18 a 24 meses. Um perfil comercial da propriedade atribui ao Le Bourg um potencial de guarda imenso e diz que os vinhos atravessam décadas.",
+  "prod-huet":
+    "Fundado em Vouvray em 1928 por Gaston Huet, com três vinhedos históricos de Chenin Blanc: Le Haut-Lieu, Le Mont e Clos du Bourg. Biodinâmico desde 1988, um dos pioneiros no Loire; seus vinhos doces botritizados estão entre os mais longevos do mundo.",
+  "prod-dagueneau":
+    "Domaine de Saint-Andelain cujo Sauvignon Blanc vem de solos de sílex, calcário e argila. O Silex fermenta em barrica sobre as borras finas, com bâtonnage, e estagia em barris de 450 e 600 litros e nos alongados 'charutos' de 350 litros criados por Didier Dagueneau. Isso não é um estágio longo sur lie. Desde 2017 os vinhos saem como Vin de France.",
+  "prod-coulee-de-serrant":
+    "Apelação monopólio de 7 ha de Chenin Blanc em encostas íngremes de xisto vermelho sobre o Loire, plantada por monges cistercienses em 1130. Biodinâmica desde 1981; o vinho passa de 6 a 8 meses em carvalho (no máximo 5% novo), com bâtonnage.",
+  "prod-keller":
+    "Propriedade de Rheinhessen cujo vinhedo Dalsheimer Hubacker pertence à família Keller desde 1789. Rieslings secos de vinhedos calcários como Hubacker, Morstein e Kirchspiel, com fermentação espontânea, longo contato com as borras e estágio em grandes tonéis Fuder antigos de carvalho alemão.",
+  "prod-jj-prum":
+    "Propriedade de Wehlen em encostas íngremes de ardósia devoniana, com cerca de 90% de vinhas sem enxerto. Os Rieslings fermentam espontaneamente e amadurecem sobre as borras em inox; os auslese botritizados e os vinhos mais doces podem evoluir por 20 a 30 anos ou mais.",
+  "prod-donnhoff":
+    "Propriedade do Nahe cujo Grosses Gewächs Hermannshöhle nasce em uma encosta íngreme voltada para o sul, de ardósia cinza-escura com pórfiro vulcânico e calcário. O Riesling fermenta e amadurece em inox e em tonéis tradicionais de carvalho, com uma nota salina que a vinícola atribui à ardósia.",
+  "prod-fx-pichler":
+    "Propriedade familiar da Wachau, com terraços de até 450 m sobre gnaisse e granito decomposto, como no Loibenberg, cerca de 250 m acima do Danúbio. Grüner Veltliner e Riesling estagiam sobre as borras em inox; desde a safra 2020 os rótulos seguem as regras da Wachau DAC.",
+  "prod-prager":
+    "Propriedade de Weißenkirchen; Franz Prager foi cofundador da Vinea Wachau em 1983, e Toni Bodenstein assumiu depois a adega. Os terraços íngremes de Achleiten têm pouca terra sobre gnaisse de Gföhl, anfibolito e ardósia; os vinhos fermentam espontaneamente em inox e mostram uma nota mineral de pederneira.",
+  "prod-chave":
+    "Domaine familiar desde 1481, que monta seu Hermitage com parcelas como as encostas íngremes de granito de Bessards; o Hermitage branco é sobretudo Marsanne de vinhas com quase 100 anos. O tinto fermenta em cimento, inox e carvalho aberto antigo, e depois estagia cerca de 18 meses em barricas de 228 litros, das quais cerca de 10% são novas. Costuma pedir pelo menos 20 anos de garrafa para mostrar o melhor.",
+  "prod-clape":
+    "Referência de Cornas: cerca de 8,8 ha de vinhas velhas de Syrah em terraços íngremes de granito voltados para sudeste, replantados por Auguste Clape a partir de 1968. Fermentação com cachos inteiros e cerca de 24 meses em foudres velhos de 1.000 litros, com notas de trufa e salinidade de granito.",
+  "prod-foillard":
+    "Produtor de Villié-Morgon cujo Gamay da Côte du Py cresce sobre granito e xisto. Os cachos inteiros fermentam por três a quatro semanas com pouco ou nenhum enxofre, e o vinho estagia de 6 a 9 meses em barricas usadas da Borgonha; a Kermit Lynch fala de uma 'espinha dorsal mineral'.",
+  "prod-lapierre":
+    "Domaine de Morgon com 15 ha de Gamay com certificação orgânica, vinhas de 70 anos em média, sobre granito decomposto pobre e ácido. Maceração semicarbônica tradicional do Beaujolais por 10 a 21 dias, sem SO2 adicionado e sem leveduras selecionadas.",
+  "prod-cornelissen":
+    "Propriedade da encosta norte do Etna, com primeira safra em 2001, construída em torno de vinhas em alberello sem enxerto. O Magma é 100% Nerello Mascalese sem enxerto, de vinhas com mais de 100 anos na Contrada Barbabecchi, a 870–910 m; fermenta com leveduras nativas e passa 18 meses em tanques neutros de epóxi e mais 18 em garrafa.",
+  "prod-benanti":
+    "Casa do Etna cujo Pietra Marina, Etna Bianco Superiore, é Carricante de vinhas em alberello em terraços de solo vulcânico arenoso, com grande amplitude térmica entre dia e noite. Passa cerca de 30 meses sobre as borras e mais 12 em garrafa; a ficha técnica descreve um estilo mineral e sápido.",
+  "prod-sigalas":
+    "Propriedade de Santorini com vinhas de pé-franco, imunes à filoxera, em solo vulcânico 'aspa', conduzidas rente ao chão em cestos 'kouloura' contra o vento. O Assyrtiko PDO Santorini vem de vinhas com mais de 60 anos, é vinificado em inox com pelo menos 4 meses sobre as borras; 14% de álcool e acidez vibrante.",
+  "prod-oremus":
+    "Propriedade do Tokaj pertencente ao grupo espanhol Vega Sicilia. O Aszú macera as bagas com podridão nobre no mosto, à moda tradicional, e depois passa dois a três anos em barrica e pelo menos um em garrafa, em adegas escavadas na rocha vulcânica; os vinhos evoluem por décadas.",
+  "prod-chateau-climens":
+    "Premier cru classé de Barsac na classificação de 1855, 100% Sémillon sobre uma fina camada de areia ferruginosa vermelha em cima de calcário fissurado. As névoas matinais do frio rio Ciron favorecem a podridão nobre; fermenta em barricas de carvalho francês, 30 a 40% novas, estagia de 20 a 22 meses e é biodinâmico desde 2010.",
+  "prod-valdespino":
+    "Bodega de Jerez com vinhedos no Pago de Macharnudo. O Fino Inocente foge do padrão atual de Jerez: fermenta em barris de carvalho americano e depois envelhece sob o véu de flor numa solera com dez criaderas, até uma idade média de 10 anos. A ficha do importador o descreve como salino e mineral. A Manzanilla da casa reflete o Atlântico e o Guadalquivir.",
+  "prod-lustau":
+    "Casa de Jerez fundada em 1896, que trabalha a uva Palomino de solos de albariza. Seu Fino Jarana envelhece biologicamente sob o véu de flor no sistema de solera, e a ficha técnica da bodega o descreve como salino e mineral.",
+  "prod-salon":
+    "O Champagne de terroir único de Eugène-Aimé Salon: só Chardonnay, de um único cru (Le Mesnil-sur-Oger), feito apenas em grandes safras. Os vinhos descansam cerca de dez anos na adega antes do lançamento; a casa destaca o caráter calcário e salino e um potencial de guarda de mais de 15 anos.",
+  "prod-egly-ouriet":
+    "Vinhateiro de Ambonnay. O Brut Tradition Grand Cru tem 70% Pinot Noir e 30% Chardonnay de Ambonnay, Bouzy e Verzenay, fermenta em barrica com leveduras nativas e sem malolática, e passa 48 meses sobre as borras; a crítica destaca o giz e o final longo e salino.",
+  "prod-larmandier-bernier":
+    "Vinhateiro de Vertus, na Côte des Blancs, com Chardonnay orgânico e biodinâmico sobre giz campaniano. Os vinhos fermentam com leveduras próprias e amadurecem cerca de um ano sobre as borras; o Terre de Vertus depois passa seis anos ou mais na adega e se destaca pela salinidade e mineralidade.",
+  "prod-felton-road":
+    "Propriedade de Bannockburn em encostas quentes voltadas para o norte, de loess glacial, com cultivo biodinâmico certificado pela Demeter e pela BioGro. Central Otago é a exceção continental da Nova Zelândia; o Pinot Noir da Felton Road estagia em carvalho francês, cerca de 30% novo.",
 };
 
 export function localizedNote(id: string, fallback: string, locale: Locale): string {
