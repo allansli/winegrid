@@ -8,6 +8,7 @@ import {
   GeneratedBoard,
   MatrixCell,
   WineEntity,
+  WineEntityType,
 } from "@/types/wine";
 import { WINE_ENTITY_BY_ID } from "@/data/wineDatabase";
 import { generateWineGridBoard } from "@/lib/matrixGenerator";
@@ -34,9 +35,11 @@ import { ObservabilityDrawer } from "./ObservabilityDrawer";
 import {
   Activity,
   BookOpen,
+  Castle,
   CheckCircle2,
   Eye,
   Flame,
+  Grape,
   HelpCircle,
   Info,
   Plus,
@@ -451,6 +454,25 @@ export function WineGridGame() {
     return "bg-emerald-100 text-emerald-800 border border-emerald-200";
   };
 
+  const getCellAcceptedTypes = useCallback((cell: MatrixCell): WineEntityType[] => {
+    const typesSet = new Set<WineEntityType>();
+    for (const id of cell.validEntityIds) {
+      const ent = WINE_ENTITY_BY_ID[id];
+      if (ent) typesSet.add(ent.entityType);
+    }
+    const ordered: WineEntityType[] = [];
+    if (typesSet.has("appellation")) ordered.push("appellation");
+    if (typesSet.has("grape")) ordered.push("grape");
+    if (typesSet.has("producer")) ordered.push("producer");
+    return ordered.length > 0 ? ordered : ["appellation", "grape", "producer"];
+  }, []);
+
+  const formatEntityTypeLabel = (type: WineEntityType) => {
+    if (type === "appellation") return "Region";
+    if (type === "grape") return "Grape";
+    return "Producer";
+  };
+
   if (!board) {
     return (
       <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
@@ -724,6 +746,7 @@ export function WineGridGame() {
               {[0, 1, 2].map((cIdx) => {
                 const cellIndex = rIdx * 3 + cIdx;
                 const cell = cells[cellIndex];
+                const acceptedTypes = cell ? getCellAcceptedTypes(cell) : [];
                 const pickedEntity = cell?.pickedEntityId
                   ? WINE_ENTITY_BY_ID[cell.pickedEntityId]
                   : null;
@@ -738,11 +761,12 @@ export function WineGridGame() {
                       key={cellIndex}
                       type="button"
                       onClick={() => setInspectCellIndex(cellIndex)}
-                      className="min-h-[112px] sm:min-h-[136px] rounded-2xl bg-emerald-50/70 hover:bg-emerald-50 border-2 border-emerald-500/40 p-3.5 sm:p-4 flex flex-col justify-between text-left transition-all shadow-soft"
+                      className="min-h-[118px] sm:min-h-[142px] rounded-2xl bg-emerald-50/70 hover:bg-emerald-50 border-2 border-emerald-500/40 p-3.5 sm:p-4 flex flex-col justify-between text-left transition-all shadow-soft"
                     >
                       <div className="flex items-center justify-between gap-1 w-full">
                         <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700 truncate">
-                          {pickedEntity.country}
+                          {pickedEntity.country} &bull;{" "}
+                          {formatEntityTypeLabel(pickedEntity.entityType)}
                         </span>
                         <span
                           className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${getRarityPillStyle(
@@ -775,10 +799,11 @@ export function WineGridGame() {
                       key={cellIndex}
                       type="button"
                       onClick={() => setInspectCellIndex(cellIndex)}
-                      className="min-h-[112px] sm:min-h-[136px] rounded-2xl bg-amber-50/60 hover:bg-amber-50 border border-amber-300/80 p-3.5 sm:p-4 flex flex-col justify-between text-left transition-all shadow-soft"
+                      className="min-h-[118px] sm:min-h-[142px] rounded-2xl bg-amber-50/60 hover:bg-amber-50 border border-amber-300/80 p-3.5 sm:p-4 flex flex-col justify-between text-left transition-all shadow-soft"
                     >
                       <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-700">
-                        Revealed
+                        Revealed &bull;{" "}
+                        {formatEntityTypeLabel(sampleSolutionEntity.entityType)}
                       </span>
                       <div>
                         <div className="font-display font-bold text-xs sm:text-base text-slate-900 leading-tight line-clamp-2">
@@ -801,10 +826,41 @@ export function WineGridGame() {
                     type="button"
                     disabled={isCompleted}
                     onClick={() => setActiveCellIndex(cellIndex)}
-                    className="group min-h-[112px] sm:min-h-[136px] rounded-2xl bg-white hover:bg-wine-50/40 border border-slate-200/90 hover:border-wine-300 p-4 flex flex-col items-center justify-center text-center transition-all duration-200 shadow-soft hover:shadow-card hover:-translate-y-0.5 disabled:opacity-50"
+                    className="group min-h-[118px] sm:min-h-[142px] rounded-2xl bg-white hover:bg-wine-50/30 border border-slate-200/90 hover:border-wine-300 p-3 sm:p-4 flex flex-col items-center justify-between text-center transition-all duration-200 shadow-soft hover:shadow-card hover:-translate-y-0.5 disabled:opacity-50"
                   >
-                    <div className="w-10 h-10 rounded-full bg-slate-50 group-hover:bg-wine-100/80 border border-slate-200/70 group-hover:border-wine-200 flex items-center justify-center transition">
-                      <Plus className="w-5 h-5 text-slate-400 group-hover:text-wine-600 transition" />
+                    <div className="text-[10px] font-medium text-slate-400 group-hover:text-slate-600">
+                      Accepts
+                    </div>
+
+                    <div className="w-9 h-9 rounded-full bg-slate-50 group-hover:bg-wine-100/80 border border-slate-200/70 group-hover:border-wine-200 flex items-center justify-center transition">
+                      <Plus className="w-4 h-4 text-slate-400 group-hover:text-wine-600 transition" />
+                    </div>
+
+                    {/* Accepted Answer Type Badges */}
+                    <div className="flex flex-wrap items-center justify-center gap-1 w-full">
+                      {acceptedTypes.map((t) => (
+                        <span
+                          key={t}
+                          className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[10px] font-semibold border ${
+                            t === "appellation"
+                              ? "bg-rose-50/90 text-rose-700 border-rose-200/80"
+                              : t === "grape"
+                              ? "bg-emerald-50/90 text-emerald-700 border-emerald-200/80"
+                              : "bg-amber-50/90 text-amber-800 border-amber-200/80"
+                          }`}
+                        >
+                          {t === "appellation" && (
+                            <Wine className="w-2.5 h-2.5 shrink-0" />
+                          )}
+                          {t === "grape" && (
+                            <Grape className="w-2.5 h-2.5 shrink-0" />
+                          )}
+                          {t === "producer" && (
+                            <Castle className="w-2.5 h-2.5 shrink-0" />
+                          )}
+                          {formatEntityTypeLabel(t)}
+                        </span>
+                      ))}
                     </div>
                   </button>
                 );
@@ -882,6 +938,7 @@ export function WineGridGame() {
           rowClue={board.rowClues[cells[activeCellIndex].row]}
           colClue={board.colClues[cells[activeCellIndex].col]}
           entityFilter={board.entityFilter}
+          acceptedTypes={getCellAcceptedTypes(cells[activeCellIndex])}
           usedEntityIds={usedEntityIds}
           onSelectEntity={handleSelectEntity}
         />
