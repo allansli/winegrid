@@ -3,6 +3,23 @@
  * Country and region membership is separate: `country` is the flagship,
  * `originCountries` is the historical home, and `alsoCountries` / `alsoRegions`
  * are places where the entity is important enough to satisfy that clue.
+ *
+ * A grape gains `alsoCountries` when a Codex appellation in that country lists
+ * it first in `primaryGrapes` (Shiraz counts as Syrah). The review's textbook
+ * homes are included even when another grape is listed first: Syrah in
+ * Australia, Sauvignon Blanc in New Zealand, Chenin Blanc in South Africa,
+ * Tempranillo and Albariño in Portugal, Cabernet Sauvignon in the United
+ * States. The same first-listed rule also adds Cabernet Sauvignon in Chile
+ * and Australia, Pinot Noir in the United States and New Zealand, and Riesling
+ * in Australia (Clare Valley). Chardonnay is not added for the USA or New
+ * Zealand, Grenache is not added for Australia, and Sémillon is not added for
+ * Australia: none is the first grape of a Codex appellation there, and Hunter
+ * is not in the Codex.
+ *
+ * A grape's `latitudeBand` is the band of its flagship appellation, the place
+ * named by the home-country appellation that lists it first. Corvina follows
+ * Amarone, Viognier follows Condrieu, Syrah follows Côte-Rôtie, and Cabernet
+ * Sauvignon follows Pauillac. Other regions do not average the band down.
  */
 export const TAG_SOURCES: Record<string, string> = {
   DOCG: "Italian Denominazione di Origine Controllata e Garantita, the top DOC tier.",

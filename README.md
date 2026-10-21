@@ -16,6 +16,8 @@ A **GeoGrid-inspired 3×3 Wine Matrix Game** crafted for casual wine lovers, WSE
   - *Classifications, Bottle Shapes, Viticultural Heritage (Ungrafted Pre-Phylloxera, Gobelet/Alberello/Kouloura Bush Vines, UNESCO/Monastic)*
 - **Guaranteed Solvable 3×3 Matrices**:
   - Uses Mulberry32 deterministic PRNG for global **Daily Vintage Challenges** + an MRV backtracking solver to guarantee every generated board has at least one 9-distinct-entity solution across 6 non-overlapping clue categories.
+  - **Answer floors, no caps.** Standard and Sommelier cells have at least 3 accepted answers. Master keeps a floor of 2 on purpose, so that tier can stay sharper. No level has a maximum.
+  - **A pick cannot dead-end the board.** The generator checks the first pick. Later picks are checked as you play: a clue-valid answer that would leave no way to finish is refused, and it does not spend a miss. Proving every sequence while the board is generated does not fit the broad Standard grape and estate pools, so the guarantee is enforced on the pick.
 - **Anonymous Play + Seamless Account Upgrade & History Sync**:
   - Play immediately as an anonymous guest (`anon_id` + LocalStorage + Supabase `game_sessions`).
   - Sign in anytime with **Supabase Auth** to automatically claim and merge all prior anonymous games via the `claim_anonymous_history` Postgres RPC.

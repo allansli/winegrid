@@ -132,6 +132,10 @@ const en = {
   "picker.allAccepted": "All accepted",
   "picker.search": "Search a region, grape, or producer...",
   "picker.used": "Already used on this board",
+  "picker.blocks": "Valid, but it would block the board",
+  "picker.blocksDetail":
+    "{name} fits this cell, but the other cells could not be finished. No miss is spent.",
+  "history.rarity": "Rarity {score}",
   "picker.empty": "No matching {types} for “{query}”.",
   "picker.noFit": "doesn’t fit this cell",
   "picker.hintsOn": "Hints on",
@@ -317,6 +321,10 @@ const ptBR: Record<MessageKey, string> = {
   "picker.allAccepted": "Todos aceitos",
   "picker.search": "Buscar região, uva ou produtor...",
   "picker.used": "Já usado neste tabuleiro",
+  "picker.blocks": "Válida, mas travaria o tabuleiro",
+  "picker.blocksDetail":
+    "{name} cabe nesta casa, mas as outras ficariam sem solução. Nenhum erro é gasto.",
+  "history.rarity": "Raridade {score}",
   "picker.empty": "Nenhum {types} para “{query}”.",
   "picker.noFit": "não serve nesta casa",
   "picker.hintsOn": "Dicas ligadas",

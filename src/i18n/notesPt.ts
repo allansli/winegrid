@@ -202,7 +202,7 @@ export const PT_NOTES: Record<string, string> = {
   "prod-catena-zapata":
     "Pioneira da viticultura de altitude extrema em Mendoza, com Nicolás e a dra. Laura Catena. O vinhedo Adrianna fica a quase 1.500 m em Gualtallary, em leitos aluviais calcários.",
   "prod-screaming-eagle":
-    "Screaming Eagle é uma propriedade minúscula de Cabernet em Oakville. Harlan Estate e Opus One são propriedades separadas de Napa e não são este vinho.",
+    "Uma propriedade minúscula de Cabernet na AVA de Oakville, em Napa Valley. As videiras ficam sobre rocha vulcânica e cascalho, e o vinho amadurece em carvalho francês novo.",
   "prod-chateau-musar":
     "Fundado em 1930 por Gaston Hochar e tornado famoso por Serge Hochar, que colheu durante a guerra civil libanesa. Corta Cabernet Sauvignon, Cinsault e Carignan de altitude do vale do Bekaa (e as antigas Obaideh e Merwah de pé franco nos brancos) e só lança os vinhos depois de 7 anos.",
   "app-vouvray":

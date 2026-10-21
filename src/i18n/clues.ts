@@ -150,7 +150,7 @@ export const PT_CLUE_COPY: Record<string, ClueCopy> = {
     shortLabel: "Solo vulcânico",
     label: "Terroir vulcânico (basalto, lava, pedra-pomes ou tufo riolítico)",
     tooltip:
-      "Solos ígneos vulcânicos, como Mount Etna, Santorini, Soave, Taurasi, Tokaj, Madeira, Willamette Jory ou Napa.",
+      "Solos ígneos vulcânicos, como Etna, Santorini, Soave, Taurasi, Tokaj, Madeira, Willamette Jory ou Napa.",
   },
   "soil-slate-schist": {
     shortLabel: "Ardósia / xisto",
@@ -267,7 +267,7 @@ export const PT_CLUE_COPY: Record<string, ClueCopy> = {
     shortLabel: "36+ meses de amadurecimento",
     label: "Maturação longa na adega (≥ 36 meses antes do lançamento)",
     tooltip:
-      "Exige ou pratica de 3 a mais de 10 anos em tonel ou garrafa antes do lançamento (Barolo, Brunello, Rioja Gran Reserva, Vintage Champagne, Vega Sicilia).",
+      "Exige ou pratica de 3 a mais de 10 anos em tonel ou garrafa antes do lançamento (Barolo, Brunello, Rioja Gran Reserva, Champagne safrado, Vega Sicilia).",
   },
   "vin-sur-lie": {
     shortLabel: "Sur Lie / borras",

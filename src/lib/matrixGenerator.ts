@@ -261,6 +261,256 @@ export function assignmentSurvivesAnyPick(cellValidIds: string[][]): boolean {
 }
 
 /**
+ * Plays one random filling of the board. The player may open any cell and
+ * take any still-unused accepted answer. Returns false when a cell runs dry.
+ */
+export function playthroughSucceeds(cellValidIds: string[][], rand: () => number): boolean {
+  const open = cellValidIds.map((_, index) => index);
+  const used = new Set<string>();
+  while (open.length > 0) {
+    const slot = Math.floor(rand() * open.length);
+    const cell = open[slot];
+    open.splice(slot, 1);
+    const choices: string[] = [];
+    for (const id of cellValidIds[cell]) {
+      if (!used.has(id)) choices.push(id);
+    }
+    if (choices.length === 0) return false;
+    used.add(choices[Math.floor(rand() * choices.length)]);
+  }
+  return true;
+}
+
+export interface SolvableCell {
+  validEntityIds: readonly string[];
+  pickedEntityId?: string | null;
+}
+
+function projectSolvableBoard(
+  cells: readonly SolvableCell[],
+  force?: { index: number; entityId: string }
+): string[][] {
+  const used = new Set<string>();
+  if (force) used.add(force.entityId);
+  for (let index = 0; index < cells.length; index++) {
+    if (force && index === force.index) continue;
+    const picked = cells[index].pickedEntityId;
+    if (picked) used.add(picked);
+  }
+  return cells.map((cell, index) => {
+    if (force && index === force.index) return [force.entityId];
+    if (cell.pickedEntityId) return [cell.pickedEntityId];
+    return cell.validEntityIds.filter((id) => !used.has(id));
+  });
+}
+
+/**
+ * A clue-valid pick is refused when it would leave no full solution.
+ * If the board is already dead, the pick is allowed so the player is not stuck.
+ */
+export function pickKeepsBoardSolvable(
+  cells: readonly SolvableCell[],
+  cellIndex: number,
+  entityId: string
+): boolean {
+  if (findDistinctAssignment(projectSolvableBoard(cells, { index: cellIndex, entityId }))) {
+    return true;
+  }
+  return findDistinctAssignment(projectSolvableBoard(cells)) === null;
+}
+
+/** Fills every cell, skipping answers that would dead-end the board. */
+export function guardedPlaythroughSucceeds(
+  cellValidIds: string[][],
+  rand: () => number
+): boolean {
+  const cells: SolvableCell[] = cellValidIds.map((ids) => ({
+    validEntityIds: ids,
+    pickedEntityId: null,
+  }));
+  const open = cells.map((_, index) => index);
+  while (open.length > 0) {
+    const slot = Math.floor(rand() * open.length);
+    const cellIndex = open[slot];
+    const choices = cells[cellIndex].validEntityIds.filter(
+      (id) =>
+        cells.every((cell) => cell.pickedEntityId !== id) &&
+        pickKeepsBoardSolvable(cells, cellIndex, id)
+    );
+    if (choices.length === 0) return false;
+    cells[cellIndex].pickedEntityId = choices[Math.floor(rand() * choices.length)];
+    open.splice(slot, 1);
+  }
+  return true;
+}
+
+function hasEntityMatching(lists: number[][]): boolean {
+  const order = lists.map((_, index) => index).sort((a, b) => lists[a].length - lists[b].length);
+  const used = new Set<number>();
+  function backtrack(step: number): boolean {
+    if (step === order.length) return true;
+    const candidates = lists[order[step]];
+    for (let i = 0; i < candidates.length; i++) {
+      const entity = candidates[i];
+      if (used.has(entity)) continue;
+      used.add(entity);
+      if (backtrack(step + 1)) return true;
+      used.delete(entity);
+    }
+    return false;
+  }
+  return backtrack(0);
+}
+
+/**
+ * Every reachable sequence of valid picks still has a full distinct solution.
+ * Cells may be filled in any order. A valid pick is any accepted entity that
+ * has not already been used. This is stricter than a single-pick check:
+ * later picks can still exhaust a cell that looked fine after the first one.
+ */
+export function assignmentSurvivesEverySequence(cellValidIds: string[][]): boolean {
+  const n = cellValidIds.length;
+  if (n === 0) return true;
+  const idIndex = new Map<string, number>();
+  const options: number[][] = cellValidIds.map((ids) => {
+    const row: number[] = [];
+    for (const id of ids) {
+      let idx = idIndex.get(id);
+      if (idx === undefined) {
+        idx = idIndex.size;
+        idIndex.set(id, idx);
+      }
+      row.push(idx);
+    }
+    return row;
+  });
+
+  const memo = new Map<string, boolean>();
+  // A broad Standard cell can have millions of partial fillings. Past this
+  // many states the layout is treated as unproven and rejected, so generation
+  // never builds an unbounded memo table.
+  const stateBudget = 20000;
+  let states = 0;
+
+  function remaining(cell: number, used: bigint): number[] {
+    const row: number[] = [];
+    const list = options[cell];
+    for (let i = 0; i < list.length; i++) {
+      const entity = list[i];
+      if ((used & (1n << BigInt(entity))) === 0n) row.push(entity);
+    }
+    return row;
+  }
+
+  function prove(mask: number, used: bigint): boolean {
+    if (mask === 0) return true;
+    if (++states > stateBudget) return false;
+    const key = `${mask.toString(16)}:${used.toString(16)}`;
+    const cached = memo.get(key);
+    if (cached !== undefined) return cached;
+
+    const open: number[] = [];
+    for (let cell = 0; cell < n; cell++) {
+      if (mask & (1 << cell)) open.push(cell);
+    }
+    const lists = open.map((cell) => remaining(cell, used));
+    for (let i = 0; i < lists.length; i++) {
+      if (lists[i].length === 0) {
+        memo.set(key, false);
+        return false;
+      }
+    }
+
+    const parent = open.map((_, index) => index);
+    const find = (index: number): number => {
+      let root = index;
+      while (parent[root] !== root) root = parent[root];
+      while (parent[index] !== root) {
+        const next = parent[index];
+        parent[index] = root;
+        index = next;
+      }
+      return root;
+    };
+    const unite = (a: number, b: number) => {
+      const ra = find(a);
+      const rb = find(b);
+      if (ra !== rb) parent[rb] = ra;
+    };
+    const owner = new Map<number, number>();
+    for (let i = 0; i < open.length; i++) {
+      const list = lists[i];
+      for (let j = 0; j < list.length; j++) {
+        const entity = list[j];
+        const prev = owner.get(entity);
+        if (prev === undefined) owner.set(entity, i);
+        else unite(prev, i);
+      }
+    }
+
+    const groups = new Map<number, number>();
+    for (let i = 0; i < open.length; i++) {
+      const root = find(i);
+      groups.set(root, (groups.get(root) ?? 0) | (1 << open[i]));
+    }
+    if (groups.size > 1) {
+      for (const sub of groups.values()) {
+        if (!prove(sub, used)) {
+          memo.set(key, false);
+          return false;
+        }
+      }
+      memo.set(key, true);
+      return true;
+    }
+
+    const freq = new Map<number, number>();
+    for (const list of lists) {
+      for (const entity of list) freq.set(entity, (freq.get(entity) ?? 0) + 1);
+    }
+    let allPrivate = true;
+    for (const list of lists) {
+      let privateEntity = false;
+      for (const entity of list) {
+        if (freq.get(entity) === 1) {
+          privateEntity = true;
+          break;
+        }
+      }
+      if (!privateEntity) {
+        allPrivate = false;
+        break;
+      }
+    }
+    if (allPrivate) {
+      memo.set(key, true);
+      return true;
+    }
+
+    if (!hasEntityMatching(lists)) {
+      memo.set(key, false);
+      return false;
+    }
+
+    for (let i = 0; i < open.length; i++) {
+      const cell = open[i];
+      const list = lists[i];
+      for (let j = 0; j < list.length; j++) {
+        const nextUsed = used | (1n << BigInt(list[j]));
+        if (!prove(mask ^ (1 << cell), nextUsed)) {
+          memo.set(key, false);
+          return false;
+        }
+      }
+    }
+    memo.set(key, true);
+    return true;
+  }
+
+  return prove((1 << n) - 1, 0n);
+}
+
+/**
  * Floors only. Standard and Sommelier stay at 3 so a cell is never a
  * one-answer trap. Master stays at 2, which is what it is today.
  * There is no upper cap: a broad cell is allowed.
