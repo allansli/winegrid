@@ -76,6 +76,8 @@ export function generateWineGridBoard(options: {
   difficulty?: DifficultyLevel;
   entityFilter?: EntityFilterMode;
   boardDate?: string;
+  /** Daily boards rotate these out so one family cannot dominate the year. */
+  excludeCategories?: ReadonlySet<string>;
 }): GeneratedBoard {
   const {
     seed,
@@ -83,6 +85,7 @@ export function generateWineGridBoard(options: {
     difficulty = "wset3",
     entityFilter = "all",
     boardDate,
+    excludeCategories,
   } = options;
 
   const rand = createPrng(hashSeed(`${seed}:${difficulty}:${entityFilter}`));
@@ -96,12 +99,13 @@ export function generateWineGridBoard(options: {
       ? new Set(["wset2", "wset3"])
       : new Set(["wset2", "wset3", "master_somm"]);
 
-  const minPerCell = minimumValidAnswers(difficulty);
+  const { min: minPerCell, max: maxPerCell } = answerCountBounds(difficulty);
 
   // Precompute matching entity IDs for each clue
   const clueMatches = new Map<string, Set<string>>();
   const candidateClues = CLUE_CATALOG.filter((clue) => {
     if (!allowedDifficulties.has(clue.difficulty)) return false;
+    if (excludeCategories?.has(clue.category)) return false;
     // If single entity type filter is active, skip redundant entity_type clues
     if (entityFilter !== "all" && clue.category === "entity_type") return false;
 
@@ -170,12 +174,16 @@ export function generateWineGridBoard(options: {
             continue;
           }
 
+          if (pairIsRedundant(clueMatches.get(cR0.id)!, clueMatches.get(candCol.id)!)) continue;
+          if (pairIsRedundant(clueMatches.get(cR1.id)!, clueMatches.get(candCol.id)!)) continue;
+          if (pairIsRedundant(clueMatches.get(cR2.id)!, clueMatches.get(candCol.id)!)) continue;
+
           const i0 = getIntersection(cR0.id, candCol.id);
-          if (i0.length < minPerCell) continue;
+          if (!cellSizeAllowed(i0.length, minPerCell, maxPerCell)) continue;
           const i1 = getIntersection(cR1.id, candCol.id);
-          if (i1.length < minPerCell) continue;
+          if (!cellSizeAllowed(i1.length, minPerCell, maxPerCell)) continue;
           const i2 = getIntersection(cR2.id, candCol.id);
-          if (i2.length < minPerCell) continue;
+          if (!cellSizeAllowed(i2.length, minPerCell, maxPerCell)) continue;
 
           validCols.push(candCol);
         }
@@ -183,7 +191,7 @@ export function generateWineGridBoard(options: {
         if (validCols.length < 3) continue;
 
         // Try combinations of 3 columns from validCols
-        const m = Math.min(validCols.length, 18);
+        const m = Math.min(validCols.length, 16);
         for (let c0 = 0; c0 < m; c0++) {
           for (let c1 = c0 + 1; c1 < m; c1++) {
             for (let c2 = c1 + 1; c2 < m; c2++) {
@@ -205,7 +213,7 @@ export function generateWineGridBoard(options: {
               }
 
               const solution = findDistinctAssignment(cellValidIds);
-              if (solution) {
+              if (solution && assignmentSurvivesAnyPick(cellValidIds)) {
                 const cells: MatrixCell[] = cellValidIds.map((validIds, idx) => ({
                   index: idx,
                   row: Math.floor(idx / 3),
@@ -240,10 +248,58 @@ export function generateWineGridBoard(options: {
   throw new Error("Could not generate a valid 3x3 WineGrid matrix for given constraints.");
 }
 
-/** Easy/daily cells need at least 3 legal answers. Sommelier and Master need at least 2. */
+function cellSizeAllowed(count: number, min: number, max: number): boolean {
+  return count >= min && count <= max;
+}
+
+/**
+ * One clue adds nothing when its matches sit entirely inside the other.
+ * Subsets smaller than 8 stay eligible: a three-grape region inside "dry red"
+ * is still a real filter, while Piedmont (12) inside dry red is not.
+ */
+export function pairIsRedundant(left: Set<string>, right: Set<string>): boolean {
+  const [small, large] = left.size <= right.size ? [left, right] : [right, left];
+  if (small.size < 8) return false;
+  for (const id of small) {
+    if (!large.has(id)) return false;
+  }
+  return true;
+}
+
+/**
+ * After any one legal pick, the other eight cells must still have a
+ * distinct solution. A valid guess cannot paint the board into a corner.
+ */
+export function assignmentSurvivesAnyPick(cellValidIds: string[][]): boolean {
+  for (let cell = 0; cell < cellValidIds.length; cell++) {
+    for (const pick of cellValidIds[cell]) {
+      const narrowed = cellValidIds.map((ids, index) => {
+        if (index === cell) return [pick];
+        return ids.filter((id) => id !== pick);
+      });
+      if (!findDistinctAssignment(narrowed)) return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Standard 3–15, Sommelier 3–8, Master 2–4.
+ * The floors keep a cell from becoming a single-answer trap. The caps
+ * keep a cell from listing most of the catalog.
+ */
+export function answerCountBounds(difficulty: DifficultyLevel): { min: number; max: number } {
+  if (difficulty === "wset2") return { min: 3, max: 15 };
+  if (difficulty === "wset3") return { min: 3, max: 8 };
+  return { min: 2, max: 4 };
+}
+
 export function minimumValidAnswers(difficulty: DifficultyLevel): number {
-  if (difficulty === "wset2") return 3;
-  return 2;
+  return answerCountBounds(difficulty).min;
+}
+
+export function maximumValidAnswers(difficulty: DifficultyLevel): number {
+  return answerCountBounds(difficulty).max;
 }
 
 export const DAILY_DIFFICULTY: DifficultyLevel = "wset2";
@@ -254,12 +310,56 @@ export function dailySeedForDate(date: string): string {
   return date;
 }
 
+const DAILY_CATEGORY_ROTATION = [
+  "geography",
+  "region",
+  "classification",
+  "soil",
+  "climate",
+  "hydrology",
+  "style",
+  "vinification",
+  "sensory",
+  "varietal",
+  "bottle",
+  "heritage",
+  "entity_type",
+];
+
+/**
+ * Two families sit out each day on a fixed rotation, and the entity-type
+ * family (appellation / grape / producer) sits out four days in five.
+ * That stops "Wine Appellation" from landing on most dailies.
+ */
+export function dailyExcludedCategories(date: string): Set<string> {
+  const day = Math.floor(Date.parse(`${date}T00:00:00Z`) / 86_400_000);
+  const excluded = new Set<string>();
+  excluded.add(DAILY_CATEGORY_ROTATION[Math.abs(day) % DAILY_CATEGORY_ROTATION.length]);
+  excluded.add(DAILY_CATEGORY_ROTATION[Math.abs(day + 6) % DAILY_CATEGORY_ROTATION.length]);
+  if (Math.abs(day) % 5 !== 0) excluded.add("entity_type");
+  return excluded;
+}
+
 export function generateDailyBoard(date: string): GeneratedBoard {
-  return generateWineGridBoard({
-    seed: dailySeedForDate(date),
-    mode: "daily",
-    difficulty: DAILY_DIFFICULTY,
-    entityFilter: DAILY_ENTITY_FILTER,
-    boardDate: date,
-  });
+  const attempts: Array<Set<string> | undefined> = [
+    dailyExcludedCategories(date),
+    new Set(["entity_type"]),
+    undefined,
+  ];
+  let lastError: unknown;
+  for (const excludeCategories of attempts) {
+    try {
+      return generateWineGridBoard({
+        seed: dailySeedForDate(date),
+        mode: "daily",
+        difficulty: DAILY_DIFFICULTY,
+        entityFilter: DAILY_ENTITY_FILTER,
+        boardDate: date,
+        excludeCategories,
+      });
+    } catch (error) {
+      lastError = error;
+    }
+  }
+  throw lastError;
 }

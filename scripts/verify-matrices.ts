@@ -2,7 +2,7 @@ import * as fs from "fs";
 import * as path from "path";
 import { ALL_WINE_ENTITIES, WINE_ENTITY_BY_ID } from "../src/data/wineDatabase";
 import { CLUE_CATALOG } from "../src/data/clueCatalog";
-import { generateDailyBoard, generateWineGridBoard } from "../src/lib/matrixGenerator";
+import { answerCountBounds, generateDailyBoard, generateWineGridBoard } from "../src/lib/matrixGenerator";
 import { DifficultyLevel, EntityFilterMode } from "../src/types/wine";
 
 function escapeSql(str: string): string {
@@ -35,7 +35,13 @@ function main() {
   const filters: EntityFilterMode[] = ["all", "appellation", "grape", "producer"];
 
   let totalVerified = 0;
+  const sizesByLevel: Record<DifficultyLevel, number[]> = {
+    wset2: [],
+    wset3: [],
+    master_somm: [],
+  };
   for (const diff of difficulties) {
+    const bounds = answerCountBounds(diff);
     for (const filter of filters) {
       for (let i = 0; i < 15; i++) {
         const board = generateWineGridBoard({
@@ -48,12 +54,30 @@ function main() {
         if (uniqueSolutions.size !== 9) {
           throw new Error(`Board ${board.boardId} did not have 9 distinct solutions!`);
         }
+        for (const cell of board.cells) {
+          const count = cell.validEntityIds.length;
+          if (count < bounds.min || count > bounds.max) {
+            throw new Error(
+              `${board.boardId} cell ${cell.index} has ${count} answers, outside ${bounds.min}–${bounds.max}`
+            );
+          }
+          sizesByLevel[diff].push(count);
+        }
         totalVerified++;
       }
     }
   }
 
   console.log(`Successfully generated & verified ${totalVerified} 3x3 boards across all modes & difficulties (100% solvable with 9 distinct answers)!`);
+  for (const diff of difficulties) {
+    const sizes = [...sizesByLevel[diff]].sort((a, b) => a - b);
+    const mid = Math.floor(sizes.length / 2);
+    const median = sizes.length % 2 === 0 ? (sizes[mid - 1] + sizes[mid]) / 2 : sizes[mid];
+    const bounds = answerCountBounds(diff);
+    console.log(
+      `  ${diff}: min ${sizes[0]} / median ${median} / max ${sizes[sizes.length - 1]} (cap ${bounds.min}–${bounds.max}, n=${sizes.length})`
+    );
+  }
 
   // Sample board printout
   const sample = generateDailyBoard("2026-10-20");
@@ -79,6 +103,9 @@ function main() {
     const aliasesArray = `ARRAY[${e.aliases.map((a) => `'${escapeSql(a)}'`).join(", ")}]::text[]`;
     const attrs = JSON.stringify({
       countryCode: e.countryCode,
+      originCountries: e.originCountries ?? [],
+      alsoCountries: e.alsoCountries ?? [],
+      alsoRegions: e.alsoRegions ?? [],
       world: e.world,
       hemisphere: e.hemisphere,
       latitudeBand: e.latitudeBand,
