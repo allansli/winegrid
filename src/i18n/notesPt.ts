@@ -257,6 +257,59 @@ export const PT_NOTES: Record<string, string> = {
     "O grande vinho de vinhedo único da Austrália. Hill of Grace sai do bloco Grandfathers, de Shiraz de pé franco anterior à filoxera, plantado por volta de 1860 no alto do Eden Valley, em frente à igreja luterana de Gnadenberg.",
   "prod-ridge":
     "Guiada por décadas pelo enólogo-filósofo Paul Draper. A 400–800 m, nas montanhas frias de Santa Cruz, sobre o raro calcário franciscano em decomposição da Califórnia. O Ridge Monte Bello 1971 ficou em 5º no Julgamento de Paris de 1976 e em 1º na reedição dos 30 anos, em 2006.",
+  // South America and Brazil batch.
+  "app-vale-dos-vinhedos":
+    "Primeira indicação geográfica do Brasil (IP, 2002) e primeira Denominação de Origem (2012): 72,45 km² do planalto vulcânico da Serra Geral, em Bento Gonçalves, Garibaldi e Monte Belo do Sul. Os tintos da DO precisam ter Merlot como base (pelo menos 60% do corte), e os espumantes são só pelo método tradicional, com no mínimo 9 meses sobre as leveduras.",
+  "app-altos-de-pinto-bandeira":
+    "Denominação de Origem exclusiva para espumantes (INPI, 2022): 65 km² entre 520 e 770 m de altitude, no planalto basáltico da Serra Geral. Só vale o método tradicional, com prensagem de cachos inteiros e pelo menos 12 meses sobre as leveduras antes do dégorgement, a partir de Chardonnay, Pinot Noir e no máximo 25% de Riesling Itálico.",
+  "app-vinhos-de-altitude-sc":
+    "A IG dos vinhos de altitude do Brasil (IP, 2021): só entram vinhedos a 840 m ou mais, e a maioria fica entre 900 e 1.400 m no planalto basáltico de São Joaquim, Água Doce, Bom Retiro e Urupema. O verão ameno e seco, com grande amplitude térmica, mantém o ácido málico alto e dá tintos intensos e de acidez marcante; os espumantes são feitos pelo método charmat e pelo tradicional.",
+  "app-limari":
+    "Vale semiárido do norte do Chile, conhecido pelo pisco e pelos petróglifos, refrescado pela neblina matinal chamada 'camanchaca'. É um dos poucos lugares do país com solos calcários e tem cerca de 780 ha de Chardonnay, fresco e mineral, além de espumantes pelo método tradicional.",
+  "app-itata":
+    "Uma das áreas vitícolas mais antigas das Américas, plantada desde o século XVI. País e Moscatel de Alejandría, em sequeiro, conduzidas em cabeça e em grande parte de pé-franco — e, depois do terremoto de 1939, também Cinsault — crescem em encostas de granito e quartzo. As tinajas de barro são os recipientes tradicionais de fermentação e amadurecimento, e a Cinsault daqui dá tintos leves e refrescantes.",
+  "grape-torrontes":
+    "A uva branca emblemática da Argentina. O DNA mostra que a Torrontés Riojano é um cruzamento natural de Moscatel de Alexandria com Criolla Chica (a Listán Prieto, a País do Chile), o que explica seus vinhos secos com aroma de moscatel. Seu lar são os altos Vales Calchaquíes, em Salta, em solos arenosos e pedregosos com grande amplitude térmica, onde costuma fermentar em inox, sem madeira.",
+  "grape-pais":
+    "A espanhola Listán Prieto, provavelmente a primeira vinífera levada às Américas pelos missionários — Mission na Califórnia, Criolla Chica na Argentina. Só o Itata tem 3.877 ha de vinhas velhas, conduzidas em cabeça e de pé-franco, em solos graníticos. Os vinhos são sempre de cor clara, com taninos rústicos que os enólogos domam com técnicas como a maceração carbônica.",
+  "prod-cave-geisse":
+    "Fundada em Pinto Bandeira em 1979 pelo agrônomo e enólogo chileno Mario Geisse, que veio ao Brasil em 1976 para dirigir a operação local da Moët & Chandon. Os testes de espumante pelo método tradicional começaram em 1981; hoje o Cave Geisse Brut tem 70% Chardonnay e 30% Pinot Noir, com 24 meses sobre as leveduras, e o Brut 1998, guardado por 12 anos, mostrou o potencial de envelhecimento dos espumantes de Pinto Bandeira.",
+  "prod-miolo":
+    "Giuseppe Miolo chegou a Bento Gonçalves em 1897 e comprou o Lote 43, no atual Vale dos Vinhedos; a vinícola da família é de 1989, e seu primeiro vinho engarrafado foi um Merlot. O grupo é o maior exportador de vinhos do Brasil, seus vinhos do Vale dos Vinhedos levam o selo da DO, e o espumante Millésime passa pelo menos 18 meses sobre as leveduras.",
+  "prod-casa-valduga":
+    "A família Valduga veio de Rovereto, no norte da Itália, no fim do século XIX e plantou alguns dos primeiros vinhedos no coração do atual Vale dos Vinhedos. Seus ícones amadurecem em carvalho francês e depois em caves subterrâneas: o Storia Merlot 2020 passou 18 meses em barricas novas de carvalho francês e 50 meses na cave, com 15,5% de álcool.",
+  "prod-pizzato":
+    "Propriedade familiar do Vale dos Vinhedos: Antônio Pizzato chegou da Itália em 1875, mas a família vendia suas uvas até a primeira safra própria, em 1999 — 15.500 garrafas de Merlot. O Merlot DNA99 só é feito nos grandes anos, nove vezes em 25 safras, e amadurece em carvalho francês de primeiro uso; a vinícola o descreve como encorpado e, ao mesmo tempo, elegante.",
+  "prod-lidio-carraro":
+    "A vinícola 'purista' do Brasil: nada de madeira, movimentação por gravidade e nenhuma filtração, para que o vinho mostre só a uva e o lugar. Os vinhedos foram plantados no Vale dos Vinhedos a partir de 1998, em solo argiloarenoso de basalto, e em Encruzilhada do Sul a partir de 2001, em solo arenoso de granito; o corte Quorum junta Merlot, Cabernet Sauvignon, Cabernet Franc e Tannat.",
+  "prod-guaspari":
+    "Vinícola paulista na Serra da Mantiqueira: a família chegou em 2001, plantou em 2006 e fez suas primeiras 30 garrafas em 2008. A Syrah cresce entre 1.000 e 1.140 m, e a dupla poda leva a colheita para o inverno seco, em julho e agosto. O Syrah Vista do Chá passa 28 meses em carvalho francês e mais 32 meses na garrafa.",
+  "prod-zuccardi":
+    "A história da Zuccardi começou em 1963, com um vinhedo plantado para demonstrar um sistema de irrigação. A vinícola de Paraje Altamira, inaugurada em 2016, é toda de concreto sem revestimento, e o Malbec Concreto fermenta com cachos inteiros e amadurece em concreto, a partir de parcelas pedregosas e calcárias entre 1.050 e 1.150 m.",
+  "prod-achaval-ferrer":
+    "Fundada em 1998 em torno de Malbecs de vinhedo único, vindos de antigos plantios de Mendoza de 1910, 1921, 1923 e 1950. A Finca Altamira, plantada em 1950 a 1.100 m na margem sul do rio Tunuyán, cresce sobre cinzas vulcânicas e seixos aluviais ricos em sedimentos calcários; fermenta em pequenos tanques de concreto, faz a malolática em carvalho francês novo e mostra violeta e mineralidade.",
+  "prod-colome":
+    "Fundada em 1831, a Colomé é a vinícola em produção contínua mais antiga da Argentina; a família Hess a comprou em 2001. Os vinhedos sobem de 2.300 m a 3.111 m, e o Altura Máxima, a 3.111 m sobre cascalho calcário e granítico, dá vinhos muito florais e de taninos delicados. O Malbec Auténtico não passa por madeira.",
+  "prod-chacra":
+    "Piero Incisa della Rocchetta, neto do criador do Sassicaia, faz Pinot Noir em Río Negro, como o Treinta y Dos, de vinhas sem enxerto plantadas em 1932. A propriedade tem certificação biodinâmica, o Chardonnay é feito com Jean-Marc Roulot, e nos solos de cascalho as noites chegam a ser até 40 graus mais frias que os dias.",
+  "prod-el-enemigo":
+    "A Bodega Aleanna, de Alejandro Vigil. O Gran Enemigo Gualtallary (85% Cabernet Franc, 15% Malbec) vem de solos calcários e rochosos a 1.470 m, com 40% de cachos inteiros, fermentado e amadurecido em concreto, com pH 3,03; a safra 2013 recebeu 100 pontos da Wine Advocate. O Chardonnay amadurece sob véu de flor, e a Bonarda em grandes tonéis.",
+  "prod-almaviva":
+    "Parceria de 1997 entre o Baron Philippe de Rothschild e a Concha y Toro, lançada em 1998 como o primeiro vinho 'conceito château' do Chile. Seus 65 ha ficam a 650 m, em solos aluviais na margem norte do rio Maipo, em Puente Alto; o 1997 tinha 72% Cabernet Sauvignon, 23% Carménère e 5% Cabernet Franc, com 16 meses em carvalho francês novo.",
+  "prod-don-melchor":
+    "Cabernet Sauvignon de Puente Alto, feito pela primeira vez em 1987, 100% varietal. O vinhedo fica a 650 m, em solos pedregosos na margem norte do rio Maipo, e é manejado em 7 parcelas e 151 microparcelas. O 2021 (93% Cabernet Sauvignon) passou 15 meses em carvalho francês, 68% novo, tem notas de violeta e, segundo a vinícola, 35 a 40 anos de potencial de guarda; foi eleito o Vinho do Ano pela Wine Spectator.",
+  "prod-clos-apalta":
+    "Corte liderado pela Carménère, de Apalta, cujas parcelas mais antigas foram plantadas entre 1915 e 1920. Seus 40 ha de vinhas de pé-franco crescem em granito perto do rio Tinguiririca, em clima semimediterrâneo com enorme amplitude térmica. O 2021 (75% Carménère) fez a malolática em carvalho francês novo, amadureceu 21 meses em barricas 78% novas e mostra pimenta-do-reino.",
+  "prod-sena":
+    "Fundada em 1995 por Eduardo Chadwick e Robert Mondavi como um corte ícone chileno, hoje cultivado em biodinâmica em Ocoa, no Vale do Aconcágua, em clima mediterrâneo sobre andesito vulcânico, coluvião e aluvião. O 1995 tinha 70% Cabernet Sauvignon e 30% Carménère, com 14 meses em carvalho francês novo; na Degustação de Berlim de 2004, o Seña 2001 ficou em segundo, atrás do Viñedo Chadwick 2000.",
+  "prod-montes":
+    "Primeira colheita em 1987, fundada em 1988 como Discover Wines. A Montes diz ter introduzido a Syrah no Chile em 1993, comprou a propriedade de Apalta em 1995, lançou o primeiro vinho ícone chileno, o Alpha M, em 1996, o Syrah Folly em 2000 e o Purple Angel, primeiro Carménère ícone do Chile, em 2003; o Folly vem das encostas mais altas da Finca de Apalta.",
+  "prod-de-martino":
+    "O Viejas Tinajas Cinsault da De Martino vem de Guarilihue, no Itata costeiro, a 22 km do Pacífico, em granito decomposto: o vinhedo foi plantado em 1982 sem porta-enxerto, conduzido em gobelet e sem irrigação. As bagas inteiras fermentam em estilo semicarbônico em tinajas de barro centenárias, e o vinho é floral, com violeta, taninos finos e macios e 12,5% de álcool.",
+  "prod-garzon":
+    "Propriedade em Maldonado a 18 km do oceano Atlântico, cuja brisa constante refresca as vinhas, sobre rocha alterada do antigo embasamento cristalino do Uruguai (o 'balasto'), com granito exposto. O Albariño passa de 3 a 6 meses sobre borras finas e é fresco e mineral, enquanto os Tannat de topo amadurecem de 12 a 18 meses em grandes tonéis relativamente neutros de 1.500 a 2.500 litros.",
+  "prod-bouza":
+    "Vinícola familiar de raízes galegas que começou em 1998 com um vinhedo de 35 anos em Las Violetas, Canelones, e em 2001 restaurou uma vinícola dos anos 1950 em Melilla, Montevidéu, em clima temperado com influência atlântica. Plantou Albariño e Tempranillo ao lado das Chardonnay, Merlot e Tannat herdadas; o Albariño passa 4 meses sobre as borras, e o Tannat de parcela única B6 amadurece 12 meses em carvalho francês e americano novo.",
 };
 
 export function localizedNote(id: string, fallback: string, locale: Locale): string {

@@ -6,12 +6,14 @@ import { APPELLATION_ENTITIES } from "./entities/appellations";
 import { GRAPE_ENTITIES } from "./entities/grapes";
 import { PRODUCER_ENTITIES } from "./entities/producers";
 import { ADDITIONAL_WINE_ENTITIES } from "./entities/moreEntities";
+import { SOUTH_AMERICA_ENTITIES } from "./entities/southAmerica";
 
 export const ALL_WINE_ENTITIES: WineEntity[] = [
   ...APPELLATION_ENTITIES,
   ...GRAPE_ENTITIES,
   ...PRODUCER_ENTITIES,
   ...ADDITIONAL_WINE_ENTITIES,
+  ...SOUTH_AMERICA_ENTITIES,
 ];
 
 export const WINE_ENTITY_BY_ID: Record<string, WineEntity> = Object.fromEntries(
