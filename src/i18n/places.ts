@@ -38,6 +38,8 @@ export const REGION_LABELS: Record<string, Record<Locale, string>> = {
   Sicily: { en: "Sicily", "pt-BR": "Sicília" },
   California: { en: "California", "pt-BR": "Califórnia" },
   Oregon: { en: "Oregon", "pt-BR": "Oregon" },
+  Napa: { en: "Napa", "pt-BR": "Napa" },
+  "Sonoma County": { en: "Sonoma County", "pt-BR": "Condado de Sonoma" },
   "Aegean Islands": { en: "Aegean Islands", "pt-BR": "Ilhas do Egeu" },
   "Ahr Valley": { en: "Ahr Valley", "pt-BR": "Vale do Ahr" },
   Andalusia: { en: "Andalusia", "pt-BR": "Andaluzia" },
@@ -72,6 +74,23 @@ export const REGION_LABELS: Record<string, Record<Locale, string>> = {
   "Tokaj-Hegyalja": { en: "Tokaj-Hegyalja", "pt-BR": "Tokaj-Hegyalja" },
   "Western Australia": { en: "Western Australia", "pt-BR": "Austrália Ocidental" },
   Burgenland: { en: "Burgenland", "pt-BR": "Burgenland" },
+  // Wine regions and appellations keep their name in both locales. The
+  // benchmark line looks each one up so a missing key cannot fall through.
+  Bandol: { en: "Bandol", "pt-BR": "Bandol" },
+  Barossa: { en: "Barossa", "pt-BR": "Barossa" },
+  Cahors: { en: "Cahors", "pt-BR": "Cahors" },
+  "Central Otago": { en: "Central Otago", "pt-BR": "Central Otago" },
+  "Châteauneuf-du-Pape": { en: "Châteauneuf-du-Pape", "pt-BR": "Châteauneuf-du-Pape" },
+  "Clare Valley": { en: "Clare Valley", "pt-BR": "Clare Valley" },
+  Coonawarra: { en: "Coonawarra", "pt-BR": "Coonawarra" },
+  "Hawke's Bay": { en: "Hawke's Bay", "pt-BR": "Hawke's Bay" },
+  "Hunter Valley": { en: "Hunter Valley", "pt-BR": "Hunter Valley" },
+  "Maipo Valley": { en: "Maipo Valley", "pt-BR": "Maipo Valley" },
+  "Margaret River": { en: "Margaret River", "pt-BR": "Margaret River" },
+  Marlborough: { en: "Marlborough", "pt-BR": "Marlborough" },
+  "Monção e Melgaço": { en: "Monção e Melgaço", "pt-BR": "Monção e Melgaço" },
+  Puglia: { en: "Puglia", "pt-BR": "Puglia" },
+  "Willamette Valley": { en: "Willamette Valley", "pt-BR": "Willamette Valley" },
 };
 
 const REGION_SEARCH_ALIASES: Record<string, string[]> = {

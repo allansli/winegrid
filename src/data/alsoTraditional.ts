@@ -1,6 +1,6 @@
 import { COUNTRY_REGION_GROUP, sourcedAlsoCountries } from "@/data/clueCatalog";
 import { ALL_WINE_ENTITIES, normalizeSearchText } from "@/data/wineDatabase";
-import { ALSO_COUNTRY_SOURCES } from "@/data/tagSources";
+import { ALSO_COUNTRY_SOURCES, alsoCountryNote, alsoCountrySynonym } from "@/data/tagSources";
 import { Locale } from "@/i18n/locale";
 import { translate } from "@/i18n/messages";
 import { placeLabel } from "@/i18n/places";
@@ -136,30 +136,83 @@ export function alsoCountryGrantsRegionGroup(entity: WineEntity, country: string
 }
 
 /**
- * Countries that add an Old World, New World, or Southern Hemisphere clue
- * the flagship origin does not already give, with places taken from the source.
+ * `Parent (Child / Child)` segments in a subregion. A source that names the
+ * child is shown as the parent: Manduria becomes Puglia.
  */
-export function alsoTraditionalPlaces(entity: WineEntity): { country: string; places: string[] }[] {
+function parentPlace(subRegion: string | undefined, child: string): string | undefined {
+  if (!subRegion) return undefined;
+  const childNorm = normalizeSearchText(child);
+  for (const match of subRegion.matchAll(/([^/|&]+?)\s*\(([^)]+)\)/g)) {
+    const parent = tidyPlace(match[1].trim());
+    if (!parent) continue;
+    for (const part of match[2].split(/[/&|,]/)) {
+      const label = tidyPlace(part.trim());
+      if (label && normalizeSearchText(label) === childNorm) return parent;
+    }
+  }
+  return undefined;
+}
+
+function displayPlaces(entity: WineEntity, mentioned: string[]): string[] {
+  const places: string[] = [];
+  for (const place of mentioned) {
+    const label = parentPlace(entity.subRegion, place) ?? place;
+    if (places.some((existing) => normalizeSearchText(existing) === normalizeSearchText(label))) continue;
+    places.push(label);
+  }
+  return places;
+}
+
+/**
+ * A curated synonym is shown only when it is one of the entity's aliases and
+ * the source note actually uses that name.
+ */
+function citedSynonym(entity: WineEntity, note: string, synonym: string | undefined): string | undefined {
+  if (!synonym) return undefined;
+  const alias = entity.aliases.find((item) => normalizeSearchText(item) === normalizeSearchText(synonym));
+  if (!alias) return undefined;
+  const prose = normalizeSearchText(sourceProse(note)).replace(/[^a-z0-9]+/g, " ");
+  if (!prose.includes(normalizeSearchText(alias))) return undefined;
+  return alias;
+}
+
+export type AlsoBenchmarkEntry = { country: string; places: string[]; synonym?: string };
+
+/**
+ * Every sourced `alsoCountries` entry. Country clues count these even when
+ * the country sits in the same region group as the flagship origin.
+ */
+export function alsoTraditionalPlaces(entity: WineEntity): AlsoBenchmarkEntry[] {
   const notes = ALSO_COUNTRY_SOURCES[entity.id] ?? {};
-  const entries: { country: string; places: string[] }[] = [];
+  const entries: AlsoBenchmarkEntry[] = [];
   for (const country of sourcedAlsoCountries(entity)) {
-    if (!alsoCountryGrantsRegionGroup(entity, country)) continue;
-    const note = notes[country]?.trim();
+    const source = notes[country];
+    const note = alsoCountryNote(source);
     if (!note) continue;
-    entries.push({ country, places: placesMentioned(entity, note) });
+    const synonym = citedSynonym(entity, note, alsoCountrySynonym(source));
+    entries.push({
+      country,
+      places: displayPlaces(entity, placesMentioned(entity, note)),
+      ...(synonym ? { synonym } : {}),
+    });
   }
   return entries;
 }
 
-/** One generated line, or null when no also-country adds a region group. */
+function formatCountry(entry: AlsoBenchmarkEntry, locale: Locale): string {
+  const label = placeLabel(entry.country, locale, "country");
+  const inner = [
+    ...entry.places.map((place) => placeLabel(place, locale, "region")),
+    ...(entry.synonym ? [translate(locale, "card.alsoAs", { name: entry.synonym })] : []),
+  ];
+  return inner.length > 0 ? `${label} (${inner.join(", ")})` : label;
+}
+
+/** One generated line, or null when the entity has no sourced also-country. */
 export function alsoTraditionalLine(entity: WineEntity, locale: Locale): string | null {
   const entries = alsoTraditionalPlaces(entity);
   if (entries.length === 0) return null;
-  const places = entries
-    .map(({ country, places: named }) => {
-      const label = placeLabel(country, locale, "country");
-      return named.length > 0 ? `${label} (${named.join(", ")})` : label;
-    })
-    .join(", ");
-  return translate(locale, "card.alsoTraditional", { places });
+  return translate(locale, "card.alsoBenchmark", {
+    places: entries.map((entry) => formatCountry(entry, locale)).join(", "),
+  });
 }
