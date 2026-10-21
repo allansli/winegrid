@@ -30,6 +30,8 @@ export interface ResumeSnapshot {
   missesUsed: number;
   economyVersion: number;
   isRevealed: boolean;
+  /** Puzzle identity. Absent on saves written before clue hashing. */
+  clueHash?: string;
   run?: InfiniteRunState;
 }
 

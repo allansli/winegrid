@@ -21,6 +21,7 @@ import { readDailyStreak, recordDailyResult, writeDailyStreak, EMPTY_DAILY_STREA
 import { leaderboard } from "@/lib/leaderboard";
 import { buildShareText, deliverShareText, formatDecimal, shareCellForPick } from "@/lib/shareScore";
 import { WINE_ENTITY_BY_ID } from "@/data/wineDatabase";
+import { boardClueHash, savedBoardMatchesClues } from "@/lib/boardClueHash";
 import {
   DAILY_DIFFICULTY,
   generateDailyBoard,
@@ -101,6 +102,7 @@ interface PersistedActiveState {
   guessesRemaining: number;
   missesUsed?: number;
   economyVersion?: number;
+  clueHash?: string;
   isCompleted: boolean;
   isRevealed: boolean;
 }
@@ -340,8 +342,9 @@ export function WineGridGame() {
       const saved = loadActiveBoardState<PersistedActiveState>(
         generated.boardId
       );
+      const saveMatches = savedBoardMatchesClues(saved, generated);
       const restoredBudget =
-        saved && saved.cells?.length === 9
+        saveMatches && saved && saved.cells?.length === 9
           ? restoreGuessBudget(
               {
                 economyVersion: saved.economyVersion,
@@ -353,7 +356,7 @@ export function WineGridGame() {
               targetMode
             )
           : null;
-      if (saved && saved.cells && saved.cells.length === 9 && restoredBudget) {
+      if (saveMatches && saved && saved.cells && saved.cells.length === 9 && restoredBudget) {
         if (targetMode === "infinite") runBudgetRef.current = restoredBudget;
         setSessionId(saved.sessionId);
         setBoard(generated);
@@ -363,6 +366,7 @@ export function WineGridGame() {
         setIsCompleted(saved.isCompleted);
         setIsRevealed(saved.isRevealed);
       } else {
+        if (saved) clearActiveBoardState(generated.boardId);
         const newSessionId = crypto.randomUUID();
         const fresh =
           targetMode === "infinite" ? runBudgetRef.current : freshGuessBudget();
@@ -401,6 +405,7 @@ export function WineGridGame() {
       guessesRemaining,
       missesUsed: guessesUsedCount,
       economyVersion: ECONOMY_VERSION,
+      clueHash: boardClueHash(board),
       isCompleted,
       isRevealed,
     });
@@ -708,6 +713,7 @@ export function WineGridGame() {
       missesUsed: guessesUsedCount,
       economyVersion: ECONOMY_VERSION,
       isRevealed,
+      clueHash: boardClueHash(board),
       run: from === "infinite" ? infiniteRun ?? undefined : undefined,
     };
     writeResumeSnapshot(window.localStorage, from, snap);
@@ -791,6 +797,7 @@ export function WineGridGame() {
       guessesRemaining: resumeOffer.guessesRemaining,
       missesUsed: resumeOffer.missesUsed,
       economyVersion: resumeOffer.economyVersion,
+      clueHash: resumeOffer.clueHash,
       isCompleted: false,
       isRevealed: resumeOffer.isRevealed,
     });
