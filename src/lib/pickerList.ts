@@ -1,4 +1,5 @@
-import { entityMatchesSearch, searchQuery } from "@/data/wineDatabase";
+import { entityMatchesSearch, EntitySearchScope, searchQuery } from "@/data/wineDatabase";
+import { Locale } from "@/i18n/locale";
 import { pickKeepsBoardSolvable, type SolvableCell } from "@/lib/matrixGenerator";
 import { WineEntity } from "@/types/wine";
 
@@ -24,10 +25,15 @@ export function validEntities(
   return entities;
 }
 
-function matchesQuery(entity: WineEntity, rawQuery: string): boolean {
+function matchesQuery(
+  entity: WineEntity,
+  rawQuery: string,
+  scope: EntitySearchScope,
+  locale?: Locale
+): boolean {
   const q = searchQuery(rawQuery);
   if (q === null) return false;
-  return entityMatchesSearch(entity, rawQuery);
+  return entityMatchesSearch(entity, rawQuery, locale, scope);
 }
 
 function byRarity(a: WineEntity, b: WineEntity): number {
@@ -46,8 +52,9 @@ function orderValids(valid: readonly WineEntity[], usedIds: ReadonlySet<string>)
 
 /**
  * Hints on: the cell's valid answers, unused before used, with no rarity cap.
- * Hints off: the shared search ranking only. Fitting answers are not pulled
- * to the front, so the list does not give the cell away.
+ * The query uses the full scope, including notes and grapes.
+ * Hints off: name, alias, and place only, in the shared search ranking.
+ * Fitting answers are not pulled to the front.
  */
 export function buildPickerResults(input: {
   query: string;
@@ -55,15 +62,19 @@ export function buildPickerResults(input: {
   validEntities: readonly WineEntity[];
   usedIds?: ReadonlySet<string>;
   extraEntities?: readonly WineEntity[];
+  locale?: Locale;
 }): WineEntity[] {
   if (searchQuery(input.query) === null) return [];
+  const scope: EntitySearchScope = input.hintsOn ? "full" : "identity";
   if (input.hintsOn) {
     return orderValids(
-      input.validEntities.filter((entity) => matchesQuery(entity, input.query)),
+      input.validEntities.filter((entity) => matchesQuery(entity, input.query, scope, input.locale)),
       input.usedIds ?? new Set()
     );
   }
-  return (input.extraEntities ?? []).filter((entity) => matchesQuery(entity, input.query));
+  return (input.extraEntities ?? []).filter((entity) =>
+    matchesQuery(entity, input.query, scope, input.locale)
+  );
 }
 
 export type PickDecision = "used" | "blocked" | "correct" | "miss";

@@ -63,26 +63,48 @@ export function fieldsMatchSearch(fields: readonly string[], rawQuery: string): 
   return fields.some((field) => normalizeSearchText(field).includes(q));
 }
 
-/** Fields the Codex and the picker both search, including aliases. */
-export function entitySearchFields(entity: WineEntity, locale?: Locale): string[] {
+/**
+ * `identity` is the hints-off picker: name, aliases, and place
+ * (country, region, subregion, and localized exonyms).
+ * `full` is the Codex and the hints-on picker: those fields plus the
+ * English note, the note for the active locale, and the primary grapes.
+ */
+export type EntitySearchScope = "full" | "identity";
+
+function placeFields(entity: WineEntity): string[] {
   return [
-    entity.name,
-    entity.canonicalName,
     entity.country,
     entity.macroRegion,
     ...placeSearchLabels(entity.country, "country"),
     ...placeSearchLabels(entity.macroRegion, "region"),
     entity.subRegion ?? "",
+  ];
+}
+
+/** Fields for one scope of the shared search. */
+export function entitySearchFields(
+  entity: WineEntity,
+  locale?: Locale,
+  scope: EntitySearchScope = "full"
+): string[] {
+  const identity = [entity.name, entity.canonicalName, ...entity.aliases, ...placeFields(entity)];
+  if (scope === "identity") return identity;
+  return [
+    ...identity,
     entity.sommelierNote,
     localizedNote(entity.id, entity.sommelierNote, locale ?? "en"),
-    ...entity.aliases,
     ...entity.primaryGrapes,
   ];
 }
 
 /** The one normalized/alias match used by the Codex and the picker. */
-export function entityMatchesSearch(entity: WineEntity, rawQuery: string, locale?: Locale): boolean {
-  return fieldsMatchSearch(entitySearchFields(entity, locale), rawQuery);
+export function entityMatchesSearch(
+  entity: WineEntity,
+  rawQuery: string,
+  locale?: Locale,
+  scope: EntitySearchScope = "full"
+): boolean {
+  return fieldsMatchSearch(entitySearchFields(entity, locale, scope), rawQuery);
 }
 
 export interface WineEntitySearchOptions {
@@ -93,6 +115,11 @@ export interface WineEntitySearchOptions {
   limit?: number;
   /** Same locale the Codex uses when it overlays a tasting note. */
   locale?: Locale;
+  /**
+   * `full` searches notes and grapes. `identity` does not, so a hints-off
+   * picker cannot be led by clue words that only appear in the copy.
+   */
+  scope?: EntitySearchScope;
 }
 
 export function searchWineEntities(
@@ -111,6 +138,7 @@ export function searchWineEntities(
     return true;
   });
   const limit = options.limit ?? 40;
+  const scope = options.scope ?? "full";
   const q = searchQuery(query);
   if (q === null) return [];
   if (!q) {
@@ -152,14 +180,14 @@ export function searchWineEntities(
         placeNorms.some((place) => place.includes(q))
       ) {
         score = 50;
-      } else if (grapeNorms.some((g) => g.includes(q))) {
+      } else if (scope === "full" && grapeNorms.some((g) => g.includes(q))) {
         score = 40;
       } else if (subRegionNorm.includes(q)) {
         score = 30;
-      } else if (noteNorm.includes(q)) {
+      } else if (scope === "full" && noteNorm.includes(q)) {
         score = 20;
       }
-      if (score === 0 && entityMatchesSearch(entity, query, options.locale)) score = 10;
+      if (score === 0 && entityMatchesSearch(entity, query, options.locale, scope)) score = 10;
 
       return { entity, score };
     })
