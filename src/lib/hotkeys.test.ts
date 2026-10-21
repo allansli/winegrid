@@ -87,6 +87,11 @@ describe("hotkeys", () => {
     assert.equal(overflowMenuEscape("n", true), false);
   });
 
+  it("lets the first Escape close a dialog instead of the menu behind it", () => {
+    assert.equal(overflowMenuEscape("Escape", true, true), false);
+    assert.equal(overflowMenuEscape("Escape", true, false), true);
+  });
+
   it("allows a bare key on the board itself", () => {
     assert.equal(
       shouldIgnoreHotkey({

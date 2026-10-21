@@ -20,8 +20,12 @@ export function shouldIgnoreHotkey(event: {
   return false;
 }
 
-/** Escape closes an open overflow menu and the caller returns focus to its button. */
-export function overflowMenuEscape(key: string, open: boolean): boolean {
+/**
+ * Escape closes an open overflow menu and the caller returns focus to its button.
+ * An open dialog wins: the first Escape closes the picker, not the menu behind it.
+ */
+export function overflowMenuEscape(key: string, open: boolean, dialogOpen = false): boolean {
+  if (dialogOpen) return false;
   return open && (key === "Escape" || key === "Esc");
 }
 

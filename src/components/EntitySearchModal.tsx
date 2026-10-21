@@ -9,7 +9,7 @@ import {
 } from "@/types/wine";
 import { searchWineEntities, WINE_ENTITY_BY_ID } from "@/data/wineDatabase";
 import { originLine } from "@/i18n/places";
-import { localizedEntityName } from "@/lib/entityName";
+import { displayEntityName } from "@/lib/entityName";
 import { readHintsOn, writeHintsOn } from "@/lib/hintsPreference";
 import { buildPickerResults, entityFitsCell, validEntities, validEntityIds } from "@/lib/pickerList";
 import { movePickerIndex, pickerEnterAction } from "@/lib/pickerSelection";
@@ -151,6 +151,12 @@ export function EntitySearchModal({
   };
 
   const handleInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Escape" || event.key === "Esc") {
+      event.preventDefault();
+      event.stopPropagation();
+      onClose();
+      return;
+    }
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
       event.preventDefault();
       setSelectedIndex((current) =>
@@ -336,11 +342,7 @@ export function EntitySearchModal({
                         selectable ? "text-slate-900" : "text-slate-400"
                       }`}
                     >
-                      {localizedEntityName(
-                        entity.name,
-                        entity.entityType,
-                        t(typeMessage(entity.entityType))
-                      )}
+                      {displayEntityName(entity.name, entity.entityType)}
                     </span>
                     <TypeBadge type={entity.entityType} muted={!selectable} label={t(typeMessage(entity.entityType))} />
                   </div>

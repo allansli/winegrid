@@ -99,6 +99,75 @@ export function entitySearchFields(
   ];
 }
 
+/**
+ * Rank for one entity. Exact and prefix hits on the name or an alias come
+ * first, then any other name or alias hit, then place (country, region,
+ * subregion), then grapes, then the tasting note. 0 means no match.
+ */
+export function entitySearchScore(
+  entity: WineEntity,
+  rawQuery: string,
+  locale?: Locale,
+  scope: EntitySearchScope = "full"
+): number {
+  const q = searchQuery(rawQuery);
+  if (!q) return 0;
+  const nameNorm = normalizeSearchText(entity.name);
+  const canonNorm = normalizeSearchText(entity.canonicalName);
+  const aliasNorms = entity.aliases.map(normalizeSearchText);
+  const placeNorms = [
+    normalizeSearchText(entity.country),
+    normalizeSearchText(entity.macroRegion),
+    entity.subRegion ? normalizeSearchText(entity.subRegion) : "",
+    ...placeSearchLabels(entity.country, "country").map(normalizeSearchText),
+    ...placeSearchLabels(entity.macroRegion, "region").map(normalizeSearchText),
+  ];
+  const nameHit = [canonNorm, nameNorm, ...aliasNorms];
+  if (nameHit.some((field) => field === q)) return 100;
+  if (nameHit.some((field) => field.startsWith(q))) return 85;
+  if (nameHit.some((field) => field.includes(q))) return 70;
+  if (placeNorms.some((place) => place.includes(q))) return 50;
+  if (scope === "full" && entity.primaryGrapes.some((grape) => normalizeSearchText(grape).includes(q))) {
+    return 40;
+  }
+  if (
+    scope === "full" &&
+    normalizeSearchText(
+      `${entity.sommelierNote} ${localizedNote(entity.id, entity.sommelierNote, locale ?? "en")}`
+    ).includes(q)
+  ) {
+    return 20;
+  }
+  if (entityMatchesSearch(entity, rawQuery, locale, scope)) return 10;
+  return 0;
+}
+
+/** Codex list: full-text matches, with name and alias hits ahead of place and notes. */
+export function filterCodexEntities(
+  entities: readonly WineEntity[],
+  input: {
+    query: string;
+    locale?: Locale;
+    type?: EntityFilterMode;
+    matchesClue?: (entity: WineEntity) => boolean;
+  }
+): WineEntity[] {
+  const matched = entities.filter((entity) => {
+    if (input.type && input.type !== "all" && entity.entityType !== input.type) return false;
+    if (input.matchesClue && !input.matchesClue(entity)) return false;
+    return entityMatchesSearch(entity, input.query, input.locale, "full");
+  });
+  const q = searchQuery(input.query);
+  if (!q) return matched;
+  return [...matched].sort((a, b) => {
+    const delta =
+      entitySearchScore(b, input.query, input.locale, "full") -
+      entitySearchScore(a, input.query, input.locale, "full");
+    if (delta !== 0) return delta;
+    return a.baseRarity - b.baseRarity || a.canonicalName.localeCompare(b.canonicalName);
+  });
+}
+
 /** The one normalized/alias match used by the Codex and the picker. */
 export function entityMatchesSearch(
   entity: WineEntity,
@@ -153,46 +222,7 @@ export function searchWineEntities(
   }
 
   const scored = pool
-    .map((entity) => {
-      const nameNorm = normalizeSearchText(entity.name);
-      const canonNorm = normalizeSearchText(entity.canonicalName);
-      const countryNorm = normalizeSearchText(entity.country);
-      const regionNorm = normalizeSearchText(entity.macroRegion);
-      const placeNorms = [
-        ...placeSearchLabels(entity.country, "country"),
-        ...placeSearchLabels(entity.macroRegion, "region"),
-      ].map(normalizeSearchText);
-      const aliasNorms = entity.aliases.map(normalizeSearchText);
-      const grapeNorms = entity.primaryGrapes.map(normalizeSearchText);
-      const subRegionNorm = entity.subRegion ? normalizeSearchText(entity.subRegion) : "";
-      const noteNorm = normalizeSearchText(
-        `${entity.sommelierNote} ${localizedNote(entity.id, entity.sommelierNote, options.locale ?? "en")}`
-      );
-
-      let score = 0;
-      if (canonNorm === q || nameNorm === q || aliasNorms.includes(q)) {
-        score = 100;
-      } else if (canonNorm.startsWith(q) || nameNorm.startsWith(q) || aliasNorms.some((a) => a.startsWith(q))) {
-        score = 85;
-      } else if (canonNorm.includes(q) || nameNorm.includes(q) || aliasNorms.some((a) => a.includes(q))) {
-        score = 70;
-      } else if (
-        regionNorm.includes(q) ||
-        countryNorm.includes(q) ||
-        placeNorms.some((place) => place.includes(q))
-      ) {
-        score = 50;
-      } else if (scope === "full" && grapeNorms.some((g) => g.includes(q))) {
-        score = 40;
-      } else if (subRegionNorm.includes(q)) {
-        score = 30;
-      } else if (scope === "full" && noteNorm.includes(q)) {
-        score = 20;
-      }
-      if (score === 0 && entityMatchesSearch(entity, query, options.locale, scope)) score = 10;
-
-      return { entity, score };
-    })
+    .map((entity) => ({ entity, score: entitySearchScore(entity, query, options.locale, scope) }))
     .filter((item) => item.score > 0)
     .sort((a, b) => b.score - a.score || a.entity.baseRarity - b.entity.baseRarity);
 

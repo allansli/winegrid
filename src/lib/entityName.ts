@@ -6,13 +6,11 @@ const SUFFIX: Record<WineEntityType, RegExp> = {
   producer: /\s\((?:Producer|Estate)\)$/,
 };
 
-/** Replaces an English type suffix with the active locale's word. */
-export function localizedEntityName(
-  name: string,
-  entityType: WineEntityType,
-  typeLabel: string
-): string {
-  const pattern = SUFFIX[entityType];
-  if (!pattern.test(name)) return name;
-  return name.replace(pattern, ` (${typeLabel})`);
+/**
+ * Card titles drop the English type suffix. The type badge already says
+ * Region, Grape, or Producer in the active locale, so the title does not
+ * repeat "(Grape)" or a translated "(Uva)".
+ */
+export function displayEntityName(name: string, entityType: WineEntityType): string {
+  return name.replace(SUFFIX[entityType], "");
 }

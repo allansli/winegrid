@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { ALL_WINE_ENTITIES, entityMatchesSearch } from "@/data/wineDatabase";
+import { ALL_WINE_ENTITIES, filterCodexEntities } from "@/data/wineDatabase";
+import { displayEntityName } from "@/lib/entityName";
 import { localizedNote } from "@/i18n/notesPt";
 import { alsoTraditionalLine } from "@/data/alsoTraditional";
 import { originLine } from "@/i18n/places";
@@ -34,10 +35,11 @@ export function SommelierCodexModal({
   );
 
   const filteredEntities = useMemo(() => {
-    return ALL_WINE_ENTITIES.filter((e) => {
-      if (typeFilter !== "all" && e.entityType !== typeFilter) return false;
-      if (activeClue && !activeClue.predicate(e)) return false;
-      return entityMatchesSearch(e, query, locale, "full");
+    return filterCodexEntities(ALL_WINE_ENTITIES, {
+      query,
+      locale,
+      type: typeFilter,
+      matchesClue: activeClue ? (entity) => activeClue.predicate(entity) : undefined,
     });
   }, [query, typeFilter, activeClue, locale]);
 
@@ -127,7 +129,7 @@ export function SommelierCodexModal({
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <h3 className="font-display font-bold text-base text-slate-900">
-                      {entity.name}
+                      {displayEntityName(entity.name, entity.entityType)}
                     </h3>
                     <div className="text-xs text-slate-500 mt-0.5">
                       {originLine(entity.country, entity.macroRegion, locale)}

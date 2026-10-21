@@ -25,7 +25,7 @@ import { boardClueHash, reconcileSavedBoard } from "@/lib/boardClueHash";
 import { clientVercelEnv, parseDailyQuery, searchWithoutRejectedFuture } from "@/lib/dailyDate";
 import { futureNoticeVisible } from "@/lib/futureNotice";
 import { overflowMenuEscape } from "@/lib/hotkeys";
-import { localizedEntityName } from "@/lib/entityName";
+import { displayEntityName } from "@/lib/entityName";
 import {
   DAILY_DIFFICULTY,
   generateDailyBoard,
@@ -139,6 +139,85 @@ function filterKey(filter: EntityFilterMode): MessageKey {
 
 function categoryKey(category: string): MessageKey {
   return `category.${category}` as MessageKey;
+}
+
+function ClueCard({
+  clue,
+  category,
+  align,
+  onInspect,
+}: {
+  clue: ClueDefinition;
+  category: string;
+  align: "start" | "end" | "center";
+  onInspect: () => void;
+}) {
+  const [pinned, setPinned] = useState(false);
+  const [hover, setHover] = useState(false);
+  const open = pinned || hover;
+  const rootRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onPointer = (event: PointerEvent) => {
+      if (!rootRef.current?.contains(event.target as Node)) {
+        setPinned(false);
+        setHover(false);
+      }
+    };
+    document.addEventListener("pointerdown", onPointer);
+    return () => document.removeEventListener("pointerdown", onPointer);
+  }, [open]);
+
+  const alignClass =
+    align === "start" ? "left-0" : align === "end" ? "right-0" : "left-1/2 -translate-x-1/2";
+
+  return (
+    <button
+      ref={rootRef}
+      type="button"
+      aria-expanded={open}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      onBlur={(event) => {
+        if (!rootRef.current?.contains(event.relatedTarget as Node)) {
+          setPinned(false);
+          setHover(false);
+        }
+      }}
+      onClick={() => {
+        onInspect();
+        if (open) {
+          setPinned(false);
+          setHover(false);
+        } else {
+          setPinned(true);
+        }
+      }}
+      className="winegrid-clue-card group relative bg-white border border-slate-200/90 flex flex-col justify-between text-left shadow-soft hover:border-slate-300 transition"
+    >
+      <div className="flex items-center justify-between gap-1 w-full">
+        <span className="winegrid-clue-category inline-flex items-center rounded-full bg-slate-100 px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500 max-w-full whitespace-normal leading-tight">
+          {category}
+        </span>
+        <HelpCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-300 group-hover:text-slate-500 transition shrink-0 hidden sm:inline" />
+      </div>
+      <div className="mt-1.5 sm:mt-3 w-full">
+        <div className="winegrid-clue-title font-display font-bold text-xs sm:text-lg text-slate-900 leading-snug">
+          {clue.shortLabel}
+        </div>
+        <p className="text-xs text-slate-500 mt-1 leading-relaxed hidden lg:block">{clue.label}</p>
+      </div>
+      {open && (
+        <div
+          className={`hidden lg:block pointer-events-none absolute bottom-full mb-2.5 w-72 max-w-[calc(100vw-2rem)] z-40 rounded-2xl bg-slate-900 p-4 text-xs text-white shadow-xl ${alignClass}`}
+        >
+          <div className="font-semibold text-rose-300 mb-1">{clue.label}</div>
+          <p className="text-slate-200 leading-relaxed">{clue.tooltip}</p>
+        </div>
+      )}
+    </button>
+  );
 }
 
 function shareRows(cells: MatrixCell[]) {
@@ -341,7 +420,8 @@ export function WineGridGame() {
       if (!navRef.current?.contains(event.target as Node)) setNavOpen(false);
     };
     const onKey = (event: KeyboardEvent) => {
-      if (!overflowMenuEscape(event.key, true)) return;
+      const dialogOpen = Boolean(document.querySelector("[role='dialog'][aria-modal='true']"));
+      if (!overflowMenuEscape(event.key, true, dialogOpen)) return;
       event.preventDefault();
       event.stopPropagation();
       event.stopImmediatePropagation();
@@ -648,16 +728,7 @@ export function WineGridGame() {
     [anonId, board, locale, sessionId, t, todayStr, currentUser]
   );
 
-  const displayName = (entity: WineEntity) =>
-    localizedEntityName(
-      entity.name,
-      entity.entityType,
-      entity.entityType === "appellation"
-        ? t("type.region")
-        : entity.entityType === "grape"
-        ? t("type.grape")
-        : t("type.producer")
-    );
+  const displayName = (entity: WineEntity) => displayEntityName(entity.name, entity.entityType);
 
   const handleSelectEntity = async (entity: WineEntity) => {
     if (activeCellIndex === null || !board || isCompleted) return;
@@ -1434,44 +1505,21 @@ export function WineGridGame() {
           {/* 3 Column Headers (Tap on mobile or hover on desktop to inspect clue) */}
           {board.colClues.map((sourceCol, cIdx) => {
             const colClue = presentClue(sourceCol);
+            const align = cIdx === 0 ? "start" : cIdx === board.colClues.length - 1 ? "end" : "center";
             return (
-            <button
-              key={colClue.id}
-              type="button"
-              onClick={() =>
-                setFeedback({
-                  type: "info",
-                  title: `${colClue.shortLabel} (${t(categoryKey(colClue.category))})`,
-                  detail: t("clue.detail", { label: colClue.label, tooltip: colClue.tooltip }),
-                })
-              }
-              className="winegrid-clue-card group relative bg-white border border-slate-200/90 flex flex-col justify-between text-left shadow-soft hover:border-slate-300 transition"
-            >
-              <div className="flex items-center justify-between gap-1 w-full">
-                <span className="winegrid-clue-category inline-flex items-center rounded-full bg-slate-100 px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500 max-w-full whitespace-normal leading-tight">
-                  {t(categoryKey(colClue.category))}
-                </span>
-                <HelpCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-300 group-hover:text-slate-500 transition shrink-0 hidden sm:inline" />
-              </div>
-              <div className="mt-1.5 sm:mt-3 w-full">
-                <div className="winegrid-clue-title font-display font-bold text-xs sm:text-lg text-slate-900 leading-snug">
-                  {colClue.shortLabel}
-                </div>
-                <p className="text-xs text-slate-500 mt-1 leading-relaxed hidden lg:block">
-                  {colClue.label}
-                </p>
-              </div>
-
-              {/* Clean Light Tooltip (Desktop Hover) */}
-              <div className={`hidden lg:block pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity absolute bottom-full mb-2.5 w-72 max-w-[calc(100vw-2rem)] z-40 rounded-2xl bg-slate-900 p-4 text-xs text-white shadow-xl ${
-                cIdx === 0 ? "left-0" : cIdx === board.colClues.length - 1 ? "right-0" : "left-1/2 -translate-x-1/2"
-              }`}>
-                <div className="font-semibold text-rose-300 mb-1">
-                  {colClue.label}
-                </div>
-                <p className="text-slate-200 leading-relaxed">{colClue.tooltip}</p>
-              </div>
-            </button>
+              <ClueCard
+                key={colClue.id}
+                clue={colClue}
+                category={t(categoryKey(colClue.category))}
+                align={align}
+                onInspect={() =>
+                  setFeedback({
+                    type: "info",
+                    title: `${colClue.shortLabel} (${t(categoryKey(colClue.category))})`,
+                    detail: t("clue.detail", { label: colClue.label, tooltip: colClue.tooltip }),
+                  })
+                }
+              />
             );
           })}
 
@@ -1480,41 +1528,18 @@ export function WineGridGame() {
             const rowClue = presentClue(sourceRow);
             return (
             <React.Fragment key={rowClue.id}>
-              {/* Row Header (Tap on mobile or hover on desktop to inspect clue) */}
-              <button
-                type="button"
-                onClick={() =>
+              <ClueCard
+                clue={rowClue}
+                category={t(categoryKey(rowClue.category))}
+                align="start"
+                onInspect={() =>
                   setFeedback({
                     type: "info",
                     title: `${rowClue.shortLabel} (${t(categoryKey(rowClue.category))})`,
                     detail: t("clue.detail", { label: rowClue.label, tooltip: rowClue.tooltip }),
                   })
                 }
-                className="winegrid-clue-card group relative bg-white border border-slate-200/90 flex flex-col justify-between text-left shadow-soft hover:border-slate-300 transition"
-              >
-                <div className="flex items-center justify-between gap-1 w-full">
-                  <span className="winegrid-clue-category inline-flex items-center rounded-full bg-slate-100 px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500 max-w-full whitespace-normal leading-tight">
-                    {t(categoryKey(rowClue.category))}
-                  </span>
-                  <HelpCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-300 group-hover:text-slate-500 transition shrink-0 hidden sm:inline" />
-                </div>
-                <div className="mt-1.5 sm:mt-3 w-full">
-                  <div className="winegrid-clue-title font-display font-bold text-xs sm:text-lg text-slate-900 leading-snug">
-                    {rowClue.shortLabel}
-                  </div>
-                  <p className="text-xs text-slate-500 mt-1 leading-relaxed hidden lg:block">
-                    {rowClue.label}
-                  </p>
-                </div>
-
-                {/* Clean Light Tooltip (Desktop Hover) */}
-                <div className="hidden lg:block pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity absolute left-0 bottom-full mb-2.5 w-72 max-w-[calc(100vw-2rem)] z-40 rounded-2xl bg-slate-900 p-4 text-xs text-white shadow-xl">
-                  <div className="font-semibold text-rose-300 mb-1">
-                    {rowClue.label}
-                  </div>
-                  <p className="text-slate-200 leading-relaxed">{rowClue.tooltip}</p>
-                </div>
-              </button>
+              />
 
               {/* 3 Interactive Cells */}
               {[0, 1, 2].map((cIdx) => {

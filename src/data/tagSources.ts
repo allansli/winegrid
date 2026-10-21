@@ -118,6 +118,23 @@ export const ALSO_COUNTRY_SOURCES: Record<string, Record<string, AlsoCountrySour
   },
 };
 
+/**
+ * Why Almaviva and Don Melchor carry Mediterranean climate.
+ * Both sit at Puente Alto. The Maipo Valley card already uses this climate,
+ * and Wines of Chile describes that valley, whose denominations include
+ * Puente Alto, as mild Mediterranean.
+ */
+export const CLIMATE_SOURCES: Record<string, Partial<Record<"mediterranean", string>>> = {
+  "prod-almaviva": {
+    mediterranean:
+      "Wines of Chile: Puente Alto is a Maipo Valley denomination, and the Maipo Valley has a mild Mediterranean climate with hot, dry summers and cold, wet winters. https://www.winesofchile.org/denominations-of-origin/",
+  },
+  "prod-don-melchor": {
+    mediterranean:
+      "Wines of Chile: Puente Alto is a Maipo Valley denomination, and the Maipo Valley has a mild Mediterranean climate with hot, dry summers and cold, wet winters. https://www.winesofchile.org/denominations-of-origin/",
+  },
+};
+
 export const TAG_SOURCES: Record<string, string> = {
   DOCG: "Italian Denominazione di Origine Controllata e Garantita, the top DOC tier.",
   AOC: "French Appellation d'Origine Contrôlée / AOP.",
