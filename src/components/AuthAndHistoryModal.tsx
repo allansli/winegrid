@@ -11,6 +11,7 @@ import {
   isSupabaseConfigured,
 } from "@/lib/supabase/client";
 import { identifyObservabilityUser, trackEvent } from "@/lib/observability";
+import { ModalFrame } from "./ModalFrame";
 import {
   Award,
   CheckCircle2,
@@ -47,8 +48,6 @@ export function AuthAndHistoryModal({
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
-  if (!isOpen) return null;
 
   const supabaseReady = isSupabaseConfigured();
   const unclaimedAnonCount = history.filter((h) => !h.userId).length;
@@ -131,14 +130,12 @@ export function AuthAndHistoryModal({
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 backdrop-blur-sm p-4"
-      onClick={onClose}
+    <ModalFrame
+      isOpen={isOpen}
+      onClose={onClose}
+      ariaLabel="Player profile and history"
+      panelClassName="w-full max-w-2xl max-h-[86vh] flex flex-col rounded-3xl border border-slate-200 bg-white shadow-modal overflow-hidden"
     >
-      <div
-        className="w-full max-w-2xl max-h-[86vh] flex flex-col rounded-3xl border border-slate-200 bg-white shadow-modal overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
         {/* Header */}
         <div className="bg-slate-50/80 px-6 py-5 border-b border-slate-200/80 flex items-center justify-between">
           <div>
@@ -150,8 +147,10 @@ export function AuthAndHistoryModal({
             </h2>
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="rounded-full p-2 text-slate-400 hover:bg-slate-200/60 hover:text-slate-700 transition"
+            aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
@@ -358,7 +357,7 @@ export function AuthAndHistoryModal({
                         </div>
                         <div className="text-xs text-slate-400 mt-0.5">
                           {new Date(item.completedAt).toLocaleDateString()} &bull;{" "}
-                          {item.guessesUsed} guesses
+                          {item.guessesUsed} misses
                         </div>
                       </div>
                     </div>
@@ -379,7 +378,6 @@ export function AuthAndHistoryModal({
             )}
           </div>
         </div>
-      </div>
-    </div>
+    </ModalFrame>
   );
 }
