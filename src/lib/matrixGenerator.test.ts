@@ -155,6 +155,29 @@ describe("board difficulty floors", () => {
     assert.ok(appellationDays < 80, `type-appellation on ${appellationDays}/365 days`);
   });
 
+  it("finishes an Infinite sweep with the guard on", () => {
+    for (let i = 0; i < 8; i++) {
+      for (const difficulty of DIFFICULTIES) {
+        for (const entityFilter of FILTERS) {
+          const board = generateWineGridBoard({
+            seed: `infinite-audit-${i}`,
+            mode: "infinite",
+            difficulty,
+            entityFilter,
+          });
+          assert.equal(
+            guardedPlaythroughSucceeds(
+              board.cells.map((cell) => cell.validEntityIds),
+              createPrng(i + 11)
+            ),
+            true,
+            board.boardId
+          );
+        }
+      }
+    }
+  });
+
   it("blocks the 2026-10-23 Margaret River sequence before the board dies", () => {
     const cells = [
       ["app-champagne", "app-muscadet", "app-sonoma-coast", "app-willamette-valley", "app-margaret-river", "app-marlborough", "grape-pinot-noir", "grape-chardonnay", "prod-krug", "prod-selosse"],

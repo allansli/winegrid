@@ -99,7 +99,9 @@ body {
   .winegrid-clue-category {
     font-size: 0.55rem;
     padding: 0.1rem 0.35rem;
-    letter-spacing: 0.03em;
+    letter-spacing: 0.01em;
+    white-space: normal;
+    line-height: 1.15;
   }
 
   .winegrid-possible-label {
@@ -159,6 +161,30 @@ body {
   animation: winegrid-cell-miss 0.38s ease;
   border-color: rgb(244 63 94) !important;
   background-color: rgb(255 241 242);
+}
+
+/* Narrow phones: keep the 4-column matrix, but let clue titles wrap. */
+@media (max-width: 430px) {
+  .winegrid-matrix {
+    grid-template-columns: minmax(68px, 0.86fr) repeat(3, minmax(0, 1fr));
+    gap: 0.25rem;
+  }
+
+  .winegrid-corner-card,
+  .winegrid-clue-card,
+  .winegrid-cell {
+    padding: 0.35rem 0.28rem;
+  }
+
+  .winegrid-clue-title {
+    font-size: 0.62rem;
+    line-height: 1.2;
+  }
+
+  .winegrid-clue-category {
+    font-size: 0.5rem;
+    letter-spacing: 0;
+  }
 }
 
 /* Extra-small phones (< 380px) */

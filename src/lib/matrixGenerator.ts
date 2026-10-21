@@ -319,6 +319,11 @@ export function pickKeepsBoardSolvable(
   return findDistinctAssignment(projectSolvableBoard(cells)) === null;
 }
 
+/** True when the picks already on the board can still be finished. */
+export function boardStillSolvable(cells: readonly SolvableCell[]): boolean {
+  return findDistinctAssignment(projectSolvableBoard(cells)) !== null;
+}
+
 /** Fills every cell, skipping answers that would dead-end the board. */
 export function guardedPlaythroughSucceeds(
   cellValidIds: string[][],
@@ -512,11 +517,12 @@ export function assignmentSurvivesEverySequence(cellValidIds: string[][]): boole
 
 /**
  * Floors only. Standard and Sommelier stay at 3 so a cell is never a
- * one-answer trap. Master stays at 2, which is what it is today.
- * There is no upper cap: a broad cell is allowed.
+ * one-answer trap. Master's floor of 2 is intentional, so that tier can
+ * stay sharper. There is no upper cap: a broad cell is allowed.
  */
 export function minimumValidAnswers(difficulty: DifficultyLevel): number {
   if (difficulty === "wset2" || difficulty === "wset3") return 3;
+  // Master keeps a floor of 2 on purpose.
   return 2;
 }
 

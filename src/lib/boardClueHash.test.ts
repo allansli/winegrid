@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { generateDailyBoard } from "./matrixGenerator";
-import { boardClueHash, savedBoardMatchesClues } from "./boardClueHash";
+import { boardClueHash, reconcileSavedBoard, savedBoardMatchesClues } from "./boardClueHash";
 
 function cell(index: number, rowClueId: string, colClueId: string, validEntityIds: string[]) {
   return { index, rowClueId, colClueId, validEntityIds };
@@ -76,5 +76,64 @@ describe("board clue hash", () => {
       ),
       false
     );
+  });
+
+  it("keeps a finished daily when the answer hash changes and the clues do not", () => {
+    const generated = sample.cells.map((entry, index) =>
+      index === 0 ? { ...entry, validEntityIds: ["b", "c"] } : entry
+    );
+    const finished = sample.cells.map((entry) => ({
+      ...entry,
+      pickedEntityId: entry.validEntityIds[0],
+      pickedRarityPct: 12.5,
+      isLocked: true,
+    }));
+    const restored = reconcileSavedBoard(
+      { isCompleted: true, cells: finished },
+      generated,
+      { keepCompletedDaily: true }
+    );
+    assert.equal(restored.action, "restore");
+    if (restored.action !== "restore") return;
+    assert.equal(restored.isCompleted, true);
+    assert.equal(restored.cells[0].pickedEntityId, "a");
+    assert.equal(restored.cells.filter((cell) => cell.pickedEntityId).length, 9);
+  });
+
+  it("drops only placements that no longer fit when the daily is still in progress", () => {
+    const generated = sample.cells;
+    const savedCells = generated.map((entry, index) => ({
+      ...entry,
+      pickedEntityId: index === 0 ? "not-in-the-cell" : index === 1 ? "d" : null,
+    }));
+    const restored = reconcileSavedBoard(
+      { isCompleted: false, cells: savedCells },
+      generated,
+      { keepCompletedDaily: false }
+    );
+    assert.equal(restored.action, "restore");
+    if (restored.action !== "restore") return;
+    assert.equal(restored.cells[0].pickedEntityId, null);
+    assert.equal(restored.cells[1].pickedEntityId, "d");
+    assert.equal(restored.isCompleted, false);
+  });
+
+  it("discards the save only when the clue ids themselves changed", () => {
+    const swapped = sample.cells.map((entry, index) =>
+      index === 3 ? { ...entry, rowClueId: "geo-usa", colClueId: "style-sparkling" } : entry
+    );
+    assert.equal(
+      reconcileSavedBoard({ isCompleted: true, cells: swapped }, sample.cells, {
+        keepCompletedDaily: true,
+      }).action,
+      "discard"
+    );
+    assert.equal(reconcileSavedBoard(null, sample.cells, { keepCompletedDaily: true }).action, "discard");
+    const sameClues = reconcileSavedBoard(
+      { cells: sample.cells.map((entry) => ({ ...entry, pickedEntityId: null })) },
+      sample.cells,
+      { keepCompletedDaily: false }
+    );
+    assert.equal(sameClues.action, "restore");
   });
 });

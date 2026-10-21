@@ -1,8 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { CLUE_BY_ID } from "./clueCatalog";
+import { CLUE_BY_ID, COUNTRY_REGION_GROUP } from "./clueCatalog";
 import { ALSO_COUNTRY_SOURCES, TAG_SOURCES } from "./tagSources";
 import { ALL_WINE_ENTITIES, WINE_ENTITY_BY_ID } from "./wineDatabase";
+import { WineEntity } from "../types/wine";
 
 const TAG_FIELDS = [
   "classifications",
@@ -56,6 +57,25 @@ describe("attribute tag sources", () => {
     }
     assert.deepEqual(missing, []);
     assert.deepEqual(extras, []);
+  });
+
+  it("cites an external page for every alsoCountries note", () => {
+    for (const [id, countries] of Object.entries(ALSO_COUNTRY_SOURCES)) {
+      for (const [country, note] of Object.entries(countries)) {
+        assert.match(note, /https?:\/\//, `${id} ${country}`);
+        assert.doesNotMatch(note, /codex|this grape's|subRegion/i, `${id} ${country}`);
+      }
+    }
+  });
+
+  it("maps every sourced alsoCountry onto an explicit region group", () => {
+    const missing: string[] = [];
+    for (const [id, countries] of Object.entries(ALSO_COUNTRY_SOURCES)) {
+      for (const country of Object.keys(countries)) {
+        if (!COUNTRY_REGION_GROUP[country]) missing.push(`${id} ${country}`);
+      }
+    }
+    assert.deepEqual(missing, []);
   });
 });
 
@@ -166,6 +186,31 @@ describe("audit clue accept and reject cases", () => {
     ["geo-cool-latitude", "grape-viognier", true],
     ["geo-cool-latitude", "grape-syrah", true],
     ["geo-cool-latitude", "grape-cabernet-sauvignon", true],
+    ["geo-new-world", "grape-chardonnay", true],
+    ["geo-southern-hemisphere", "grape-chardonnay", true],
+    ["geo-new-world", "grape-sauvignon-blanc", true],
+    ["geo-southern-hemisphere", "grape-sauvignon-blanc", true],
+    ["geo-new-world", "grape-grenache", true],
+    ["geo-southern-hemisphere", "grape-grenache", true],
+    ["geo-new-world", "grape-semillon", true],
+    ["geo-southern-hemisphere", "grape-semillon", true],
+    ["geo-new-world", "grape-syrah", true],
+    ["geo-southern-hemisphere", "grape-syrah", true],
+    ["geo-new-world", "grape-cabernet-sauvignon", true],
+    ["geo-southern-hemisphere", "grape-cabernet-sauvignon", true],
+    ["geo-new-world", "grape-chenin-blanc", true],
+    ["geo-southern-hemisphere", "grape-chenin-blanc", true],
+    ["geo-new-world", "grape-pinot-noir", true],
+    ["geo-southern-hemisphere", "grape-pinot-noir", true],
+    ["geo-germanic", "grape-pinot-noir", true],
+    ["geo-france", "grape-riesling", true],
+    ["geo-new-world", "grape-riesling", true],
+    ["geo-southern-hemisphere", "grape-riesling", true],
+    ["geo-old-world", "grape-zinfandel", true],
+    ["geo-new-world", "grape-merlot", false],
+    ["geo-southern-hemisphere", "grape-merlot", false],
+    ["geo-old-world", "grape-malbec", false],
+    ["geo-new-world", "grape-malbec", true],
     ["her-unesco-monastic", "app-pauillac", false],
     ["clim-high-altitude", "app-naoussa", false],
     ["clim-high-altitude", "app-napa-valley", false],
@@ -178,6 +223,61 @@ describe("audit clue accept and reject cases", () => {
       assert.equal(accepts(clueId, entityId), expected);
     });
   }
+
+  it("does not infer region groups from unsourced alsoCountries or unknown countries", () => {
+    const base = WINE_ENTITY_BY_ID["grape-merlot"];
+    const unsourced: WineEntity = {
+      ...base,
+      id: "synthetic-unsourced-countries",
+      alsoCountries: ["Australia", "United States", "New Zealand"],
+    };
+    for (const clueId of ["geo-new-world", "geo-southern-hemisphere", "geo-oceania", "geo-usa"]) {
+      assert.equal(CLUE_BY_ID[clueId].predicate(unsourced), false, clueId);
+    }
+    assert.equal(CLUE_BY_ID["geo-france"].predicate(unsourced), true);
+    assert.equal(CLUE_BY_ID["geo-old-world"].predicate(unsourced), true);
+
+    const unknown: WineEntity = {
+      ...base,
+      id: "synthetic-unknown-country",
+      country: "United States",
+      world: "New World",
+      hemisphere: "Northern",
+      originCountries: ["France"],
+      alsoCountries: ["Atlantis"],
+    };
+    ALSO_COUNTRY_SOURCES["synthetic-unknown-country"] = {
+      Atlantis: "A sourced country that is not in the region-group map. https://example.com/atlantis",
+    };
+    try {
+      assert.equal(CLUE_BY_ID["geo-old-world"].predicate(unknown), false);
+      assert.equal(CLUE_BY_ID["geo-southern-hemisphere"].predicate(unknown), false);
+      assert.equal(CLUE_BY_ID["geo-france"].predicate(unknown), true);
+      assert.equal(CLUE_BY_ID["geo-new-world"].predicate(unknown), true);
+      assert.equal(COUNTRY_REGION_GROUP.Atlantis, undefined);
+    } finally {
+      delete ALSO_COUNTRY_SOURCES["synthetic-unknown-country"];
+    }
+  });
+
+  it("keeps Margaret River and the new Old World homes on the curated grapes", () => {
+    const sauvignon = WINE_ENTITY_BY_ID["grape-sauvignon-blanc"].alsoCountries ?? [];
+    const chardonnay = WINE_ENTITY_BY_ID["grape-chardonnay"].alsoCountries ?? [];
+    assert.ok(sauvignon.includes("New Zealand"));
+    assert.ok(sauvignon.includes("Australia"));
+    assert.ok(chardonnay.includes("Australia"));
+    assert.match(ALSO_COUNTRY_SOURCES["grape-sauvignon-blanc"].Australia, /Margaret River/);
+    assert.match(ALSO_COUNTRY_SOURCES["grape-chardonnay"].Australia, /Margaret River/);
+    assert.match(ALSO_COUNTRY_SOURCES["grape-sauvignon-blanc"]["New Zealand"], /Marlborough/);
+    const grenache = WINE_ENTITY_BY_ID["grape-grenache"];
+    const mourvedre = WINE_ENTITY_BY_ID["grape-mourvedre"];
+    assert.equal(grenache.country, "Spain");
+    assert.equal(grenache.macroRegion, "Aragon");
+    assert.ok(grenache.alsoRegions?.includes("Rhône Valley"));
+    assert.equal(mourvedre.country, "Spain");
+    assert.equal(mourvedre.macroRegion, "Valencia");
+    assert.ok(mourvedre.alsoRegions?.includes("Provence"));
+  });
 
   it("keeps the corrected aliases off the wrong entities", () => {
     assert.equal(WINE_ENTITY_BY_ID["prod-screaming-eagle"].aliases.includes("Opus One"), false);

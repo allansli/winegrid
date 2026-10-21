@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { normalizeSearchText, searchWineEntities } from "./wineDatabase";
+import { fieldsMatchSearch, normalizeSearchText, searchQuery, searchWineEntities } from "./wineDatabase";
 
 describe("cell-scoped entity search", () => {
   it("does not list other types when a cell only accepts producers", () => {
@@ -61,6 +61,21 @@ describe("cell-scoped entity search", () => {
     assert.ok(searchWineEntities("Alemanha").some((entity) => entity.country === "Germany"));
     assert.ok(searchWineEntities("Piemonte").some((entity) => entity.macroRegion === "Piedmont"));
     assert.ok(searchWineEntities("Galiza").some((entity) => entity.macroRegion === "Galicia"));
+  });
+
+  it("ignores queries that fold down to fewer than two characters", () => {
+    for (const query of ["ue", "oe", "ae", "ü", "ö", "ä", "u", "a", "·"]) {
+      assert.equal(searchQuery(query), null, query);
+      assert.equal(searchWineEntities(query).length, 0, query);
+      assert.equal(fieldsMatchSearch(["Pinot Noir", "Spätburgunder", "Blaufränkisch"], query), false, query);
+    }
+    assert.equal(searchQuery(""), "");
+    assert.equal(searchQuery("   "), "");
+    assert.ok(searchWineEntities("").length > 0);
+    assert.equal(fieldsMatchSearch(["Pinot Noir"], ""), true);
+    assert.equal(fieldsMatchSearch(["Spätburgunder"], "Spatburgunder"), true);
+    assert.ok(searchWineEntities("Spatburgunder").some((entity) => entity.id === "grape-pinot-noir"));
+    assert.ok(searchWineEntities("Blaufrankisch").some((entity) => entity.id === "app-burgenland"));
   });
 
   it("drops an entity that matches neither clue", () => {

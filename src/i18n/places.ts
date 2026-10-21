@@ -36,6 +36,8 @@ const REGION_PT: Record<string, string> = {
   "Aegean Islands": "Ilhas do Egeu",
   "Ahr Valley": "Vale do Ahr",
   Andalusia: "Andaluzia",
+  Aragon: "Aragão",
+  Valencia: "Valência",
   Bekaa: "Vale do Bekaa",
   Campania: "Campânia",
   "Campania & Basilicata": "Campânia e Basilicata",

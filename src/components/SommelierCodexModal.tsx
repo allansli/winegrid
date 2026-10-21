@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useRef, useState } from "react";
-import { ALL_WINE_ENTITIES, normalizeSearchText } from "@/data/wineDatabase";
+import { ALL_WINE_ENTITIES, fieldsMatchSearch } from "@/data/wineDatabase";
 import { localizedNote } from "@/i18n/notesPt";
 import { placeLabel, placeSearchLabels } from "@/i18n/places";
 import { CLUE_CATALOG } from "@/data/clueCatalog";
@@ -33,25 +33,25 @@ export function SommelierCodexModal({
   );
 
   const filteredEntities = useMemo(() => {
-    const q = normalizeSearchText(query);
     return ALL_WINE_ENTITIES.filter((e) => {
       if (typeFilter !== "all" && e.entityType !== typeFilter) return false;
       if (activeClue && !activeClue.predicate(e)) return false;
-      if (!q) return true;
-      const fields = [
-        e.name,
-        e.canonicalName,
-        e.country,
-        e.macroRegion,
-        ...placeSearchLabels(e.country, "country"),
-        ...placeSearchLabels(e.macroRegion, "region"),
-        e.subRegion ?? "",
-        e.sommelierNote,
-        localizedNote(e.id, e.sommelierNote, locale),
-        ...e.aliases,
-        ...e.primaryGrapes,
-      ];
-      return fields.some((field) => normalizeSearchText(field).includes(q));
+      return fieldsMatchSearch(
+        [
+          e.name,
+          e.canonicalName,
+          e.country,
+          e.macroRegion,
+          ...placeSearchLabels(e.country, "country"),
+          ...placeSearchLabels(e.macroRegion, "region"),
+          e.subRegion ?? "",
+          e.sommelierNote,
+          localizedNote(e.id, e.sommelierNote, locale),
+          ...e.aliases,
+          ...e.primaryGrapes,
+        ],
+        query
+      );
     });
   }, [query, typeFilter, activeClue, locale]);
 

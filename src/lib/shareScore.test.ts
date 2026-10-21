@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { buildShareText, deliverShareText, shareCellForPick } from "./shareScore";
+import { buildShareText, deliverShareText, formatDecimal, shareCellForPick } from "./shareScore";
 
 const ROWS = [
   ["purple", "green", "yellow"],
@@ -25,7 +25,8 @@ describe("share score", () => {
       text,
       [
         "🍷 WineGrid Daily (2026-10-21)",
-        "Score: 6/9 · Rarity: 198.2 · ❌×1 · Streak 3",
+        "Score: 6/9 · Rarity: 198.2",
+        "❌×1 · Streak 3",
         "🟪🟩🟨",
         "🟩🟧⬜",
         "⬜⬜🟩",
@@ -47,8 +48,17 @@ describe("share score", () => {
       rows: ROWS.map((row) => [...row]),
       locale: "pt-BR",
     });
-    assert.match(text, /Raridade: 840,9 · ❌×0 · Sequência 2/);
-    assert.equal(text.split("\n").length, 6);
+    assert.match(text, /Raridade: 840,9\n❌×0 · Sequência 2/);
+    assert.equal(text.split("\n").length, 7);
+  });
+
+  it("formats a percentage with the locale decimal mark", () => {
+    assert.equal(formatDecimal(12.5, "pt-BR"), "12,5");
+    assert.equal(formatDecimal(12.5, "en"), "12.5");
+    assert.equal(formatDecimal(12, "pt-BR"), "12");
+    assert.equal(formatDecimal(80, "en"), "80");
+    assert.equal(formatDecimal(198.24, "en"), "198.2");
+    assert.equal(formatDecimal(840.94, "pt-BR"), "840,9");
   });
 
   it("shades pick rate as purple, green, yellow, then orange", () => {
@@ -93,8 +103,8 @@ describe("share score", () => {
     assert.equal(result, "shared");
     assert.deepEqual(written, [text]);
     assert.deepEqual(shared, [text]);
-    assert.equal(text.split("\n")[2], "🟩🟩🟩");
     assert.equal(text.split("\n")[3], "🟩🟩🟩");
     assert.equal(text.split("\n")[4], "🟩🟩🟩");
+    assert.equal(text.split("\n")[5], "🟩🟩🟩");
   });
 });
