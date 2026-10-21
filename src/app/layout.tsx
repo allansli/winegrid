@@ -34,7 +34,7 @@ export const metadata: Metadata = {
       "Can you solve today's 3x3 Wine Matrix? Match Regions, Grapes & Iconic Producers across Terroir, Soil, and Classification.",
     images: [
       {
-        url: `${SITE_URL}/og-hero.jpg`,
+        url: `${SITE_URL}/og-hero-v3.jpg`,
         width: 1200,
         height: 630,
         type: "image/jpeg",
@@ -47,7 +47,7 @@ export const metadata: Metadata = {
     title: "WineGrid | The Daily Sommelier Matrix",
     description:
       "Can you solve today's 3x3 Wine Matrix? Match Regions, Grapes & Iconic Producers across Terroir, Soil, and Classification.",
-    images: [`${SITE_URL}/og-hero.jpg`],
+    images: [`${SITE_URL}/og-hero-v3.jpg`],
   },
 };
 
