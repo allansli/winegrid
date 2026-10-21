@@ -12,6 +12,7 @@ import {
 } from "@/lib/supabase/client";
 import { identifyObservabilityUser, trackEvent } from "@/lib/observability";
 import { ModalFrame } from "./ModalFrame";
+import { useI18n } from "@/i18n/I18nProvider";
 import {
   Award,
   CheckCircle2,
@@ -43,6 +44,7 @@ export function AuthAndHistoryModal({
   stats,
   onAuthChanged,
 }: AuthAndHistoryModalProps) {
+  const { t } = useI18n();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
@@ -71,13 +73,9 @@ export function AuthAndHistoryModal({
             const claimed = await mergeAnonymousHistoryOnSignIn(data.user.id);
             identifyObservabilityUser(data.user.id, email.trim());
             onAuthChanged({ id: data.user.id, email: email.trim() });
-            setStatusMessage(
-              `Account created & ${claimed} anonymous game(s) synced to your profile.`
-            );
+            setStatusMessage(t("profile.created", { n: claimed }));
           } else {
-            setStatusMessage(
-              "Check your email inbox to confirm your WineGrid account."
-            );
+            setStatusMessage(t("profile.checkEmail"));
           }
         } else {
           const { data, error } = await supabase.auth.signInWithPassword({
@@ -95,7 +93,7 @@ export function AuthAndHistoryModal({
           }
         }
       } catch (err: any) {
-        setStatusMessage(err?.message || "Authentication failed.");
+        setStatusMessage(err?.message || t("profile.authFailed"));
       } finally {
         setLoading(false);
       }
@@ -126,31 +124,31 @@ export function AuthAndHistoryModal({
     window.localStorage.removeItem("winegrid_demo_user");
     trackEvent("user_signed_out", { previous_user_id: userId });
     onAuthChanged(null);
-    setStatusMessage("Signed out. Playing as a guest.");
+    setStatusMessage(t("profile.signedOut"));
   };
 
   return (
     <ModalFrame
       isOpen={isOpen}
       onClose={onClose}
-      ariaLabel="Player profile and history"
+      ariaLabel={t("profile.aria")}
       panelClassName="w-full max-w-2xl max-h-[86vh] flex flex-col rounded-3xl border border-slate-200 bg-white shadow-modal overflow-hidden"
     >
         {/* Header */}
         <div className="bg-slate-50/80 px-6 py-5 border-b border-slate-200/80 flex items-center justify-between">
           <div>
             <div className="text-[11px] uppercase tracking-wider text-wine-600 font-semibold">
-              Player Profile &amp; History
+              {t("profile.kicker")}
             </div>
             <h2 className="font-display text-xl font-bold text-slate-900 mt-0.5">
-              {userEmail ? userEmail : "Guest Sommelier"}
+              {userEmail ? userEmail : t("profile.guest")}
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="rounded-full p-2 text-slate-400 hover:bg-slate-200/60 hover:text-slate-700 transition"
-            aria-label="Close"
+            aria-label={t("action.close")}
           >
             <X className="w-5 h-5" />
           </button>
@@ -162,7 +160,7 @@ export function AuthAndHistoryModal({
             <div className="flex items-center justify-between gap-4 mb-4">
               <div>
                 <div className="text-xs font-semibold text-wine-600 flex items-center gap-1.5">
-                  <Award className="w-4 h-4" /> Rank
+                  <Award className="w-4 h-4" /> {t("profile.rank")}
                 </div>
                 <div className="font-display text-lg font-bold text-slate-900 mt-0.5">
                   {stats.sommelierRank}
@@ -170,7 +168,7 @@ export function AuthAndHistoryModal({
               </div>
               <div className="text-right">
                 <div className="text-xs text-slate-500">
-                  Next: {stats.nextRank}
+                  {t("profile.next", { rank: stats.nextRank })}
                 </div>
                 <div className="w-32 h-2 rounded-full bg-slate-200 overflow-hidden mt-1.5">
                   <div
@@ -186,26 +184,26 @@ export function AuthAndHistoryModal({
                 <div className="font-display text-xl font-bold text-slate-900">
                   {stats.gamesPlayed}
                 </div>
-                <div className="text-[11px] text-slate-500">Played</div>
+                <div className="text-[11px] text-slate-500">{t("profile.played")}</div>
               </div>
               <div>
                 <div className="font-display text-xl font-bold text-emerald-600">
                   {stats.perfectGrids}
                 </div>
-                <div className="text-[11px] text-slate-500">Perfect 9/9</div>
+                <div className="text-[11px] text-slate-500">{t("profile.perfect")}</div>
               </div>
               <div>
                 <div className="font-display text-xl font-bold text-slate-900 flex items-center justify-center gap-1">
                   <Flame className="w-4 h-4 text-amber-500 fill-amber-400" />
                   {stats.currentStreak}
                 </div>
-                <div className="text-[11px] text-slate-500">Streak</div>
+                <div className="text-[11px] text-slate-500">{t("profile.streak")}</div>
               </div>
               <div>
                 <div className="font-display text-xl font-bold text-slate-900">
                   {stats.bestRarityScore !== null ? stats.bestRarityScore : "—"}
                 </div>
-                <div className="text-[11px] text-slate-500">Best Rarity</div>
+                <div className="text-[11px] text-slate-500">{t("profile.bestRarity")}</div>
               </div>
             </div>
           </div>
@@ -220,10 +218,10 @@ export function AuthAndHistoryModal({
                   </div>
                   <div>
                     <div className="text-sm font-semibold text-slate-900">
-                      Signed in as {userEmail}
+                      {t("profile.signedIn", { email: userEmail })}
                     </div>
                     <div className="text-xs text-slate-500">
-                      Your game history is synced to your account.
+                      {t("profile.synced")}
                     </div>
                   </div>
                 </div>
@@ -231,7 +229,7 @@ export function AuthAndHistoryModal({
                   onClick={handleSignOut}
                   className="inline-flex items-center gap-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/70 px-3.5 py-2 text-xs font-semibold text-slate-700 transition"
                 >
-                  <LogOut className="w-3.5 h-3.5" /> Sign Out
+                  <LogOut className="w-3.5 h-3.5" /> {t("profile.signOut")}
                 </button>
               </div>
             ) : (
@@ -239,10 +237,10 @@ export function AuthAndHistoryModal({
                 <div className="flex items-center justify-between gap-3 mb-3">
                   <div>
                     <h3 className="font-display text-sm font-bold text-slate-900">
-                      Sync Your Game History
+                      {t("profile.syncTitle")}
                     </h3>
                     <p className="text-xs text-slate-500 mt-0.5">
-                      Sign in to save your {unclaimedAnonCount} guest game(s) across devices.
+                      {t("profile.syncBody", { n: unclaimedAnonCount })}
                     </p>
                   </div>
                   <div className="flex rounded-xl bg-slate-100 p-1">
@@ -255,7 +253,7 @@ export function AuthAndHistoryModal({
                           : "text-slate-500"
                       }`}
                     >
-                      Sign In
+                      {t("nav.signIn")}
                     </button>
                     <button
                       type="button"
@@ -266,7 +264,7 @@ export function AuthAndHistoryModal({
                           : "text-slate-500"
                       }`}
                     >
-                      Register
+                      {t("profile.register")}
                     </button>
                   </div>
                 </div>
@@ -291,7 +289,7 @@ export function AuthAndHistoryModal({
                     required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Password"
+                    placeholder={t("profile.password")}
                     minLength={6}
                     className="w-full rounded-xl bg-slate-50 border border-slate-200 px-3 py-2 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-wine-400"
                   />
@@ -302,10 +300,10 @@ export function AuthAndHistoryModal({
                   >
                     <LogIn className="w-3.5 h-3.5" />
                     {loading
-                      ? "Syncing..."
+                      ? t("profile.syncing")
                       : authMode === "signin"
-                      ? "Sign In"
-                      : "Create Account"}
+                      ? t("nav.signIn")
+                      : t("profile.create")}
                   </button>
                 </form>
               </div>
@@ -322,11 +320,11 @@ export function AuthAndHistoryModal({
           {/* Past Games */}
           <div>
             <h3 className="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-3">
-              Recent Games ({history.length})
+              {t("profile.recent", { n: history.length })}
             </h3>
             {history.length === 0 ? (
               <div className="rounded-2xl border border-slate-200/70 bg-slate-50/50 py-10 text-center text-sm text-slate-400">
-                No completed games yet.
+                {t("profile.empty")}
               </div>
             ) : (
               <div className="space-y-2.5">
@@ -352,12 +350,12 @@ export function AuthAndHistoryModal({
                       <div>
                         <div className="font-display font-bold text-sm text-slate-900">
                           {item.mode === "daily"
-                            ? `Daily Grid (${item.boardDate})`
-                            : "Unlimited Grid"}
+                            ? t("profile.dailyGrid", { date: item.boardDate })
+                            : t("profile.unlimitedGrid")}
                         </div>
                         <div className="text-xs text-slate-400 mt-0.5">
                           {new Date(item.completedAt).toLocaleDateString()} &bull;{" "}
-                          {item.guessesUsed} misses
+                          {t("profile.misses", { n: item.guessesUsed })}
                         </div>
                       </div>
                     </div>

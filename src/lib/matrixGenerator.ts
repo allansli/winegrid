@@ -96,8 +96,7 @@ export function generateWineGridBoard(options: {
       ? new Set(["wset2", "wset3"])
       : new Set(["wset2", "wset3", "master_somm"]);
 
-  const minPerCell =
-    difficulty === "wset2" ? 3 : difficulty === "wset3" ? 2 : 1;
+  const minPerCell = minimumValidAnswers(difficulty);
 
   // Precompute matching entity IDs for each clue
   const clueMatches = new Map<string, Set<string>>();
@@ -112,8 +111,12 @@ export function generateWineGridBoard(options: {
         matchedIds.add(entity.id);
       }
     }
-    // Clue must match enough entities to potentially fill 3 cells in a row/col
-    if (matchedIds.size < Math.max(4, minPerCell * 2)) return false;
+    // A clue has to be able to support a whole axis. Easy boards use the
+    // cell floor itself so country and grape-family clues still qualify inside
+    // a single-type catalog. Sommelier and Master keep a wider support floor.
+    const clueSupportFloor =
+      difficulty === "wset2" ? minPerCell : Math.max(4, minPerCell * 2);
+    if (matchedIds.size < clueSupportFloor) return false;
     clueMatches.set(clue.id, matchedIds);
     return true;
   });
@@ -189,7 +192,9 @@ export function generateWineGridBoard(options: {
                 ...rows.map((r) => r.category),
                 ...cols.map((c) => c.category),
               ]);
-              // Require at least 5 distinct categories across the 6 axes for maximum wine-expert variety
+              // At least 5 clue families, including on Standard. Basic climate stays
+              // in that tier so a Regions/Grapes/Estates filter still has five families
+              // after the entity-type clues drop out.
               if (allSixCats.size < 5) continue;
 
               const cellValidIds: string[][] = [];
@@ -233,4 +238,28 @@ export function generateWineGridBoard(options: {
   }
 
   throw new Error("Could not generate a valid 3x3 WineGrid matrix for given constraints.");
+}
+
+/** Easy/daily cells need at least 3 legal answers. Sommelier and Master need at least 2. */
+export function minimumValidAnswers(difficulty: DifficultyLevel): number {
+  if (difficulty === "wset2") return 3;
+  return 2;
+}
+
+export const DAILY_DIFFICULTY: DifficultyLevel = "wset2";
+export const DAILY_ENTITY_FILTER: EntityFilterMode = "all";
+
+/** The daily puzzle is keyed only by the calendar date, in the player's local YYYY-MM-DD. */
+export function dailySeedForDate(date: string): string {
+  return date;
+}
+
+export function generateDailyBoard(date: string): GeneratedBoard {
+  return generateWineGridBoard({
+    seed: dailySeedForDate(date),
+    mode: "daily",
+    difficulty: DAILY_DIFFICULTY,
+    entityFilter: DAILY_ENTITY_FILTER,
+    boardDate: date,
+  });
 }
