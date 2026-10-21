@@ -3,7 +3,7 @@
 import React from "react";
 import { ClueDefinition, MatrixCell } from "@/types/wine";
 import { WINE_ENTITY_BY_ID } from "@/data/wineDatabase";
-import { X, Award, Sparkles, BookOpen } from "lucide-react";
+import { X, Award, Sparkles } from "lucide-react";
 
 interface CellInspectModalProps {
   isOpen: boolean;
@@ -29,140 +29,98 @@ export function CellInspectModal({
   const validEntities = cell.validEntityIds
     .map((id) => WINE_ENTITY_BY_ID[id])
     .filter(Boolean)
-    .sort((a, b) => b.baseRarity - a.baseRarity); // Rarest first!
+    .sort((a, b) => b.baseRarity - a.baseRarity);
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 backdrop-blur-sm p-4"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl max-h-[85vh] flex flex-col rounded-2xl border border-champagne-500/30 bg-cellar-900 shadow-2xl overflow-hidden"
+        className="w-full max-w-2xl max-h-[85vh] flex flex-col rounded-3xl border border-slate-200 bg-white shadow-modal overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-burgundy-950 via-cellar-900 to-burgundy-950 px-6 py-4 border-b border-white/10 flex items-center justify-between">
+        <div className="bg-slate-50/80 px-6 py-5 border-b border-slate-200/80 flex items-center justify-between">
           <div>
-            <div className="text-xs uppercase tracking-widest text-champagne-400 font-semibold flex items-center gap-1.5">
-              <BookOpen className="w-3.5 h-3.5" /> Sommelier Cell Analysis
+            <div className="text-[11px] uppercase tracking-wider text-wine-600 font-semibold">
+              Cell Breakdown
             </div>
-            <h3 className="text-lg font-serif font-bold text-white mt-0.5">
+            <h3 className="font-display text-lg font-bold text-slate-900 mt-0.5">
               {rowClue.shortLabel} &times; {colClue.shortLabel}
             </h3>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-zinc-400 hover:bg-white/10 hover:text-white transition"
+            className="rounded-full p-2 text-slate-400 hover:bg-slate-200/60 hover:text-slate-700 transition"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-6 overflow-y-auto space-y-5">
-          {/* Clue Explanations */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="rounded-xl bg-black/40 border border-white/10 p-3">
-              <div className="text-[11px] uppercase tracking-wider text-champagne-400 font-semibold">
-                Row: {rowClue.label}
-              </div>
-              <p className="text-xs text-zinc-300 mt-1">{rowClue.tooltip}</p>
-            </div>
-            <div className="rounded-xl bg-black/40 border border-white/10 p-3">
-              <div className="text-[11px] uppercase tracking-wider text-champagne-400 font-semibold">
-                Column: {colClue.label}
-              </div>
-              <p className="text-xs text-zinc-300 mt-1">{colClue.tooltip}</p>
-            </div>
-          </div>
-
+        <div className="p-6 overflow-y-auto space-y-6">
           {/* Player's Pick */}
           {pickedEntity && (
-            <div className="rounded-xl border border-emerald-500/40 bg-emerald-950/30 p-4">
+            <div className="rounded-2xl border border-emerald-200 bg-emerald-50/60 p-5">
               <div className="flex items-center justify-between flex-wrap gap-2">
-                <div className="flex items-center gap-2">
-                  <Award className="w-5 h-5 text-emerald-400" />
-                  <span className="text-xs uppercase tracking-wider text-emerald-300 font-semibold">
-                    Your Valid Sommelier Pick
-                  </span>
+                <div className="flex items-center gap-2 text-xs font-semibold text-emerald-800">
+                  <Award className="w-4 h-4 text-emerald-600" />
+                  Your Answer
                 </div>
                 {cell.pickedRarityPct !== null && (
-                  <span className="rounded-full bg-emerald-900/80 border border-emerald-500/40 px-2.5 py-0.5 text-xs font-bold text-emerald-200">
-                    {cell.pickedRarityPct}% Global Pick Rate
+                  <span className="rounded-full bg-white border border-emerald-200 px-3 py-0.5 text-xs font-bold text-emerald-700">
+                    {cell.pickedRarityPct}% Pick Rate
                   </span>
                 )}
               </div>
-              <div className="mt-2 font-serif text-xl font-bold text-white">
+              <div className="mt-2 font-display text-xl font-bold text-slate-900">
                 {pickedEntity.name}
               </div>
-              <div className="text-xs text-emerald-200/80 mt-0.5">
-                {pickedEntity.country} &bull; {pickedEntity.macroRegion} &bull; Primary Grapes:{" "}
+              <div className="text-xs text-slate-500 mt-0.5">
+                {pickedEntity.country} &bull; {pickedEntity.macroRegion} &bull;{" "}
                 {pickedEntity.primaryGrapes.join(", ")}
               </div>
-              <p className="text-sm text-zinc-200 mt-2.5 leading-relaxed">
+              <p className="text-sm text-slate-700 mt-3 leading-relaxed">
                 {pickedEntity.sommelierNote}
               </p>
             </div>
           )}
 
-          {/* All Valid Answers in Pool */}
+          {/* All Valid Answers */}
           <div>
-            <div className="flex items-center justify-between mb-3">
-              <h4 className="text-xs uppercase tracking-wider text-champagne-300 font-semibold flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" /> All {validEntities.length} Valid Sommelier Answers (Ordered Rarest First)
-              </h4>
-            </div>
-            <div className="space-y-2.5">
+            <h4 className="text-xs uppercase tracking-wider text-slate-400 font-semibold flex items-center gap-1.5 mb-3">
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              All {validEntities.length} Valid Answers (Rarest First)
+            </h4>
+            <div className="space-y-3">
               {validEntities.map((entity) => {
                 const isPlayerPick = entity.id === cell.pickedEntityId;
                 return (
                   <div
                     key={entity.id}
-                    className={`rounded-xl border p-3.5 transition ${
+                    className={`rounded-2xl border p-4 transition ${
                       isPlayerPick
-                        ? "border-emerald-500/40 bg-emerald-950/20"
-                        : "border-white/10 bg-cellar-950/80"
+                        ? "border-emerald-300 bg-emerald-50/30"
+                        : "border-slate-200/80 bg-white"
                     }`}
                   >
                     <div className="flex items-center justify-between flex-wrap gap-2">
                       <div>
-                        <span className="font-serif font-semibold text-base text-champagne-100">
+                        <span className="font-display font-bold text-base text-slate-900">
                           {entity.name}
                         </span>
-                        <span className="ml-2 text-xs text-zinc-400">
-                          ({entity.country} &bull; {entity.macroRegion})
+                        <span className="ml-2 text-xs text-slate-500">
+                          {entity.country} &bull; {entity.macroRegion}
                         </span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[11px] uppercase tracking-wider px-2 py-0.5 rounded bg-white/5 text-zinc-300 border border-white/10">
-                          {entity.entityType}
-                        </span>
-                        <span className="text-xs font-mono text-champagne-400">
-                          Rarity Index: {entity.baseRarity}/100
-                        </span>
-                      </div>
+                      <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full capitalize">
+                        {entity.entityType}
+                      </span>
                     </div>
-                    <p className="text-xs text-zinc-300 mt-1.5 leading-relaxed">
+                    <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
                       {entity.sommelierNote}
                     </p>
-                    <div className="flex flex-wrap gap-1.5 mt-2">
-                      {entity.soils.map((s) => (
-                        <span
-                          key={s}
-                          className="text-[10px] px-2 py-0.5 rounded bg-burgundy-950/80 border border-burgundy-800/50 text-burgundy-200"
-                        >
-                          Soil: {s.replace(/_/g, " ")}
-                        </span>
-                      ))}
-                      {entity.primaryGrapes.slice(0, 3).map((g) => (
-                        <span
-                          key={g}
-                          className="text-[10px] px-2 py-0.5 rounded bg-champagne-950/60 border border-champagne-700/40 text-champagne-200"
-                        >
-                          {g}
-                        </span>
-                      ))}
-                    </div>
                   </div>
                 );
               })}

@@ -3,7 +3,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { ClueDefinition, EntityFilterMode, WineEntity } from "@/types/wine";
 import { searchWineEntities } from "@/data/wineDatabase";
-import { Search, X, Wine, Grape, Castle, Sparkles, Check } from "lucide-react";
+import { Search, X, Wine, Grape, Castle, ArrowRight } from "lucide-react";
 
 interface EntitySearchModalProps {
   isOpen: boolean;
@@ -52,7 +52,9 @@ export function EntitySearchModal({
       onClose();
     } else if (e.key === "ArrowDown") {
       e.preventDefault();
-      setSelectedIndex((prev) => Math.min(prev + 1, Math.max(0, results.length - 1)));
+      setSelectedIndex((prev) =>
+        Math.min(prev + 1, Math.max(0, results.length - 1))
+      );
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setSelectedIndex((prev) => Math.max(prev - 1, 0));
@@ -66,20 +68,20 @@ export function EntitySearchModal({
     switch (type) {
       case "appellation":
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-burgundy-900/70 border border-burgundy-700/50 px-2 py-0.5 text-[11px] font-medium text-burgundy-200">
-            <Wine className="w-3 h-3" /> Appellation
+          <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 border border-rose-200/80 px-2.5 py-0.5 text-[11px] font-medium text-rose-700">
+            <Wine className="w-3 h-3" /> Region
           </span>
         );
       case "grape":
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-950/80 border border-emerald-700/50 px-2 py-0.5 text-[11px] font-medium text-emerald-200">
-            <Grape className="w-3 h-3" /> Grape Variety
+          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 text-[11px] font-medium text-emerald-700">
+            <Grape className="w-3 h-3" /> Grape
           </span>
         );
       case "producer":
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-champagne-950/80 border border-champagne-600/50 px-2 py-0.5 text-[11px] font-medium text-champagne-200">
-            <Castle className="w-3 h-3" /> Iconic Estate
+          <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200/80 px-2.5 py-0.5 text-[11px] font-medium text-amber-800">
+            <Castle className="w-3 h-3" /> Estate
           </span>
         );
     }
@@ -87,66 +89,66 @@ export function EntitySearchModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-start justify-center bg-black/80 backdrop-blur-sm p-4 pt-12 sm:pt-20"
+      className="fixed inset-0 z-50 flex items-start justify-center bg-slate-900/30 backdrop-blur-sm p-4 pt-14 sm:pt-20"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-xl rounded-2xl border border-champagne-500/30 bg-cellar-900 shadow-2xl overflow-hidden"
+        className="w-full max-w-xl rounded-3xl border border-slate-200/90 bg-white shadow-modal overflow-hidden"
         onClick={(e) => e.stopPropagation()}
         onKeyDown={handleKeyDown}
       >
-        {/* Intersecting Clues Banner */}
-        <div className="bg-gradient-to-r from-burgundy-950 via-cellar-900 to-burgundy-950 px-5 py-4 border-b border-white/10">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs uppercase tracking-widest text-champagne-400 font-semibold flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5" /> Select Wine Entity for Intersection
+        {/* Clean Intersection Header */}
+        <div className="bg-slate-50/80 px-6 py-4 border-b border-slate-200/70">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">
+              Match Both Criteria
             </span>
             <button
               onClick={onClose}
-              className="rounded-lg p-1 text-zinc-400 hover:bg-white/10 hover:text-white transition"
+              className="rounded-full p-1 text-slate-400 hover:bg-slate-200/60 hover:text-slate-700 transition"
               aria-label="Close modal"
             >
               <X className="w-4 h-4" />
             </button>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <div className="rounded-xl bg-black/40 border border-white/10 p-2.5">
-              <div className="text-[10px] uppercase tracking-wider text-zinc-400">
-                Row Criterion ({rowClue.category})
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="rounded-2xl bg-white border border-slate-200/80 p-3 shadow-sm">
+              <div className="text-[10px] uppercase tracking-wider font-semibold text-slate-400">
+                Row &bull; {rowClue.category}
               </div>
-              <div className="text-sm font-serif font-semibold text-champagne-100 mt-0.5">
-                {rowClue.label}
+              <div className="font-display text-sm font-bold text-slate-900 mt-0.5">
+                {rowClue.shortLabel}
               </div>
             </div>
-            <div className="rounded-xl bg-black/40 border border-white/10 p-2.5">
-              <div className="text-[10px] uppercase tracking-wider text-zinc-400">
-                Column Criterion ({colClue.category})
+            <div className="rounded-2xl bg-white border border-slate-200/80 p-3 shadow-sm">
+              <div className="text-[10px] uppercase tracking-wider font-semibold text-slate-400">
+                Column &bull; {colClue.category}
               </div>
-              <div className="text-sm font-serif font-semibold text-champagne-100 mt-0.5">
-                {colClue.label}
+              <div className="font-display text-sm font-bold text-slate-900 mt-0.5">
+                {colClue.shortLabel}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Search Input */}
-        <div className="relative border-b border-white/10 bg-cellar-950 px-4 py-3">
-          <Search className="w-5 h-5 text-champagne-400 absolute left-4 top-1/2 -translate-y-1/2" />
+        {/* Spotlight Search Input */}
+        <div className="relative border-b border-slate-200/70 bg-white px-6 py-4">
+          <Search className="w-5 h-5 text-slate-400 absolute left-6 top-1/2 -translate-y-1/2" />
           <input
             ref={inputRef}
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search appellation (Barolo, Pauillac...), grape (Nebbiolo, Riesling...), or estate (DRC, Krug...)"
-            className="w-full bg-transparent pl-8 pr-4 text-sm sm:text-base text-white placeholder-zinc-500 focus:outline-none"
+            placeholder="Search region (Barolo, Champagne), grape (Pinot Noir), or estate..."
+            className="w-full bg-transparent pl-9 pr-4 text-sm sm:text-base text-slate-900 placeholder-slate-400 focus:outline-none"
           />
         </div>
 
         {/* Results List */}
-        <div className="max-h-80 overflow-y-auto divide-y divide-white/5">
+        <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
           {results.length === 0 ? (
-            <div className="py-10 text-center text-sm text-zinc-400">
-              No matching unused wine entities found for &ldquo;{query}&rdquo;.
+            <div className="py-12 text-center text-sm text-slate-400">
+              No unused wine entities found for &ldquo;{query}&rdquo;.
             </div>
           ) : (
             results.map((entity, idx) => {
@@ -157,48 +159,38 @@ export function EntitySearchModal({
                   type="button"
                   onClick={() => onSelectEntity(entity)}
                   onMouseEnter={() => setSelectedIndex(idx)}
-                  className={`w-full text-left px-5 py-3 flex items-center justify-between transition ${
-                    isSelected
-                      ? "bg-burgundy-900/50 text-white"
-                      : "hover:bg-white/5 text-zinc-200"
+                  className={`w-full text-left px-6 py-3.5 flex items-center justify-between transition ${
+                    isSelected ? "bg-slate-50" : "bg-white hover:bg-slate-50/60"
                   }`}
                 >
                   <div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-serif font-semibold text-base text-champagne-50">
+                    <div className="flex items-center gap-2.5 flex-wrap">
+                      <span className="font-display font-bold text-sm sm:text-base text-slate-900">
                         {entity.name}
                       </span>
                       {getEntityBadge(entity.entityType)}
                     </div>
-                    <div className="text-xs text-zinc-400 mt-0.5">
+                    <div className="text-xs text-slate-500 mt-0.5">
                       {entity.country} &bull; {entity.macroRegion}
-                      {entity.subRegion ? ` (${entity.subRegion})` : ""}
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-champagne-400 font-medium hidden sm:inline">
-                      Select
-                    </span>
-                    <Check
-                      className={`w-4 h-4 ${
-                        isSelected ? "text-champagne-400" : "text-zinc-600"
-                      }`}
-                    />
-                  </div>
+                  <ArrowRight
+                    className={`w-4 h-4 transition ${
+                      isSelected
+                        ? "text-wine-600 translate-x-0.5"
+                        : "text-slate-300"
+                    }`}
+                  />
                 </button>
               );
             })
           )}
         </div>
 
-        {/* Footer tip */}
-        <div className="bg-cellar-950 px-5 py-2.5 border-t border-white/10 flex items-center justify-between text-[11px] text-zinc-400">
-          <span>
-            Tip: Rarer valid answers earn a lower (better) Sommelier Rarity Score!
-          </span>
-          <span className="hidden sm:inline text-zinc-500">
-            ↑↓ Navigate &bull; Enter to Guess &bull; Esc to Cancel
-          </span>
+        {/* Minimal Footer */}
+        <div className="bg-slate-50/80 px-6 py-3 border-t border-slate-200/70 flex items-center justify-between text-[11px] text-slate-400">
+          <span>Rarer answers improve your Rarity Score</span>
+          <span className="hidden sm:inline">↑↓ Navigate &bull; Enter to Select</span>
         </div>
       </div>
     </div>

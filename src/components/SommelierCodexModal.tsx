@@ -4,14 +4,17 @@ import React, { useMemo, useState } from "react";
 import { ALL_WINE_ENTITIES } from "@/data/wineDatabase";
 import { CLUE_CATALOG } from "@/data/clueCatalog";
 import { EntityFilterMode } from "@/types/wine";
-import { BookOpen, Search, X, Wine, Grape, Castle, Filter } from "lucide-react";
+import { Search, X, Filter } from "lucide-react";
 
 interface SommelierCodexModalProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function SommelierCodexModal({ isOpen, onClose }: SommelierCodexModalProps) {
+export function SommelierCodexModal({
+  isOpen,
+  onClose,
+}: SommelierCodexModalProps) {
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<EntityFilterMode>("all");
   const [selectedClueId, setSelectedClueId] = useState<string>("all");
@@ -41,136 +44,116 @@ export function SommelierCodexModal({ isOpen, onClose }: SommelierCodexModalProp
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 backdrop-blur-sm p-4"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-4xl max-h-[88vh] flex flex-col rounded-2xl border border-champagne-500/30 bg-cellar-900 shadow-2xl overflow-hidden"
+        className="w-full max-w-4xl max-h-[86vh] flex flex-col rounded-3xl border border-slate-200 bg-white shadow-modal overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-burgundy-950 via-cellar-900 to-burgundy-950 px-6 py-4 border-b border-white/10 flex items-center justify-between">
+        <div className="bg-slate-50/80 px-6 py-5 border-b border-slate-200/80 flex items-center justify-between">
           <div>
-            <div className="text-xs uppercase tracking-widest text-champagne-400 font-semibold flex items-center gap-1.5">
-              <BookOpen className="w-3.5 h-3.5" /> Master Sommelier Knowledge Graph
+            <div className="text-[11px] uppercase tracking-wider text-wine-600 font-semibold">
+              Knowledge Graph
             </div>
-            <h2 className="text-xl font-serif font-bold text-white mt-0.5">
-              WineGrid Codex ({ALL_WINE_ENTITIES.length} Entities &bull; {CLUE_CATALOG.length} Matrix Predicates)
+            <h2 className="font-display text-xl font-bold text-slate-900 mt-0.5">
+              WineGrid Codex ({filteredEntities.length} of {ALL_WINE_ENTITIES.length})
             </h2>
           </div>
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-zinc-400 hover:bg-white/10 hover:text-white transition"
+            className="rounded-full p-2 text-slate-400 hover:bg-slate-200/60 hover:text-slate-700 transition"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Filters Bar */}
-        <div className="bg-cellar-950 px-6 py-3.5 border-b border-white/10 space-y-3">
+        {/* Filters */}
+        <div className="bg-white px-6 py-4 border-b border-slate-200/70 space-y-3">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
-              <Search className="w-4 h-4 text-champagne-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="Search by appellation, grape, producer, soil, or tasting note..."
-                className="w-full rounded-xl bg-cellar-900 border border-white/10 pl-9 pr-4 py-2 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-champagne-400"
+                placeholder="Search region, grape, estate, or soil..."
+                className="w-full rounded-xl bg-slate-50 border border-slate-200/80 pl-9 pr-4 py-2 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-wine-400"
               />
             </div>
 
-            <div className="flex items-center gap-1.5 bg-cellar-900 p-1 rounded-xl border border-white/10">
-              {(["all", "appellation", "grape", "producer"] as EntityFilterMode[]).map(
-                (t) => (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => setTypeFilter(t)}
-                    className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition ${
-                      typeFilter === t
-                        ? "bg-burgundy-700 text-white"
-                        : "text-zinc-400 hover:text-white"
-                    }`}
-                  >
-                    {t === "all" ? "All Types" : `${t}s`}
-                  </button>
-                )
-              )}
+            <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+              {(
+                ["all", "appellation", "grape", "producer"] as EntityFilterMode[]
+              ).map((t) => (
+                <button
+                  key={t}
+                  type="button"
+                  onClick={() => setTypeFilter(t)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium capitalize transition ${
+                    typeFilter === t
+                      ? "bg-white text-slate-900 shadow-sm"
+                      : "text-slate-500 hover:text-slate-900"
+                  }`}
+                >
+                  {t === "all" ? "All" : `${t}s`}
+                </button>
+              ))}
             </div>
           </div>
 
           <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-champagne-400 shrink-0" />
+            <Filter className="w-4 h-4 text-slate-400 shrink-0" />
             <select
               value={selectedClueId}
               onChange={(e) => setSelectedClueId(e.target.value)}
-              className="w-full rounded-xl bg-cellar-900 border border-white/10 px-3 py-1.5 text-xs text-zinc-200 focus:outline-none focus:border-champagne-400"
+              className="w-full rounded-xl bg-slate-50 border border-slate-200/80 px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-wine-400"
             >
               <option value="all">
-                Filter by any of the {CLUE_CATALOG.length} Sommelier Matrix Clues (Showing All)
+                Filter by any of the {CLUE_CATALOG.length} Matrix Criteria (All)
               </option>
               {CLUE_CATALOG.map((clue) => (
                 <option key={clue.id} value={clue.id}>
-                  [{clue.category.toUpperCase()} - {clue.difficulty.toUpperCase()}] {clue.label}
+                  [{clue.category.toUpperCase()}] {clue.label}
                 </option>
               ))}
             </select>
           </div>
         </div>
 
-        {/* Entity Cards */}
-        <div className="p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Cards */}
+        <div className="p-6 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-4 bg-slate-50/40">
           {filteredEntities.map((entity) => (
             <div
               key={entity.id}
-              className="rounded-xl border border-white/10 bg-cellar-950/90 p-4 flex flex-col justify-between"
+              className="rounded-2xl border border-slate-200/80 bg-white p-5 flex flex-col justify-between shadow-soft"
             >
               <div>
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <h3 className="font-serif font-bold text-base text-champagne-100">
+                    <h3 className="font-display font-bold text-base text-slate-900">
                       {entity.name}
                     </h3>
-                    <div className="text-xs text-zinc-400 mt-0.5">
+                    <div className="text-xs text-slate-500 mt-0.5">
                       {entity.country} &bull; {entity.macroRegion}
-                      {entity.subRegion ? ` (${entity.subRegion})` : ""}
                     </div>
                   </div>
-                  <span className="shrink-0 inline-flex items-center gap-1 rounded-full bg-white/5 border border-white/10 px-2.5 py-0.5 text-[11px] text-champagne-300 capitalize">
-                    {entity.entityType === "appellation" && <Wine className="w-3 h-3" />}
-                    {entity.entityType === "grape" && <Grape className="w-3 h-3" />}
-                    {entity.entityType === "producer" && <Castle className="w-3 h-3" />}
+                  <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-600 capitalize">
                     {entity.entityType}
                   </span>
                 </div>
 
-                <p className="text-xs text-zinc-300 mt-2.5 leading-relaxed">
+                <p className="text-xs text-slate-600 mt-3 leading-relaxed">
                   {entity.sommelierNote}
                 </p>
               </div>
 
-              <div className="mt-3 pt-2.5 border-t border-white/5 flex flex-wrap gap-1.5">
-                {entity.classifications.map((c) => (
-                  <span
-                    key={c}
-                    className="text-[10px] px-2 py-0.5 rounded bg-champagne-950/70 border border-champagne-700/40 text-champagne-200"
-                  >
-                    {c.replace(/_/g, " ")}
-                  </span>
-                ))}
-                {entity.soils.map((s) => (
-                  <span
-                    key={s}
-                    className="text-[10px] px-2 py-0.5 rounded bg-burgundy-950/80 border border-burgundy-800/50 text-burgundy-200"
-                  >
-                    {s.replace(/_/g, " ")}
-                  </span>
-                ))}
+              <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap gap-1.5">
                 {entity.primaryGrapes.slice(0, 3).map((g) => (
                   <span
                     key={g}
-                    className="text-[10px] px-2 py-0.5 rounded bg-emerald-950/70 border border-emerald-800/50 text-emerald-200"
+                    className="text-[11px] px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium"
                   >
                     {g}
                   </span>
