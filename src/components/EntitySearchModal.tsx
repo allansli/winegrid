@@ -85,15 +85,17 @@ export function EntitySearchModal({
   const searchOptions = {
     acceptedTypes,
     locale,
+    scope: hintsOn ? ("full" as const) : ("identity" as const),
   };
 
   const extraEntities = useMemo(() => {
-    // Same alias search as the Codex. Hints on does not use this ranking.
+    // Hints off searches name, alias, and place. Hints on uses the full scope
+    // when it filters the valid set, and does not use this ranking.
     return searchWineEntities(query, activeTypeTab, new Set(), searchOptions);
     // Predicates are stable for a cell. Depending on the clue objects would
     // rebuild the list on every parent render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, activeTypeTab, acceptedKey, locale]);
+  }, [query, activeTypeTab, acceptedKey, locale, hintsOn]);
 
   const results = useMemo(
     () =>
@@ -103,8 +105,9 @@ export function EntitySearchModal({
         validEntities: fittingEntities,
         usedIds: usedEntityIds,
         extraEntities,
+        locale,
       }),
-    [query, hintsOn, fittingEntities, usedEntityIds, extraEntities]
+    [query, hintsOn, fittingEntities, usedEntityIds, extraEntities, locale]
   );
 
   renderedQueryRef.current = query;
@@ -165,6 +168,7 @@ export function EntitySearchModal({
         validEntities: fittingEntities,
         usedIds: usedEntityIds,
         extraEntities: searchWineEntities(typed, activeTypeTab, new Set(), searchOptions),
+        locale,
       });
       const decision = pickerEnterAction({
         inputValue: typed,

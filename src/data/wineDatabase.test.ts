@@ -1,6 +1,13 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { fieldsMatchSearch, normalizeSearchText, searchQuery, searchWineEntities } from "./wineDatabase";
+import {
+  entityMatchesSearch,
+  fieldsMatchSearch,
+  normalizeSearchText,
+  searchQuery,
+  searchWineEntities,
+  WINE_ENTITY_BY_ID,
+} from "./wineDatabase";
 
 describe("cell-scoped entity search", () => {
   it("does not list other types when a cell only accepts producers", () => {
@@ -84,6 +91,47 @@ describe("cell-scoped entity search", () => {
         entity.macroRegion === "Rhône Valley" || entity.alsoRegions?.includes("Rhône Valley") === true,
     });
     assert.equal(results.some((entity) => entity.id === "app-cava"), false);
+  });
+
+  it("limits the identity scope to name, alias, and place", () => {
+    const cava = WINE_ENTITY_BY_ID["app-cava"];
+    for (const query of ["volcanic", "terra rossa", "vulcânico"]) {
+      assert.equal(
+        searchWineEntities(query, "all", new Set(), { scope: "identity", locale: "pt-BR", limit: 200 }).length,
+        0,
+        query
+      );
+      assert.equal(entityMatchesSearch(cava, query, "pt-BR", "identity"), false, query);
+    }
+    assert.ok(searchWineEntities("volcanic", "all", new Set(), { scope: "full", limit: 200 }).length > 0);
+    assert.ok(searchWineEntities("terra rossa", "all", new Set(), { scope: "full", limit: 200 }).length > 0);
+    assert.ok(
+      searchWineEntities("vulcânico", "all", new Set(), { scope: "full", locale: "pt-BR", limit: 200 }).length > 0
+    );
+    assert.equal(entityMatchesSearch(cava, "Xarello", "en", "identity"), false);
+    assert.equal(entityMatchesSearch(cava, "Xarello", "en", "full"), true);
+    assert.equal(entityMatchesSearch(cava, "Parellada", "pt-BR", "identity"), false);
+    assert.equal(entityMatchesSearch(cava, "Parellada", "pt-BR", "full"), true);
+    assert.ok(
+      searchWineEntities("Mueller", "all", new Set(), { scope: "identity" }).some(
+        (entity) => entity.id === "prod-egon-muller"
+      )
+    );
+    assert.ok(
+      searchWineEntities("Aragão", "all", new Set(), { scope: "identity" }).some(
+        (entity) => entity.id === "grape-grenache"
+      )
+    );
+    assert.ok(
+      searchWineEntities("Catalunha", "all", new Set(), { scope: "identity" }).some(
+        (entity) => entity.id === "app-cava"
+      )
+    );
+    assert.ok(
+      searchWineEntities("Penedès", "all", new Set(), { scope: "identity" }).some(
+        (entity) => entity.id === "app-cava"
+      )
+    );
   });
 
   it("returns no producer when the cell only accepts grapes", () => {

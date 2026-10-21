@@ -109,7 +109,7 @@ describe("picker and the dead-end guard share one answer set", () => {
     );
     const ids = valid.map((entity) => entity.id);
     assert.equal(entityFitsCell("grape-chardonnay", ids), false);
-    const ranked = searchWineEntities("chardonnay");
+    const ranked = searchWineEntities("chardonnay", "all", new Set(), { scope: "identity" });
     const listed = buildPickerResults({
       query: "chardonnay",
       hintsOn: false,
@@ -151,7 +151,10 @@ describe("picker and the dead-end guard share one answer set", () => {
     assert.equal(other.some((entity) => entity.id === "prod-egon-muller"), false);
 
     for (const query of ["Mueller", "Müller"]) {
-      const ranked = searchWineEntities(query, "all", new Set(), { acceptedTypes: ["producer"] });
+      const ranked = searchWineEntities(query, "all", new Set(), {
+        acceptedTypes: ["producer"],
+        scope: "identity",
+      });
       assert.ok(ranked.some((entity) => entity.id === "prod-egon-muller"), query);
       const whereValid = buildPickerResults({
         query,
@@ -188,6 +191,47 @@ describe("picker and the dead-end guard share one answer set", () => {
         "miss"
       );
     }
+  });
+
+  it("does not surface clue words when hints are off", () => {
+    for (const query of ["volcanic", "terra rossa"]) {
+      const noted = searchWineEntities(query, "all", new Set(), { scope: "full", limit: 200 });
+      assert.ok(noted.length > 0, query);
+      const hintsOff = buildPickerResults({
+        query,
+        hintsOn: false,
+        validEntities: noted,
+        extraEntities: noted,
+      });
+      assert.deepEqual(
+        hintsOff.map((entity) => entity.id),
+        [],
+        query
+      );
+      const hintsOn = buildPickerResults({
+        query,
+        hintsOn: true,
+        validEntities: noted,
+        extraEntities: noted,
+      });
+      assert.deepEqual(
+        hintsOn.map((entity) => entity.id).sort(),
+        noted.map((entity) => entity.id).sort(),
+        query
+      );
+    }
+
+    const ranked = searchWineEntities("Mueller", "all", new Set(), {
+      acceptedTypes: ["producer"],
+      scope: "identity",
+    });
+    const listed = buildPickerResults({
+      query: "Mueller",
+      hintsOn: false,
+      validEntities: [],
+      extraEntities: ranked,
+    });
+    assert.ok(listed.some((entity) => entity.id === "prod-egon-muller"));
   });
 
   it("lists the validator set for every cell of sampled boards", () => {

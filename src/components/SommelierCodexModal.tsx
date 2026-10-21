@@ -36,7 +36,7 @@ export function SommelierCodexModal({
     return ALL_WINE_ENTITIES.filter((e) => {
       if (typeFilter !== "all" && e.entityType !== typeFilter) return false;
       if (activeClue && !activeClue.predicate(e)) return false;
-      return entityMatchesSearch(e, query, locale);
+      return entityMatchesSearch(e, query, locale, "full");
     });
   }, [query, typeFilter, activeClue, locale]);
 
