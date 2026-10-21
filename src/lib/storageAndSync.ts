@@ -57,30 +57,23 @@ export function computeSommelierRank(perfectGrids: number, gamesWon: number): {
   const xp = perfectGrids * 25 + gamesWon * 10;
   if (xp >= 250) {
     return {
-      sommelierRank: "Grand Master Sommelier (CMS IV)",
+      sommelierRank: "Master Sommelier",
       nextRank: "Max Rank Achieved",
       rankProgressPct: 100,
     };
   }
   if (xp >= 120) {
     return {
-      sommelierRank: "Master of Wine (MW)",
-      nextRank: "Grand Master Sommelier",
+      sommelierRank: "Advanced Sommelier",
+      nextRank: "Master Sommelier",
       rankProgressPct: Math.min(99, Math.round(((xp - 120) / 130) * 100)),
-    };
-  }
-  if (xp >= 60) {
-    return {
-      sommelierRank: "WSET Level 4 Diploma",
-      nextRank: "Master of Wine (MW)",
-      rankProgressPct: Math.min(99, Math.round(((xp - 60) / 60) * 100)),
     };
   }
   if (xp >= 20) {
     return {
       sommelierRank: "Certified Sommelier",
-      nextRank: "WSET Level 4 Diploma",
-      rankProgressPct: Math.min(99, Math.round(((xp - 20) / 40) * 100)),
+      nextRank: "Advanced Sommelier",
+      rankProgressPct: Math.min(99, Math.round(((xp - 20) / 100) * 100)),
     };
   }
   return {

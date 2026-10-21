@@ -1,4 +1,29 @@
-import { ClueDefinition } from "@/types/wine";
+import { ClueDefinition, WineEntity } from "@/types/wine";
+
+/** Flagship country, historical origin, and other countries where the entity is defining. */
+export function entityCountries(entity: WineEntity): string[] {
+  return [entity.country, ...(entity.originCountries ?? []), ...(entity.alsoCountries ?? [])];
+}
+
+/** Flagship region plus other regions where the entity is important. */
+export function entityRegions(entity: WineEntity): string[] {
+  return [entity.macroRegion, ...(entity.alsoRegions ?? [])];
+}
+
+function inCountry(entity: WineEntity, ...names: string[]): boolean {
+  const countries = entityCountries(entity);
+  return names.some((name) => countries.includes(name));
+}
+
+function inRegion(entity: WineEntity, ...names: string[]): boolean {
+  const regions = entityRegions(entity);
+  return names.some((name) => regions.includes(name));
+}
+
+/** Appellation law and cru rank belong to places and estates, not to a grape. */
+function isClassifiedPlace(entity: WineEntity): boolean {
+  return entity.entityType !== "grape";
+}
 
 export const CLUE_CATALOG: ClueDefinition[] = [
   // ==========================================================================
@@ -10,9 +35,9 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     shortLabel: "France",
     category: "geography",
     difficulty: "wset2",
-    tooltip: "Appellations, grape varieties, or estates rooted in France.",
+    tooltip: "Flagship country, historical origin, or a defining home in France.",
     iconName: "Globe",
-    predicate: (e) => e.country === "France",
+    predicate: (e) => inCountry(e, "France"),
   },
   {
     id: "geo-italy",
@@ -22,7 +47,7 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     difficulty: "wset2",
     tooltip: "Appellations, grape varieties, or estates rooted in Italy.",
     iconName: "Globe",
-    predicate: (e) => e.country === "Italy",
+    predicate: (e) => inCountry(e, "Italy"),
   },
   {
     id: "geo-spain",
@@ -32,7 +57,7 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     difficulty: "wset2",
     tooltip: "Appellations, grape varieties, or estates rooted in Spain.",
     iconName: "Globe",
-    predicate: (e) => e.country === "Spain",
+    predicate: (e) => inCountry(e, "Spain"),
   },
   {
     id: "geo-iberia",
@@ -42,7 +67,7 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     difficulty: "wset2",
     tooltip: "Located in or native to Spain or Portugal (including Portuguese islands).",
     iconName: "Compass",
-    predicate: (e) => e.country === "Spain" || e.country === "Portugal",
+    predicate: (e) => inCountry(e, "Spain", "Portugal"),
   },
   {
     id: "geo-germanic",
@@ -52,7 +77,7 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     difficulty: "wset2",
     tooltip: "Rooted in Germany, Austria, or Hungary.",
     iconName: "Mountain",
-    predicate: (e) => ["Germany", "Austria", "Hungary"].includes(e.country),
+    predicate: (e) => inCountry(e, "Germany", "Austria", "Hungary"),
   },
   {
     id: "geo-usa",
@@ -62,7 +87,7 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     difficulty: "wset2",
     tooltip: "American AVAs, benchmark estates, or flagship varieties.",
     iconName: "Flag",
-    predicate: (e) => e.country === "United States",
+    predicate: (e) => inCountry(e, "United States"),
   },
   {
     id: "geo-oceania",
@@ -72,7 +97,7 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     difficulty: "wset2",
     tooltip: "Located in Australia or New Zealand.",
     iconName: "Sun",
-    predicate: (e) => e.country === "Australia" || e.country === "New Zealand",
+    predicate: (e) => inCountry(e, "Australia", "New Zealand"),
   },
   {
     id: "geo-south-america",
@@ -82,7 +107,7 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     difficulty: "wset2",
     tooltip: "Located in or signature to Argentina or Chile.",
     iconName: "Mountain",
-    predicate: (e) => e.country === "Argentina" || e.country === "Chile",
+    predicate: (e) => inCountry(e, "Argentina", "Chile"),
   },
   {
     id: "geo-old-world",
@@ -144,9 +169,9 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     shortLabel: "Bordeaux",
     category: "region",
     difficulty: "wset2",
-    tooltip: "Left Bank, Right Bank, Graves/Sauternes, or native Bordeaux grape/château.",
+    tooltip: "Left Bank, Right Bank, Graves/Sauternes, or a grape that is important in Bordeaux.",
     iconName: "Castle",
-    predicate: (e) => e.macroRegion === "Bordeaux",
+    predicate: (e) => inRegion(e, "Bordeaux"),
   },
   {
     id: "reg-burgundy-champagne",
@@ -156,7 +181,7 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     difficulty: "wset2",
     tooltip: "Côte d'Or, Chablis, Beaujolais, or Champagne.",
     iconName: "Wine",
-    predicate: (e) => e.macroRegion === "Burgundy" || e.macroRegion === "Champagne",
+    predicate: (e) => inRegion(e, "Burgundy", "Champagne"),
   },
   {
     id: "reg-rhone-provence",
@@ -166,7 +191,7 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     difficulty: "wset2",
     tooltip: "Northern Rhône, Southern Rhône, Provence, or Roussillon.",
     iconName: "Sun",
-    predicate: (e) => ["Rhône Valley", "Provence", "Roussillon"].includes(e.macroRegion),
+    predicate: (e) => inRegion(e, "Rhône Valley", "Provence", "Roussillon"),
   },
   {
     id: "reg-loire",
@@ -174,9 +199,9 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     shortLabel: "Loire Valley",
     category: "region",
     difficulty: "wset3",
-    tooltip: "Pay Nantais, Anjou-Saumur, Touraine, or Central Vineyards.",
+    tooltip: "Pays Nantais, Anjou-Saumur, Touraine, or Central Vineyards.",
     iconName: "Waves",
-    predicate: (e) => e.macroRegion === "Loire Valley",
+    predicate: (e) => inRegion(e, "Loire Valley"),
   },
   {
     id: "reg-piedmont-tuscany",
@@ -186,7 +211,7 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     difficulty: "wset2",
     tooltip: "Italy's two most celebrated fine-wine regions.",
     iconName: "Award",
-    predicate: (e) => e.macroRegion === "Piedmont" || e.macroRegion === "Tuscany",
+    predicate: (e) => inRegion(e, "Piedmont", "Tuscany"),
   },
 
   // ==========================================================================
@@ -200,7 +225,7 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     difficulty: "wset3",
     tooltip: "Regulated under France's Appellation d'Origine Contrôlée system.",
     iconName: "ShieldCheck",
-    predicate: (e) => e.classifications.includes("AOC"),
+    predicate: (e) => isClassifiedPlace(e) && e.classifications.includes("AOC"),
   },
   {
     id: "cls-docg",
@@ -210,7 +235,7 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     difficulty: "wset3",
     tooltip: "Italy's highest legal wine classification tier requiring ministry tasting and numbered neck bands.",
     iconName: "Award",
-    predicate: (e) => e.classifications.includes("DOCG"),
+    predicate: (e) => isClassifiedPlace(e) && e.classifications.includes("DOCG"),
   },
   {
     id: "cls-grand-cru",
@@ -221,7 +246,8 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     tooltip: "Features an official Grand Cru, 1855 First Growth, or Gran Vinya Classificada status.",
     iconName: "Crown",
     predicate: (e) =>
-      e.classifications.includes("Grand_Cru") || e.classifications.includes("First_Growth_1855"),
+      isClassifiedPlace(e) &&
+      (e.classifications.includes("Grand_Cru") || e.classifications.includes("First_Growth_1855")),
   },
   {
     id: "cls-1855",
@@ -229,9 +255,12 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     shortLabel: "1855 Classification",
     category: "classification",
     difficulty: "wset3",
-    tooltip: "Part of Napoleon III's historic 1855 Classification of the Médoc and Sauternes.",
+    tooltip: "An 1855 classed growth, or a Médoc or Sauternes appellation that contains one (Margaux, Saint-Julien, Pauillac, Saint-Estèphe, Sauternes).",
     iconName: "Crown",
-    predicate: (e) => e.classifications.includes("First_Growth_1855"),
+    predicate: (e) =>
+      isClassifiedPlace(e) &&
+      (e.classifications.includes("First_Growth_1855") ||
+        e.classifications.includes("Classed_Growth_1855")),
   },
   {
     id: "cls-doca-pdo",
@@ -239,9 +268,12 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     shortLabel: "DOCa / DO / DOC",
     category: "classification",
     difficulty: "wset3",
-    tooltip: "Protected Iberian or European Denominación de Origen / DOC.",
+    tooltip: "Spanish DOCa or DO, or Portuguese DOC. Other countries' PDO laws do not count.",
     iconName: "ShieldCheck",
-    predicate: (e) => e.classifications.includes("DOCa") || e.classifications.includes("PDO_DO"),
+    predicate: (e) =>
+      isClassifiedPlace(e) &&
+      inCountry(e, "Spain", "Portugal") &&
+      (e.classifications.includes("DOCa") || e.classifications.includes("PDO_DO")),
   },
   {
     id: "cls-new-world-ava-gi",
@@ -251,7 +283,10 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     difficulty: "wset3",
     tooltip: "American Viticultural Area (AVA) or Geographical Indication (GI / Wine of Origin).",
     iconName: "MapPin",
-    predicate: (e) => e.classifications.includes("AVA") || e.classifications.includes("GI"),
+    predicate: (e) =>
+      isClassifiedPlace(e) &&
+      e.world === "New World" &&
+      (e.classifications.includes("AVA") || e.classifications.includes("GI")),
   },
 
   // ==========================================================================
@@ -284,7 +319,7 @@ export const CLUE_CATALOG: ClueDefinition[] = [
       e.soils.includes("kimmeridgian_marl") ||
       e.soils.includes("tuffeau") ||
       e.soils.includes("albariza") ||
-      (e.soils.includes("limestone_chalk") && ["Champagne", "Burgundy", "Loire Valley"].includes(e.macroRegion)),
+      (e.soils.includes("limestone_chalk") && inRegion(e, "Champagne", "Burgundy", "Loire Valley")),
   },
   {
     id: "soil-volcanic",
@@ -378,7 +413,7 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     difficulty: "wset3",
     tooltip: "Elevated mountain or plateau vineyards with intense UV light and cool nights (Mendoza, Salta, Ribera del Duero, Etna, Priorat).",
     iconName: "Mountain",
-    predicate: (e) => e.climates.includes("high_altitude") || e.climates.includes("alpine_foothills"),
+    predicate: (e) => e.climates.includes("high_altitude"),
   },
   {
     id: "clim-heroic-slopes",
@@ -560,7 +595,7 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     shortLabel: "Solera / Flor Yeast",
     category: "vinification",
     difficulty: "master_somm",
-    tooltip: "Aged under a living film of yeast (Jerez, Château-Chalon) or via a multi-tier Solera system (Sherry, Selosse, Vega Sicilia).",
+    tooltip: "Aged under a living film of yeast (Jerez, Château-Chalon) or via a multi-tier Solera system (Sherry, Selosse).",
     iconName: "Infinity",
     predicate: (e) => e.vinification.includes("solera_system") || e.vinification.includes("flor_yeast"),
   },
@@ -703,9 +738,9 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     tooltip: "Rooted in native Italian (Nebbiolo, Sangiovese, Corvina, Nerello, Aglianico) or Iberian (Tempranillo, Albariño, Touriga, Palomino) grapes.",
     iconName: "Sprout",
     predicate: (e) =>
-      e.varietalTraits.includes("italian_indigenous") ||
-      e.varietalTraits.includes("iberian_indigenous") ||
-      e.classifications.includes("Autochthonous_Grape"),
+      inCountry(e, "Italy", "Spain", "Portugal") &&
+      (e.varietalTraits.includes("italian_indigenous") ||
+        e.varietalTraits.includes("iberian_indigenous")),
   },
   {
     id: "var-single-varietal",
@@ -723,9 +758,9 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     shortLabel: "Classic Blend",
     category: "varietal",
     difficulty: "wset2",
-    tooltip: "Celebrated for harmonious multi-grape blends (Bordeaux, Champagne, Châteauneuf-du-Pape, Rioja, Amarone, Port).",
+    tooltip: "A region or estate celebrated for multi-grape blends (Bordeaux, Champagne, Châteauneuf-du-Pape, Rioja, Amarone, Port). A single grape does not qualify.",
     iconName: "GitMerge",
-    predicate: (e) => e.varietalTraits.includes("multi_blend_tradition"),
+    predicate: (e) => e.entityType !== "grape" && e.varietalTraits.includes("multi_blend_tradition"),
   },
   {
     id: "var-thick-skin-late",
@@ -733,7 +768,7 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     shortLabel: "Thick-Skin Late Ripener",
     category: "varietal",
     difficulty: "master_somm",
-    tooltip: "High skin-to-juice ratio requiring a long growing season (Cabernet Sauvignon, Nebbiolo, Sangiovese, Syrah, Mourvèdre, Aglianico, Touriga).",
+    tooltip: "High skin-to-juice ratio requiring a long growing season (Cabernet Sauvignon, Nebbiolo, Syrah, Mourvèdre, Aglianico, Touriga).",
     iconName: "Shield",
     predicate: (e) => e.varietalTraits.includes("thick_skin_late_ripening"),
   },
@@ -814,7 +849,7 @@ export const CLUE_CATALOG: ClueDefinition[] = [
     shortLabel: "UNESCO / Monastic",
     category: "heritage",
     difficulty: "wset3",
-    tooltip: "Inscribed by UNESCO or mapped out by medieval monks (Burgundy Climats, Champagne, Saint-Émilion, Langhe, Douro, Tokaj, Wachau).",
+    tooltip: "UNESCO landscape (Côte d'Or Climats, Champagne, Saint-Émilion, Langhe, Douro, Tokaj, Wachau — not Chablis) or a monastic Cistercian/Benedictine origin.",
     iconName: "Landmark",
     predicate: (e) => e.heritage.includes("unesco_landscape") || e.heritage.includes("monastic_origin"),
   },

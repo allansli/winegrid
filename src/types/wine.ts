@@ -131,6 +131,7 @@ export type ClassificationTier =
   | "PDO_DO"
   | "Grand_Cru"
   | "First_Growth_1855"
+  | "Classed_Growth_1855"
   | "Super_Tuscan"
   | "Noble_Grape"
   | "Autochthonous_Grape";
@@ -143,6 +144,15 @@ export interface WineEntity {
   country: string;
   countryCode: string; // ISO-2 for flag display
   macroRegion: string;
+  /**
+   * Historical origin when it is not the flagship country printed on the card.
+   * Country clues match the flagship, this list, and `alsoCountries`.
+   */
+  originCountries?: string[];
+  /** Other countries where the entity is defining enough to satisfy a country clue. */
+  alsoCountries?: string[];
+  /** Other macro-regions where the entity is important enough to satisfy a region clue. */
+  alsoRegions?: string[];
   subRegion?: string;
   world: "Old World" | "New World";
   hemisphere: "Northern" | "Southern";
