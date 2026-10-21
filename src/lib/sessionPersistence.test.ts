@@ -66,11 +66,13 @@ describe("session persistence", () => {
       missesUsed: 1,
       economyVersion: 2,
       isRevealed: false,
+      clueHash: "abc123",
       run,
     });
     const loaded = readResumeSnapshot(storage, "infinite");
     assert.equal(loaded?.missesUsed, 1);
     assert.equal(loaded?.cells.length, 9);
+    assert.equal(loaded?.clueHash, "abc123");
     assert.equal(loaded?.run?.seed, run.seed);
   });
 });
