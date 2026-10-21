@@ -826,37 +826,31 @@ export function WineGridGame() {
                     type="button"
                     disabled={isCompleted}
                     onClick={() => setActiveCellIndex(cellIndex)}
-                    className="group min-h-[118px] sm:min-h-[142px] rounded-2xl bg-white hover:bg-wine-50/30 border border-slate-200/90 hover:border-wine-300 p-3 sm:p-4 flex flex-col items-center justify-between text-center transition-all duration-200 shadow-soft hover:shadow-card hover:-translate-y-0.5 disabled:opacity-50"
+                    className="group min-h-[118px] sm:min-h-[142px] rounded-2xl bg-white hover:bg-slate-50/80 border border-slate-200/90 hover:border-slate-300 p-3 sm:p-4 flex flex-col items-center justify-between text-center transition-all duration-200 shadow-soft hover:shadow-card hover:-translate-y-0.5 disabled:opacity-50"
                   >
-                    <div className="text-[10px] font-medium text-slate-400 group-hover:text-slate-600">
-                      Accepts
+                    <div className="text-[11px] font-semibold text-slate-400 group-hover:text-slate-600 transition">
+                      {cell?.validEntityIds.length ?? 0} possible
                     </div>
 
-                    <div className="w-9 h-9 rounded-full bg-slate-50 group-hover:bg-wine-100/80 border border-slate-200/70 group-hover:border-wine-200 flex items-center justify-center transition">
-                      <Plus className="w-4 h-4 text-slate-400 group-hover:text-wine-600 transition" />
+                    <div className="w-9 h-9 rounded-full bg-slate-50 group-hover:bg-slate-900 border border-slate-200/80 group-hover:border-slate-900 flex items-center justify-center transition">
+                      <Plus className="w-4 h-4 text-slate-400 group-hover:text-white transition" />
                     </div>
 
-                    {/* Accepted Answer Type Badges */}
+                    {/* Neutral Gray Accepted Answer Type Badges */}
                     <div className="flex flex-wrap items-center justify-center gap-1 w-full">
                       {acceptedTypes.map((t) => (
                         <span
                           key={t}
-                          className={`inline-flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[10px] font-semibold border ${
-                            t === "appellation"
-                              ? "bg-rose-50/90 text-rose-700 border-rose-200/80"
-                              : t === "grape"
-                              ? "bg-emerald-50/90 text-emerald-700 border-emerald-200/80"
-                              : "bg-amber-50/90 text-amber-800 border-amber-200/80"
-                          }`}
+                          className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium bg-slate-100 text-slate-600 border border-slate-200/80"
                         >
                           {t === "appellation" && (
-                            <Wine className="w-2.5 h-2.5 shrink-0" />
+                            <Wine className="w-2.5 h-2.5 text-slate-500 shrink-0" />
                           )}
                           {t === "grape" && (
-                            <Grape className="w-2.5 h-2.5 shrink-0" />
+                            <Grape className="w-2.5 h-2.5 text-slate-500 shrink-0" />
                           )}
                           {t === "producer" && (
-                            <Castle className="w-2.5 h-2.5 shrink-0" />
+                            <Castle className="w-2.5 h-2.5 text-slate-500 shrink-0" />
                           )}
                           {formatEntityTypeLabel(t)}
                         </span>
@@ -939,6 +933,7 @@ export function WineGridGame() {
           colClue={board.colClues[cells[activeCellIndex].col]}
           entityFilter={board.entityFilter}
           acceptedTypes={getCellAcceptedTypes(cells[activeCellIndex])}
+          validCount={cells[activeCellIndex]?.validEntityIds.length ?? 0}
           usedEntityIds={usedEntityIds}
           onSelectEntity={handleSelectEntity}
         />

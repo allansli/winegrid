@@ -17,6 +17,7 @@ interface EntitySearchModalProps {
   colClue: ClueDefinition;
   entityFilter: EntityFilterMode;
   acceptedTypes: WineEntityType[];
+  validCount: number;
   usedEntityIds: Set<string>;
   onSelectEntity: (entity: WineEntity) => void;
 }
@@ -34,6 +35,7 @@ export function EntitySearchModal({
   colClue,
   entityFilter,
   acceptedTypes,
+  validCount,
   usedEntityIds,
   onSelectEntity,
 }: EntitySearchModalProps) {
@@ -55,7 +57,6 @@ export function EntitySearchModal({
 
   const results = useMemo(() => {
     const raw = searchWineEntities(query, activeTypeTab, usedEntityIds);
-    // Filter to only entity types that are accepted in this cell
     return raw.filter((e) => acceptedTypes.includes(e.entityType));
   }, [query, activeTypeTab, usedEntityIds, acceptedTypes]);
 
@@ -86,20 +87,20 @@ export function EntitySearchModal({
     switch (type) {
       case "appellation":
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 border border-rose-200/80 px-2.5 py-0.5 text-[11px] font-medium text-rose-700">
-            <Wine className="w-3 h-3" /> Region
+          <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 border border-slate-200/90 px-2.5 py-0.5 text-[11px] font-medium text-slate-600">
+            <Wine className="w-3 h-3 text-slate-500" /> Region
           </span>
         );
       case "grape":
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 text-[11px] font-medium text-emerald-700">
-            <Grape className="w-3 h-3" /> Grape
+          <span className="inline-flex items-center gap-1 rounded-full bg-zinc-100 border border-zinc-200/90 px-2.5 py-0.5 text-[11px] font-medium text-zinc-700">
+            <Grape className="w-3 h-3 text-zinc-500" /> Grape
           </span>
         );
       case "producer":
         return (
-          <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 border border-amber-200/80 px-2.5 py-0.5 text-[11px] font-medium text-amber-800">
-            <Castle className="w-3 h-3" /> Producer
+          <span className="inline-flex items-center gap-1 rounded-full bg-stone-100 border border-stone-200/90 px-2.5 py-0.5 text-[11px] font-medium text-stone-700">
+            <Castle className="w-3 h-3 text-stone-500" /> Producer
           </span>
         );
     }
@@ -118,24 +119,24 @@ export function EntitySearchModal({
         {/* Clean Intersection Header */}
         <div className="bg-slate-50/80 px-6 py-4 border-b border-slate-200/70">
           <div className="flex items-center justify-between gap-2 mb-3">
-            <div className="flex items-center gap-2 flex-wrap">
-              <span className="text-[11px] uppercase tracking-wider text-slate-400 font-semibold">
-                Accepted Answer Types:
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <span className="text-[11px] font-semibold text-slate-500 mr-1">
+                {validCount} possible answers &bull; Accepts:
               </span>
               {acceptedTypes.map((t) => (
                 <span
                   key={t}
-                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-semibold border ${
-                    t === "appellation"
-                      ? "bg-rose-50 text-rose-700 border-rose-200"
-                      : t === "grape"
-                      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                      : "bg-amber-50 text-amber-800 border-amber-200"
-                  }`}
+                  className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-medium bg-slate-200/70 text-slate-700 border border-slate-300/80"
                 >
-                  {t === "appellation" && <Wine className="w-3 h-3" />}
-                  {t === "grape" && <Grape className="w-3 h-3" />}
-                  {t === "producer" && <Castle className="w-3 h-3" />}
+                  {t === "appellation" && (
+                    <Wine className="w-3 h-3 text-slate-500" />
+                  )}
+                  {t === "grape" && (
+                    <Grape className="w-3 h-3 text-slate-500" />
+                  )}
+                  {t === "producer" && (
+                    <Castle className="w-3 h-3 text-slate-500" />
+                  )}
                   {TYPE_LABELS[t]}
                 </span>
               ))}
@@ -181,7 +182,7 @@ export function EntitySearchModal({
                   : "bg-slate-100 text-slate-600 hover:bg-slate-200/70"
               }`}
             >
-              All Accepted ({acceptedTypes.map((t) => TYPE_LABELS[t]).join(", ")})
+              All ({acceptedTypes.map((t) => TYPE_LABELS[t]).join(", ")})
             </button>
             {acceptedTypes.map((t) => (
               <button
@@ -219,7 +220,11 @@ export function EntitySearchModal({
         <div className="max-h-72 overflow-y-auto divide-y divide-slate-100">
           {results.length === 0 ? (
             <div className="py-12 text-center text-sm text-slate-400">
-              No matching {acceptedTypes.map((t) => TYPE_LABELS[t].toLowerCase()).join(" / ")} found for &ldquo;{query}&rdquo;.
+              No matching{" "}
+              {acceptedTypes
+                .map((t) => TYPE_LABELS[t].toLowerCase())
+                .join(" / ")}{" "}
+              found for &ldquo;{query}&rdquo;.
             </div>
           ) : (
             results.map((entity, idx) => {
@@ -248,7 +253,7 @@ export function EntitySearchModal({
                   <ArrowRight
                     className={`w-4 h-4 transition ${
                       isSelected
-                        ? "text-wine-600 translate-x-0.5"
+                        ? "text-slate-900 translate-x-0.5"
                         : "text-slate-300"
                     }`}
                   />
