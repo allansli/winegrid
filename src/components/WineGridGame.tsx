@@ -537,8 +537,8 @@ export function WineGridGame() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col">
       {/* Clean Minimal Big-Tech Navigation Bar */}
-      <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200/70">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-30 bg-white/85 backdrop-blur-md border-b border-slate-200/70">
+        <div className="max-w-6xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between gap-4">
           {/* Brand Logo */}
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl bg-wine-600 flex items-center justify-center shadow-sm">
@@ -633,8 +633,8 @@ export function WineGridGame() {
         </div>
       </header>
 
-      {/* Spacious Centered Main Content */}
-      <main className="flex-1 max-w-3xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-10 space-y-6">
+      {/* Spacious Wide Main Content */}
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-8 py-8 sm:py-10 space-y-6">
         {/* Unlimited / Infinite Mode Filter Bar */}
         {(mode === "unlimited" || mode === "infinite") && (
           <div className="bg-white rounded-2xl border border-slate-200/80 p-4 shadow-soft flex flex-wrap items-center justify-between gap-4">
@@ -738,27 +738,29 @@ export function WineGridGame() {
         )}
 
         {/* THE 3x3 MATRIX GRID */}
-        <div className="grid grid-cols-4 gap-3 sm:gap-4">
+        <div className="grid grid-cols-4 lg:grid-cols-[240px_1fr_1fr_1fr] gap-3 sm:gap-5">
           {/* Top-Left Corner Info */}
-          <div className="flex flex-col justify-end p-2 sm:p-4">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-wine-600">
-              {board.mode === "daily"
-                ? "Daily Grid"
-                : board.mode === "infinite"
-                ? "Infinite Mode"
-                : "Practice"}
-            </span>
-            <span className="font-display text-sm sm:text-base font-bold text-slate-800 mt-0.5">
-              {board.mode === "daily" ? todayStr : "Custom 3×3"}
-            </span>
+          <div className="rounded-3xl bg-slate-100/70 border border-slate-200/70 p-4 sm:p-6 flex flex-col justify-between">
+            <div>
+              <span className="inline-flex items-center rounded-full bg-wine-50 border border-wine-200/70 px-2.5 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-wine-700">
+                {board.mode === "daily"
+                  ? "Daily Grid"
+                  : board.mode === "infinite"
+                  ? "Infinite Mode"
+                  : "Practice"}
+              </span>
+              <div className="font-display text-base sm:text-xl font-bold text-slate-900 mt-2">
+                {board.mode === "daily" ? todayStr : "Custom 3×3"}
+              </div>
+            </div>
             {board.mode === "daily" && nextDailyCountdown && (
-              <span className="inline-flex items-center gap-1 text-[11px] font-medium text-slate-400 mt-1">
-                <Clock className="w-3 h-3 text-slate-400 shrink-0" />
-                Refreshes in{" "}
-                <span className="font-mono font-semibold text-slate-600">
+              <div className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500 mt-3 pt-3 border-t border-slate-200/70">
+                <Clock className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                <span>Next in</span>
+                <span className="font-mono font-semibold text-slate-800">
                   {nextDailyCountdown}
                 </span>
-              </span>
+              </div>
             )}
           </div>
 
@@ -766,20 +768,25 @@ export function WineGridGame() {
           {board.colClues.map((colClue) => (
             <div
               key={colClue.id}
-              className="group relative rounded-2xl bg-white border border-slate-200/80 p-3.5 sm:p-5 flex flex-col justify-between shadow-soft hover:border-slate-300 transition"
+              className="group relative rounded-3xl bg-white border border-slate-200/90 p-4 sm:p-6 flex flex-col justify-between shadow-soft hover:border-slate-300 transition"
             >
-              <div className="flex items-center justify-between gap-1">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 truncate">
+              <div className="flex items-center justify-between gap-2">
+                <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                   {colClue.category.replace("_", " ")}
                 </span>
-                <HelpCircle className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 transition shrink-0" />
+                <HelpCircle className="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition shrink-0" />
               </div>
-              <div className="font-display font-bold text-xs sm:text-base text-slate-900 mt-2 leading-snug">
-                {colClue.shortLabel}
+              <div className="mt-3">
+                <div className="font-display font-bold text-sm sm:text-lg text-slate-900 leading-snug">
+                  {colClue.shortLabel}
+                </div>
+                <p className="text-xs text-slate-500 mt-1 leading-relaxed hidden md:block">
+                  {colClue.label}
+                </p>
               </div>
 
               {/* Clean Light Tooltip */}
-              <div className="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity absolute left-1/2 -translate-x-1/2 bottom-full mb-2.5 w-60 z-40 rounded-2xl bg-slate-900 p-3.5 text-xs text-white shadow-xl">
+              <div className="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity absolute left-1/2 -translate-x-1/2 bottom-full mb-2.5 w-72 z-40 rounded-2xl bg-slate-900 p-4 text-xs text-white shadow-xl">
                 <div className="font-semibold text-rose-300 mb-1">
                   {colClue.label}
                 </div>
@@ -792,19 +799,24 @@ export function WineGridGame() {
           {board.rowClues.map((rowClue, rIdx) => (
             <React.Fragment key={rowClue.id}>
               {/* Row Header */}
-              <div className="group relative rounded-2xl bg-white border border-slate-200/80 p-3.5 sm:p-5 flex flex-col justify-between shadow-soft hover:border-slate-300 transition">
-                <div className="flex items-center justify-between gap-1">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 truncate">
+              <div className="group relative rounded-3xl bg-white border border-slate-200/90 p-4 sm:p-6 flex flex-col justify-between shadow-soft hover:border-slate-300 transition">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500">
                     {rowClue.category.replace("_", " ")}
                   </span>
-                  <HelpCircle className="w-3.5 h-3.5 text-slate-300 group-hover:text-slate-500 transition shrink-0" />
+                  <HelpCircle className="w-4 h-4 text-slate-300 group-hover:text-slate-500 transition shrink-0" />
                 </div>
-                <div className="font-display font-bold text-xs sm:text-base text-slate-900 mt-2 leading-snug">
-                  {rowClue.shortLabel}
+                <div className="mt-3">
+                  <div className="font-display font-bold text-sm sm:text-lg text-slate-900 leading-snug">
+                    {rowClue.shortLabel}
+                  </div>
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed hidden md:block">
+                    {rowClue.label}
+                  </p>
                 </div>
 
                 {/* Clean Light Tooltip */}
-                <div className="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity absolute left-0 bottom-full mb-2.5 w-60 z-40 rounded-2xl bg-slate-900 p-3.5 text-xs text-white shadow-xl">
+                <div className="pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity absolute left-0 bottom-full mb-2.5 w-72 z-40 rounded-2xl bg-slate-900 p-4 text-xs text-white shadow-xl">
                   <div className="font-semibold text-rose-300 mb-1">
                     {rowClue.label}
                   </div>
@@ -831,15 +843,15 @@ export function WineGridGame() {
                       key={cellIndex}
                       type="button"
                       onClick={() => setInspectCellIndex(cellIndex)}
-                      className="min-h-[118px] sm:min-h-[142px] rounded-2xl bg-emerald-50/70 hover:bg-emerald-50 border-2 border-emerald-500/40 p-3.5 sm:p-4 flex flex-col justify-between text-left transition-all shadow-soft"
+                      className="min-h-[140px] sm:min-h-[172px] rounded-3xl bg-emerald-50/70 hover:bg-emerald-50 border-2 border-emerald-500/40 p-4 sm:p-6 flex flex-col justify-between text-left transition-all shadow-soft"
                     >
-                      <div className="flex items-center justify-between gap-1 w-full">
-                        <span className="text-[10px] font-semibold uppercase tracking-wider text-emerald-700 truncate">
+                      <div className="flex items-center justify-between gap-2 w-full">
+                        <span className="text-[11px] font-semibold uppercase tracking-wider text-emerald-700">
                           {pickedEntity.country} &bull;{" "}
                           {formatEntityTypeLabel(pickedEntity.entityType)}
                         </span>
                         <span
-                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${getRarityPillStyle(
+                          className={`text-xs font-bold px-2.5 py-0.5 rounded-full shrink-0 ${getRarityPillStyle(
                             cell.pickedRarityPct
                           )}`}
                         >
@@ -847,16 +859,16 @@ export function WineGridGame() {
                         </span>
                       </div>
 
-                      <div className="my-1">
-                        <div className="font-display font-bold text-xs sm:text-base text-slate-900 leading-tight line-clamp-2">
+                      <div className="my-2">
+                        <div className="font-display font-bold text-sm sm:text-lg text-slate-900 leading-snug">
                           {pickedEntity.canonicalName}
                         </div>
-                        <div className="text-[11px] text-slate-500 mt-0.5 truncate hidden sm:block">
+                        <div className="text-xs text-slate-500 mt-1 hidden sm:block">
                           {pickedEntity.macroRegion}
                         </div>
                       </div>
 
-                      <div className="text-[10px] font-medium text-emerald-700">
+                      <div className="text-xs font-medium text-emerald-700">
                         View tasting note &rarr;
                       </div>
                     </button>
@@ -869,21 +881,22 @@ export function WineGridGame() {
                       key={cellIndex}
                       type="button"
                       onClick={() => setInspectCellIndex(cellIndex)}
-                      className="min-h-[118px] sm:min-h-[142px] rounded-2xl bg-amber-50/60 hover:bg-amber-50 border border-amber-300/80 p-3.5 sm:p-4 flex flex-col justify-between text-left transition-all shadow-soft"
+                      className="min-h-[140px] sm:min-h-[172px] rounded-3xl bg-amber-50/60 hover:bg-amber-50 border border-amber-300/80 p-4 sm:p-6 flex flex-col justify-between text-left transition-all shadow-soft"
                     >
-                      <span className="text-[10px] font-semibold uppercase tracking-wider text-amber-700">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-amber-700">
                         Revealed &bull;{" "}
                         {formatEntityTypeLabel(sampleSolutionEntity.entityType)}
                       </span>
-                      <div>
-                        <div className="font-display font-bold text-xs sm:text-base text-slate-900 leading-tight line-clamp-2">
+                      <div className="my-2">
+                        <div className="font-display font-bold text-sm sm:text-lg text-slate-900 leading-snug">
                           {sampleSolutionEntity.canonicalName}
                         </div>
-                        <div className="text-[11px] text-slate-500 mt-0.5 truncate">
-                          {sampleSolutionEntity.country}
+                        <div className="text-xs text-slate-500 mt-1">
+                          {sampleSolutionEntity.country} &bull;{" "}
+                          {sampleSolutionEntity.macroRegion}
                         </div>
                       </div>
-                      <span className="text-[10px] font-medium text-amber-800">
+                      <span className="text-xs font-medium text-amber-800">
                         +{cell.validEntityIds.length} valid options &rarr;
                       </span>
                     </button>
@@ -896,31 +909,31 @@ export function WineGridGame() {
                     type="button"
                     disabled={isCompleted}
                     onClick={() => setActiveCellIndex(cellIndex)}
-                    className="group min-h-[118px] sm:min-h-[142px] rounded-2xl bg-white hover:bg-slate-50/80 border border-slate-200/90 hover:border-slate-300 p-3 sm:p-4 flex flex-col items-center justify-between text-center transition-all duration-200 shadow-soft hover:shadow-card hover:-translate-y-0.5 disabled:opacity-50"
+                    className="group min-h-[140px] sm:min-h-[172px] rounded-3xl bg-white hover:bg-slate-50/70 border border-slate-200/90 hover:border-slate-300 p-4 sm:p-6 flex flex-col items-center justify-between text-center transition-all duration-200 shadow-soft hover:shadow-card hover:-translate-y-0.5 disabled:opacity-50"
                   >
-                    <div className="text-[11px] font-semibold text-slate-400 group-hover:text-slate-600 transition">
+                    <div className="text-xs font-semibold text-slate-400 group-hover:text-slate-600 transition">
                       {cell?.validEntityIds.length ?? 0} possible
                     </div>
 
-                    <div className="w-9 h-9 rounded-full bg-slate-50 group-hover:bg-slate-900 border border-slate-200/80 group-hover:border-slate-900 flex items-center justify-center transition">
-                      <Plus className="w-4 h-4 text-slate-400 group-hover:text-white transition" />
+                    <div className="w-11 h-11 rounded-full bg-slate-50 group-hover:bg-slate-900 border border-slate-200/80 group-hover:border-slate-900 flex items-center justify-center transition">
+                      <Plus className="w-5 h-5 text-slate-400 group-hover:text-white transition" />
                     </div>
 
                     {/* Neutral Gray Accepted Answer Type Badges */}
-                    <div className="flex flex-wrap items-center justify-center gap-1 w-full">
+                    <div className="flex flex-wrap items-center justify-center gap-1.5 w-full">
                       {acceptedTypes.map((t) => (
                         <span
                           key={t}
-                          className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium bg-slate-100 text-slate-600 border border-slate-200/80"
+                          className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-medium bg-slate-100 text-slate-600 border border-slate-200/80"
                         >
                           {t === "appellation" && (
-                            <Wine className="w-2.5 h-2.5 text-slate-500 shrink-0" />
+                            <Wine className="w-3 h-3 text-slate-500 shrink-0" />
                           )}
                           {t === "grape" && (
-                            <Grape className="w-2.5 h-2.5 text-slate-500 shrink-0" />
+                            <Grape className="w-3 h-3 text-slate-500 shrink-0" />
                           )}
                           {t === "producer" && (
-                            <Castle className="w-2.5 h-2.5 text-slate-500 shrink-0" />
+                            <Castle className="w-3 h-3 text-slate-500 shrink-0" />
                           )}
                           {formatEntityTypeLabel(t)}
                         </span>
