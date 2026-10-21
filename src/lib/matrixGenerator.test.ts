@@ -1,11 +1,14 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { CLUE_BY_ID } from "../data/clueCatalog";
+import { ALL_WINE_ENTITIES } from "../data/wineDatabase";
 import { DifficultyLevel, EntityFilterMode } from "../types/wine";
+import { DIFFICULTY_TUNING } from "./difficultyTuning";
 import {
   DAILY_DIFFICULTY,
   assignmentSurvivesAnyPick,
   assignmentSurvivesEverySequence,
+  clueSupportFloor,
   createPrng,
   dailySeedForDate,
   findDistinctAssignment,
@@ -67,9 +70,22 @@ function assertCellFloors(board: ReturnType<typeof generateWineGridBoard>) {
 describe("board difficulty floors", () => {
   it("keeps the easy tier on broad clues and the technical clues off it", () => {
     assert.equal(DAILY_DIFFICULTY, "wset2");
-    assert.equal(minimumValidAnswers("wset2"), 3);
-    assert.equal(minimumValidAnswers("wset3"), 3);
-    assert.equal(minimumValidAnswers("master_somm"), 2);
+    assert.equal(minimumValidAnswers("wset2"), DIFFICULTY_TUNING.wset2.minimumValidAnswers);
+    assert.equal(minimumValidAnswers("wset3"), DIFFICULTY_TUNING.wset3.minimumValidAnswers);
+    assert.equal(minimumValidAnswers("master_somm"), DIFFICULTY_TUNING.master_somm.minimumValidAnswers);
+    assert.equal(clueSupportFloor("wset2"), DIFFICULTY_TUNING.wset2.clueSupportFloor);
+    assert.equal(clueSupportFloor("wset3"), DIFFICULTY_TUNING.wset3.clueSupportFloor);
+    assert.equal(clueSupportFloor("master_somm"), DIFFICULTY_TUNING.master_somm.clueSupportFloor);
+    assert.equal(DIFFICULTY_TUNING.wset2.minimumValidAnswers, 3);
+    assert.equal(DIFFICULTY_TUNING.wset3.minimumValidAnswers, 3);
+    assert.equal(DIFFICULTY_TUNING.master_somm.minimumValidAnswers, 2);
+    assert.equal(DIFFICULTY_TUNING.wset2.clueSupportFloor, 3);
+    assert.equal(DIFFICULTY_TUNING.wset3.clueSupportFloor, 3);
+    assert.equal(DIFFICULTY_TUNING.master_somm.clueSupportFloor, 4);
+    assert.ok(
+      DIFFICULTY_TUNING.master_somm.minimumValidAnswers < DIFFICULTY_TUNING.wset2.minimumValidAnswers
+    );
+    assert.notEqual(DIFFICULTY_TUNING.master_somm.clueSupportFloor, ALL_WINE_ENTITIES.length);
     for (const id of BROAD_CLUE_IDS) {
       assert.equal(CLUE_BY_ID[id]?.difficulty, "wset2", id);
     }
