@@ -9,6 +9,9 @@ import {
 } from "@/types/wine";
 import { CLUE_CATALOG } from "@/data/clueCatalog";
 import { getEntitiesByFilter } from "@/data/wineDatabase";
+import { allowedClueDifficulties, clueSupportFloor, minimumValidAnswers } from "@/lib/difficultyTuning";
+
+export { clueSupportFloor, minimumValidAnswers };
 
 // Deterministic string hash -> 32-bit integer seed
 export function hashSeed(seedStr: string): number {
@@ -91,15 +94,10 @@ export function generateWineGridBoard(options: {
   const rand = createPrng(hashSeed(`${seed}:${difficulty}:${entityFilter}`));
   const entities: WineEntity[] = getEntitiesByFilter(entityFilter);
 
-  // Filter clues appropriate for the selected entityFilter & difficulty
-  const allowedDifficulties: Set<DifficultyLevel> =
-    difficulty === "wset2"
-      ? new Set(["wset2"])
-      : difficulty === "wset3"
-      ? new Set(["wset2", "wset3"])
-      : new Set(["wset2", "wset3", "master_somm"]);
-
+  // Floors and which clue tiers are dealt come from difficultyTuning.ts.
+  const allowedDifficulties = allowedClueDifficulties(difficulty);
   const minPerCell = minimumValidAnswers(difficulty);
+  const supportFloor = clueSupportFloor(difficulty);
 
   // Precompute matching entity IDs for each clue
   const clueMatches = new Map<string, Set<string>>();
@@ -115,11 +113,7 @@ export function generateWineGridBoard(options: {
         matchedIds.add(entity.id);
       }
     }
-    // A clue has to be able to support a whole axis. Standard and Sommelier
-    // use the cell floor. Master keeps today's wider support floor.
-    const clueSupportFloor =
-      difficulty === "master_somm" ? Math.max(4, minPerCell * 2) : minPerCell;
-    if (matchedIds.size < clueSupportFloor) return false;
+    if (matchedIds.size < supportFloor) return false;
     clueMatches.set(clue.id, matchedIds);
     return true;
   });
@@ -513,17 +507,6 @@ export function assignmentSurvivesEverySequence(cellValidIds: string[][]): boole
   }
 
   return prove((1 << n) - 1, 0n);
-}
-
-/**
- * Floors only. Standard and Sommelier stay at 3 so a cell is never a
- * one-answer trap. Master's floor of 2 is intentional, so that tier can
- * stay sharper. There is no upper cap: a broad cell is allowed.
- */
-export function minimumValidAnswers(difficulty: DifficultyLevel): number {
-  if (difficulty === "wset2" || difficulty === "wset3") return 3;
-  // Master keeps a floor of 2 on purpose.
-  return 2;
 }
 
 export const DAILY_DIFFICULTY: DifficultyLevel = "wset2";

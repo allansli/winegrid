@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "test": "node --import tsx --import ./scripts/register-paths.mjs --test src/lib/*.test.ts src/data/*.test.ts src/i18n/*.test.ts",
-    "test:matrix": "npx tsx scripts/verify-matrices.ts"
+    "test:matrix": "npx tsx scripts/verify-matrices.ts",
+    "coverage:data": "node --import tsx --import ./scripts/register-paths.mjs scripts/data-coverage.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.5.2",

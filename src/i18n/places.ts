@@ -21,6 +21,7 @@ export const COUNTRY_LABELS: Record<string, Record<Locale, string>> = {
   Chile: { en: "Chile", "pt-BR": "Chile" },
   Greece: { en: "Greece", "pt-BR": "Grécia" },
   Lebanon: { en: "Lebanon", "pt-BR": "Líbano" },
+  Croatia: { en: "Croatia", "pt-BR": "Croácia" },
 };
 
 export const REGION_LABELS: Record<string, Record<Locale, string>> = {
