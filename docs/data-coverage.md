@@ -59,25 +59,25 @@ An entity satisfies a category when at least one clue in that category matches i
 
 These are the 15 smallest non-structural populations. A filtered board can only draw answers of that type, so a pair sitting on a cell floor is what pushes that board to the minimum answer count. A pair under a clue support floor is dropped from that difficulty instead of being dealt.
 
-Floors come from `difficultyTuning.ts`: Standard and Sommelier cells 3, clue support 3. Master cells 2, clue support 4.
+Floors come from `difficultyTuning.ts`: Standard cells 5, clue support 3. Sommelier cells 3, clue support 3. Master cells 2, clue support 4.
 
 | Rank | Clue | Type | Matches | Difficulty | Why it binds |
 | ---: | --- | --- | ---: | --- | --- |
 | 1 | United States (`geo-usa`) | Producers | 2 | wset2 | below Standard support; below Master support |
 | 2 | Solera / Flor Yeast (`vin-flor-solera`) | Regions | 2 | master_somm | below Standard support; below Master support |
 | 3 | Solera / Flor Yeast (`vin-flor-solera`) | Grapes | 2 | master_somm | below Standard support; below Master support |
-| 4 | Australia / NZ (`geo-oceania`) | Producers | 3 | wset2 | at the Standard cell floor; below Master support |
-| 5 | United States (`geo-usa`) | Regions | 3 | wset2 | at the Standard cell floor; below Master support |
-| 6 | Burgundy / Champagne (`reg-burgundy-champagne`) | Grapes | 3 | wset2 | at the Standard cell floor; below Master support |
-| 7 | Loire Valley (`reg-loire`) | Grapes | 3 | wset3 | at the Standard cell floor; below Master support |
-| 8 | Piedmont / Tuscany (`reg-piedmont-tuscany`) | Grapes | 3 | wset2 | at the Standard cell floor; below Master support |
-| 9 | Sandy / Ungrafted Soil (`soil-sand-phylloxera`) | Producers | 3 | master_somm | at the Standard cell floor; below Master support |
-| 10 | Sparkling Wine (`style-sparkling`) | Grapes | 3 | wset2 | at the Standard cell floor; below Master support |
-| 11 | Thick-Skin Late Ripener (`var-thick-skin-late`) | Producers | 3 | master_somm | at the Standard cell floor; below Master support |
-| 12 | 1855 Classification (`cls-1855`) | Producers | 4 | wset3 | above the floors |
-| 13 | Italian DOCG (`cls-docg`) | Producers | 4 | wset3 | above the floors |
-| 14 | Central Europe (`geo-germanic`) | Grapes | 4 | wset2 | above the floors |
-| 15 | United States (`geo-usa`) | Grapes | 4 | wset2 | above the floors |
+| 4 | Australia / NZ (`geo-oceania`) | Producers | 3 | wset2 | below the Standard cell floor; below Master support |
+| 5 | United States (`geo-usa`) | Regions | 3 | wset2 | below the Standard cell floor; below Master support |
+| 6 | Burgundy / Champagne (`reg-burgundy-champagne`) | Grapes | 3 | wset2 | below the Standard cell floor; below Master support |
+| 7 | Loire Valley (`reg-loire`) | Grapes | 3 | wset3 | below the Standard cell floor; below Master support |
+| 8 | Piedmont / Tuscany (`reg-piedmont-tuscany`) | Grapes | 3 | wset2 | below the Standard cell floor; below Master support |
+| 9 | Sandy / Ungrafted Soil (`soil-sand-phylloxera`) | Producers | 3 | master_somm | below the Standard cell floor; below Master support |
+| 10 | Sparkling Wine (`style-sparkling`) | Grapes | 3 | wset2 | below the Standard cell floor; below Master support |
+| 11 | Thick-Skin Late Ripener (`var-thick-skin-late`) | Producers | 3 | master_somm | below the Standard cell floor; below Master support |
+| 12 | 1855 Classification (`cls-1855`) | Producers | 4 | wset3 | below the Standard cell floor |
+| 13 | Italian DOCG (`cls-docg`) | Producers | 4 | wset3 | below the Standard cell floor |
+| 14 | Central Europe (`geo-germanic`) | Grapes | 4 | wset2 | below the Standard cell floor |
+| 15 | United States (`geo-usa`) | Grapes | 4 | wset2 | below the Standard cell floor |
 
 Structural zeros are left out of this list. Entity-type clues match only their own type. Classification clues and Classic Blend exclude grapes on purpose.
 
@@ -87,46 +87,43 @@ Each difficulty is sampled with seeds coverage-0 through coverage-5 and filters 
 
 ### Standard
 
-216 cells. Minimum 3, median 7, maximum 53. 39 cells (18.1%) sit on the floor of 3.
+216 cells. Minimum 5, median 9, maximum 72. 43 cells (19.9%) sit on the floor of 5.
 
 | Answers | Cells | Share |
 | ---: | ---: | ---: |
-| 3 | 39 | 18.1% |
-| 4 | 18 | 8.3% |
-| 5 | 34 | 15.7% |
-| 6 | 12 | 5.6% |
-| 7 | 19 | 8.8% |
-| 8 | 3 | 1.4% |
-| 9 | 9 | 4.2% |
-| 10 | 10 | 4.6% |
+| 5 | 43 | 19.9% |
+| 6 | 19 | 8.8% |
+| 7 | 29 | 13.4% |
+| 8 | 8 | 3.7% |
+| 9 | 12 | 5.6% |
+| 10 | 13 | 6.0% |
 | 11 | 8 | 3.7% |
-| 12 | 10 | 4.6% |
-| 13 | 5 | 2.3% |
+| 12 | 17 | 7.9% |
+| 13 | 9 | 4.2% |
 | 14 | 4 | 1.9% |
-| 15 | 5 | 2.3% |
+| 15 | 9 | 4.2% |
 | 16 | 3 | 1.4% |
-| 17 | 1 | 0.5% |
-| 18 | 3 | 1.4% |
-| 19 | 1 | 0.5% |
-| 20 | 3 | 1.4% |
+| 17 | 7 | 3.2% |
+| 18 | 2 | 0.9% |
+| 19 | 2 | 0.9% |
+| 20 | 4 | 1.9% |
 | 21 | 2 | 0.9% |
-| 22 | 3 | 1.4% |
-| 23 | 2 | 0.9% |
-| 24 | 1 | 0.5% |
-| 25 | 3 | 1.4% |
-| 26 | 1 | 0.5% |
+| 22 | 1 | 0.5% |
+| 23 | 3 | 1.4% |
+| 24 | 2 | 0.9% |
+| 25 | 5 | 2.3% |
+| 27 | 1 | 0.5% |
 | 28 | 2 | 0.9% |
 | 30 | 2 | 0.9% |
-| 31 | 2 | 0.9% |
-| 32 | 2 | 0.9% |
-| 34 | 2 | 0.9% |
+| 32 | 1 | 0.5% |
 | 38 | 1 | 0.5% |
-| 40 | 1 | 0.5% |
 | 42 | 1 | 0.5% |
 | 44 | 1 | 0.5% |
 | 47 | 1 | 0.5% |
 | 49 | 1 | 0.5% |
 | 53 | 1 | 0.5% |
+| 67 | 1 | 0.5% |
+| 72 | 1 | 0.5% |
 
 ### Sommelier
 

@@ -8,7 +8,7 @@ import {
   WineEntityType,
 } from "@/types/wine";
 import { searchWineEntities, WINE_ENTITY_BY_ID } from "@/data/wineDatabase";
-import { originLine } from "@/i18n/places";
+import { entityOriginLine } from "@/i18n/places";
 import { displayEntityName } from "@/lib/entityName";
 import { readHintsOn, writeHintsOn } from "@/lib/hintsPreference";
 import { buildPickerResults, entityFitsCell, validEntities, validEntityIds } from "@/lib/pickerList";
@@ -59,6 +59,11 @@ export function EntitySearchModal({
   const [hintsOn, setHintsOn] = useState(() =>
     typeof window === "undefined" ? false : readHintsOn(window.localStorage)
   );
+  // Language switches re-render this modal. The saved toggle is the source
+  // of truth, so a locale change must not put the button back to off.
+  useEffect(() => {
+    setHintsOn(readHintsOn(window.localStorage));
+  }, [locale]);
   const inputRef = useRef<HTMLInputElement>(null);
   const renderedQueryRef = useRef("");
 
@@ -347,7 +352,7 @@ export function EntitySearchModal({
                     <TypeBadge type={entity.entityType} muted={!selectable} label={t(typeMessage(entity.entityType))} />
                   </div>
                   <div className="text-xs text-slate-500 mt-0.5">
-                    {originLine(entity.country, entity.macroRegion, locale, " · ")}
+                    {entityOriginLine(entity, locale, " · ")}
                     {used
                       ? ` · ${t("picker.used")}`
                       : hintsOn

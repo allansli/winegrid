@@ -128,6 +128,26 @@ export function originLine(
   return `${placeLabel(country, locale, "country")}${separator}${placeLabel(region, locale, "region")}`;
 }
 
+/**
+ * The printed region. `displayRegion` is a label only: it is not translated
+ * and it is not a region-membership clue.
+ */
+export function entityRegionLabel(
+  entity: { macroRegion: string; displayRegion?: string },
+  locale: Locale
+): string {
+  if (entity.displayRegion) return entity.displayRegion;
+  return placeLabel(entity.macroRegion, locale, "region");
+}
+
+export function entityOriginLine(
+  entity: { country: string; macroRegion: string; displayRegion?: string },
+  locale: Locale,
+  separator = " • "
+): string {
+  return `${placeLabel(entity.country, locale, "country")}${separator}${entityRegionLabel(entity, locale)}`;
+}
+
 /** English name, the pt-BR label, and extra spellings a player might type. */
 export function placeSearchLabels(value: string, kind: "country" | "region"): string[] {
   const labels = [value, placeLabel(value, "pt-BR", kind)];

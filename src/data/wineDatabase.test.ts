@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  codexClueMatcher,
   entityMatchesSearch,
   fieldsMatchSearch,
   filterCodexEntities,
@@ -143,15 +144,53 @@ describe("cell-scoped entity search", () => {
     assert.equal(results.length, 0);
   });
 
-  it("ranks País ahead of note-only hits in the Codex", () => {
+  it("searches the Codex by name and alias, not notes or place", () => {
     const ranked = filterCodexEntities(ALL_WINE_ENTITIES, { query: "País", locale: "pt-BR" });
-    const indexOf = (id: string) => ranked.findIndex((entity) => entity.id === id);
-    const pais = indexOf("grape-pais");
-    assert.equal(ranked[0]?.id, "grape-pais");
-    assert.ok(pais >= 0);
+    assert.deepEqual(
+      ranked.map((entity) => entity.id),
+      ["grape-pais"]
+    );
     for (const id of ["grape-tempranillo", "app-itata", "grape-torrontes"]) {
-      const other = indexOf(id);
-      assert.ok(other > pais, `${id} at ${other}, País at ${pais}`);
+      assert.equal(
+        ranked.some((entity) => entity.id === id),
+        false,
+        id
+      );
     }
+    assert.equal(
+      filterCodexEntities(ALL_WINE_ENTITIES, { query: "Tinta del País" }).some(
+        (entity) => entity.id === "grape-tempranillo"
+      ),
+      true
+    );
+    for (const [query, id] of [
+      ["Donnhoff", "prod-donnhoff"],
+      ["Prum", "prod-jj-prum"],
+      ["Coulee", "prod-coulee-de-serrant"],
+    ] as const) {
+      assert.equal(
+        filterCodexEntities(ALL_WINE_ENTITIES, { query }).some((entity) => entity.id === id),
+        true,
+        query
+      );
+    }
+  });
+
+  it("matches Almaviva and Don Melchor in the Codex Mediterranean filter", () => {
+    assert.equal(codexClueMatcher("all"), undefined);
+    const matchesClue = codexClueMatcher("clim-mediterranean");
+    assert.ok(matchesClue);
+    const filtered = filterCodexEntities(ALL_WINE_ENTITIES, { query: "", matchesClue });
+    const ids = filtered.map((entity) => entity.id);
+    assert.equal(ids.includes("prod-almaviva"), true);
+    assert.equal(ids.includes("prod-don-melchor"), true);
+    assert.deepEqual(
+      filterCodexEntities(ALL_WINE_ENTITIES, { query: "Almaviva", matchesClue }).map((entity) => entity.id),
+      ["prod-almaviva"]
+    );
+    assert.deepEqual(
+      filterCodexEntities(ALL_WINE_ENTITIES, { query: "Don Melchor", matchesClue }).map((entity) => entity.id),
+      ["prod-don-melchor"]
+    );
   });
 });

@@ -8,10 +8,12 @@ import { DifficultyLevel } from "@/types/wine";
  * lower Master's floor or raise Standard's. A larger catalog can only add
  * legal answers above the floor. There is no upper cap.
  *
- * Standard and Sommelier stay easy: every cell has at least 3 answers, and
- * a clue must match at least 3 entities in the active filter before it is
- * dealt. Master stays hard: a cell may have 2 answers, master-only clues
- * stay in the pool, and a clue still needs 4 matches before it is dealt.
+ * Standard is the easy tier: every cell has at least 5 answers. A floor of
+ * 6 cannot build a grapes-only board. A clue must still match at least 3
+ * entities in the active filter before it is dealt. Sommelier stays at 3
+ * answers and a support floor of 3. Master stays
+ * hard: a cell may have 2 answers, master-only clues stay in the pool, and
+ * a clue still needs 4 matches before it is dealt.
  */
 export interface DifficultyTuning {
   id: DifficultyLevel;
@@ -25,7 +27,7 @@ export const DIFFICULTY_TUNING: Record<DifficultyLevel, DifficultyTuning> = {
   wset2: {
     id: "wset2",
     name: "Standard",
-    minimumValidAnswers: 3,
+    minimumValidAnswers: 5,
     clueSupportFloor: 3,
     clueDifficulties: ["wset2"],
   },

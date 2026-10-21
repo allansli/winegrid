@@ -134,6 +134,7 @@ function main() {
       primaryGrapes: e.primaryGrapes,
       bottleShapes: e.bottleShapes,
       heritage: e.heritage,
+      ...(e.displayRegion ? { displayRegion: e.displayRegion } : {}),
     });
     return `  ('${escapeSql(e.id)}', '${escapeSql(e.name)}', '${escapeSql(e.canonicalName)}', '${escapeSql(e.entityType)}', '${escapeSql(e.country)}', '${escapeSql(e.macroRegion)}', ${
       e.subRegion ? `'${escapeSql(e.subRegion)}'` : "null"

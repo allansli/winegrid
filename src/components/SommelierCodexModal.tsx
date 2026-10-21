@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { ALL_WINE_ENTITIES, filterCodexEntities } from "@/data/wineDatabase";
+import { ALL_WINE_ENTITIES, codexClueMatcher, filterCodexEntities } from "@/data/wineDatabase";
 import { displayEntityName } from "@/lib/entityName";
 import { localizedNote } from "@/i18n/notesPt";
 import { alsoTraditionalLine } from "@/data/alsoTraditional";
-import { originLine } from "@/i18n/places";
+import { entityOriginLine } from "@/i18n/places";
 import { CLUE_CATALOG } from "@/data/clueCatalog";
 import { EntityFilterMode } from "@/types/wine";
 import { ModalFrame } from "./ModalFrame";
@@ -29,19 +29,16 @@ export function SommelierCodexModal({
   const [selectedClueId, setSelectedClueId] = useState<string>("all");
   const searchRef = useRef<HTMLInputElement>(null);
 
-  const activeClue = useMemo(
-    () => CLUE_CATALOG.find((c) => c.id === selectedClueId) || null,
-    [selectedClueId]
-  );
+  const matchesClue = useMemo(() => codexClueMatcher(selectedClueId), [selectedClueId]);
 
   const filteredEntities = useMemo(() => {
     return filterCodexEntities(ALL_WINE_ENTITIES, {
       query,
       locale,
       type: typeFilter,
-      matchesClue: activeClue ? (entity) => activeClue.predicate(entity) : undefined,
+      matchesClue,
     });
-  }, [query, typeFilter, activeClue, locale]);
+  }, [query, typeFilter, matchesClue, locale]);
 
   return (
     <ModalFrame
@@ -132,7 +129,7 @@ export function SommelierCodexModal({
                       {displayEntityName(entity.name, entity.entityType)}
                     </h3>
                     <div className="text-xs text-slate-500 mt-0.5">
-                      {originLine(entity.country, entity.macroRegion, locale)}
+                      {entityOriginLine(entity, locale)}
                     </div>
                     {alsoTraditionalLine(entity, locale) && (
                       <p className="text-xs text-slate-500 mt-1 leading-snug">
