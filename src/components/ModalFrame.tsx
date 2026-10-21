@@ -33,7 +33,7 @@ export function ModalFrame({
   children,
   ariaLabel,
   panelClassName,
-  overlayClassName = "fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 backdrop-blur-sm p-4",
+  overlayClassName = "winegrid-modal-safe fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 backdrop-blur-sm",
   initialFocusRef,
 }: ModalFrameProps) {
   const panelRef = useRef<HTMLDivElement>(null);

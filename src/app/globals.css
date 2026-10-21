@@ -11,6 +11,23 @@ body {
   color: #0f172a;
   overflow-x: hidden;
   -webkit-tap-highlight-color: transparent;
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+.winegrid-safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.winegrid-safe-bottom {
+  margin-bottom: env(safe-area-inset-bottom);
+}
+
+.winegrid-modal-safe {
+  padding-top: max(0.75rem, env(safe-area-inset-top));
+  padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
+  padding-left: max(0.75rem, env(safe-area-inset-left));
+  padding-right: max(0.75rem, env(safe-area-inset-right));
 }
 
 /* ============================================================================

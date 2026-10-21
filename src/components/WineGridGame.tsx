@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import confetti from "canvas-confetti";
 import {
+  ClueDefinition,
   DifficultyLevel,
   EntityFilterMode,
   GameMode,
@@ -11,8 +12,18 @@ import {
   WineEntity,
   WineEntityType,
 } from "@/types/wine";
+import { useI18n } from "@/i18n/I18nProvider";
+import { localizedClue } from "@/i18n/clues";
+import { MessageKey } from "@/i18n/messages";
+import { readDailyStreak, recordDailyResult, writeDailyStreak, EMPTY_DAILY_STREAK } from "@/lib/dailyStreak";
+import { leaderboard } from "@/lib/leaderboard";
+import { buildShareText, deliverShareText, shareCellForPick } from "@/lib/shareScore";
 import { WINE_ENTITY_BY_ID } from "@/data/wineDatabase";
-import { generateWineGridBoard } from "@/lib/matrixGenerator";
+import {
+  DAILY_DIFFICULTY,
+  generateDailyBoard,
+  generateWineGridBoard,
+} from "@/lib/matrixGenerator";
 import {
   ECONOMY_VERSION,
   MISS_BUDGET,
@@ -85,31 +96,40 @@ type PendingBoardChange =
 
 const HOW_TO_PLAY_KEY = "winegrid_howto_seen_v1";
 
-function difficultyLabel(difficulty: DifficultyLevel): string {
-  if (difficulty === "wset2") return "Standard";
-  if (difficulty === "master_somm") return "Master";
-  return "Sommelier";
+function difficultyKey(difficulty: DifficultyLevel): MessageKey {
+  if (difficulty === "wset2") return "difficulty.standard";
+  if (difficulty === "master_somm") return "difficulty.master";
+  return "difficulty.sommelier";
 }
 
-function filterLabel(filter: EntityFilterMode): string {
-  if (filter === "appellation") return "Regions";
-  if (filter === "grape") return "Grapes";
-  if (filter === "producer") return "Estates";
-  return "All types";
+function filterKey(filter: EntityFilterMode): MessageKey {
+  if (filter === "appellation") return "filter.regions";
+  if (filter === "grape") return "filter.grapes";
+  if (filter === "producer") return "filter.estates";
+  return "filter.allTypes";
 }
 
-function describeBoardChange(change: PendingBoardChange): string {
-  if (change.kind === "mode") {
-    if (change.mode === "daily") return "Daily";
-    if (change.mode === "infinite") return "Infinite";
-    return "Unlimited";
-  }
-  if (change.kind === "difficulty") return difficultyLabel(change.difficulty);
-  if (change.kind === "filter") return filterLabel(change.filter);
-  return "a new board";
+function modeKey(mode: GameMode): MessageKey {
+  if (mode === "daily") return "mode.daily";
+  if (mode === "infinite") return "mode.infinite";
+  return "mode.unlimited";
+}
+
+function categoryKey(category: string): MessageKey {
+  return `category.${category}` as MessageKey;
+}
+
+function shareRows(cells: MatrixCell[]) {
+  return [0, 1, 2].map((row) =>
+    [0, 1, 2].map((col) => {
+      const cell = cells[row * 3 + col];
+      return shareCellForPick(Boolean(cell?.pickedEntityId), cell?.pickedRarityPct ?? null);
+    })
+  );
 }
 
 export function WineGridGame() {
+  const { locale, setLocale, t } = useI18n();
   const [todayStr, setTodayStr] = useState<string>("2026-10-20");
   const [nextDailyCountdown, setNextDailyCountdown] = useState<string>("");
   const [mode, setMode] = useState<GameMode>("daily");
@@ -136,7 +156,8 @@ export function WineGridGame() {
   const [codexOpen, setCodexOpen] = useState<boolean>(false);
   const [authHistoryOpen, setAuthHistoryOpen] = useState<boolean>(false);
   const [observabilityOpen, setObservabilityOpen] = useState<boolean>(false);
-  const [copiedShare, setCopiedShare] = useState<boolean>(false);
+  const [shareState, setShareState] = useState<"idle" | "copied" | "shared">("idle");
+  const [dailyStreak, setDailyStreak] = useState(EMPTY_DAILY_STREAK);
   const [howToOpen, setHowToOpen] = useState(false);
   const [pendingChange, setPendingChange] = useState<PendingBoardChange | null>(null);
   const [justFilledIndex, setJustFilledIndex] = useState<number | null>(null);
@@ -197,6 +218,7 @@ export function WineGridGame() {
     const timer = window.setInterval(updateCountdown, 1000);
 
     setHistory(getLocalHistory());
+    setDailyStreak(readDailyStreak(window.localStorage));
 
     const demoRaw = window.localStorage.getItem("winegrid_demo_user");
     if (demoRaw) {
@@ -255,17 +277,19 @@ export function WineGridGame() {
       targetFilter: EntityFilterMode,
       targetSeed: string
     ) => {
-      const seedToUse = targetMode === "daily" ? todayStr : targetSeed;
-      const effDiff = targetMode === "daily" ? "wset3" : targetDiff;
+      const effDiff = targetMode === "daily" ? DAILY_DIFFICULTY : targetDiff;
       const effFilter = targetMode === "daily" ? "all" : targetFilter;
 
-      const generated = generateWineGridBoard({
-        seed: seedToUse,
-        mode: targetMode,
-        difficulty: effDiff,
-        entityFilter: effFilter,
-        boardDate: todayStr,
-      });
+      const generated =
+        targetMode === "daily"
+          ? generateDailyBoard(todayStr)
+          : generateWineGridBoard({
+              seed: targetSeed,
+              mode: targetMode,
+              difficulty: effDiff,
+              entityFilter: effFilter,
+              boardDate: todayStr,
+            });
 
       const saved = loadActiveBoardState<PersistedActiveState>(
         generated.boardId
@@ -420,6 +444,38 @@ export function WineGridGame() {
       await saveGameSession(entry);
       setHistory(getLocalHistory());
 
+      if (board.mode === "daily") {
+        const nextStreak = recordDailyResult(
+          readDailyStreak(window.localStorage),
+          todayStr,
+          won
+        );
+        writeDailyStreak(window.localStorage, nextStreak);
+        setDailyStreak(nextStreak);
+        const shareText = buildShareText({
+          mode: "daily",
+          date: todayStr,
+          difficultyLabel: t("difficulty.standard"),
+          correct: solved,
+          rarity: rarityTotal,
+          rows: shareRows(updatedCells),
+          locale,
+        });
+        void leaderboard
+          .submit({
+            date: todayStr,
+            anonId,
+            correctCells: solved,
+            missesUsed,
+            rarityScore: rarityTotal,
+            won,
+            shareText,
+          })
+          .catch(() => {
+            // The leaderboard backend is not wired yet.
+          });
+      }
+
       trackEvent("game_completed", {
         board_id: board.boardId,
         mode: board.mode,
@@ -431,7 +487,7 @@ export function WineGridGame() {
         revealed_by_give_up: revealedByGiveUp,
       });
     },
-    [board, sessionId, todayStr, currentUser]
+    [anonId, board, locale, sessionId, t, todayStr, currentUser]
   );
 
   const handleSelectEntity = async (entity: WineEntity) => {
@@ -440,6 +496,8 @@ export function WineGridGame() {
     const cell = cells[cellIndex];
     const rowClue = board.rowClues[cell.row];
     const colClue = board.colClues[cell.col];
+    const rowCopy = localizedClue(rowClue, locale);
+    const colCopy = localizedClue(colClue, locale);
     const isValid = cell.validEntityIds.includes(entity.id);
     const nextBudget = applyPick(
       { missesRemaining: guessesRemaining, missesUsed: guessesUsedCount },
@@ -474,7 +532,7 @@ export function WineGridGame() {
       setJustFilledIndex(cellIndex);
       setFeedback({
         type: "success",
-        title: `${entity.name} — ${rarityPct}% Pick Rate`,
+        title: t("feedback.correctTitle", { name: entity.name, pct: rarityPct }),
         detail: entity.sommelierNote,
       });
 
@@ -497,20 +555,22 @@ export function WineGridGame() {
     } else {
       const matchesRow = rowClue.predicate(entity);
       const matchesCol = colClue.predicate(entity);
-      let reason = "";
-      if (!matchesRow && !matchesCol) {
-        reason = `${entity.name} matches neither "${rowClue.shortLabel}" nor "${colClue.shortLabel}".`;
-      } else if (!matchesRow) {
-        reason = `${entity.name} fits "${colClue.shortLabel}", but not "${rowClue.label}".`;
-      } else {
-        reason = `${entity.name} fits "${rowClue.shortLabel}", but not "${colClue.label}".`;
-      }
+      const reasonKey =
+        !matchesRow && !matchesCol
+          ? "feedback.missNeither"
+          : !matchesRow
+          ? "feedback.missRow"
+          : "feedback.missCol";
 
       setMissFlashIndex(cellIndex);
       setFeedback({
         type: "error",
-        title: `Not quite — ${entity.name}`,
-        detail: `${reason} That miss is spent. The cell is still open.`,
+        title: t("feedback.missTitle", { name: entity.name }),
+        detail: t(reasonKey, {
+          name: entity.name,
+          row: !matchesRow && matchesCol ? rowCopy.label : rowCopy.shortLabel,
+          col: matchesRow && !matchesCol ? colCopy.label : colCopy.shortLabel,
+        }),
       });
 
       trackEvent("cell_guess_submitted", {
@@ -576,45 +636,41 @@ export function WineGridGame() {
     }
     setFeedback({
       type: "info",
-      title: "Solutions Revealed",
-      detail: "Click any cell on the grid to explore all valid answers and tasting notes.",
+      title: t("feedback.revealedTitle"),
+      detail: t("feedback.revealedDetail"),
     });
   };
 
   const handleShareResults = async () => {
     if (!board) return;
-    const rowsEmoji = [0, 1, 2]
-      .map((r) =>
-        [0, 1, 2]
-          .map((c) => {
-            const cell = cells[r * 3 + c];
-            if (!cell?.pickedEntityId) return "⬜";
-            if ((cell.pickedRarityPct ?? 50) < 12) return "🟨";
-            return "🟩";
-          })
-          .join("")
-      )
-      .join("\n");
-
-    const shareText = `🍷 WineGrid ${
-      board.mode === "daily"
-        ? `Daily (${todayStr})`
-        : board.mode === "infinite"
-        ? "Infinite Mode"
-        : `Unlimited (${board.difficulty.toUpperCase()})`
-    }\nScore: ${correctCount}/9 · Rarity: ${currentRarityScore}\n${rowsEmoji}\nhttps://winegrid.vercel.app`;
-
+    const shareText = buildShareText({
+      mode: board.mode,
+      date: todayStr,
+      difficultyLabel: t(difficultyKey(board.difficulty)),
+      correct: correctCount,
+      rarity: currentRarityScore,
+      rows: shareRows(cells),
+      locale,
+    });
+    const mobile = window.matchMedia("(max-width: 767px)").matches;
     try {
-      await navigator.clipboard.writeText(shareText);
-      setCopiedShare(true);
+      const result = await deliverShareText(shareText, {
+        preferSystemShare: mobile,
+        clipboard: navigator.clipboard,
+        systemShare: navigator.share
+          ? (data) => navigator.share(data)
+          : undefined,
+      });
+      setShareState(result);
       trackEvent("share_results_copied", {
         board_id: board.boardId,
         correct_cells: correctCount,
         rarity_score: currentRarityScore,
+        delivery: result,
       });
-      setTimeout(() => setCopiedShare(false), 2500);
+      window.setTimeout(() => setShareState("idle"), 2500);
     } catch {
-      // Ignore
+      // Clipboard can be denied; the score stays on screen.
     }
   };
 
@@ -639,10 +695,12 @@ export function WineGridGame() {
   }, []);
 
   const formatEntityTypeLabel = (type: WineEntityType) => {
-    if (type === "appellation") return "Region";
-    if (type === "grape") return "Grape";
-    return "Producer";
+    if (type === "appellation") return t("type.region");
+    if (type === "grape") return t("type.grape");
+    return t("type.producer");
   };
+
+  const presentClue = (clue: ClueDefinition) => localizedClue(clue, locale);
 
   if (!board) {
     return (
@@ -652,7 +710,7 @@ export function WineGridGame() {
             <Wine className="w-6 h-6 text-wine-600 animate-pulse" />
           </div>
           <p className="font-display text-sm font-medium text-slate-500">
-            Preparing WineGrid...
+            {t("loading")}
           </p>
         </div>
       </div>
@@ -662,7 +720,7 @@ export function WineGridGame() {
   return (
     <div className="min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col">
       {/* Clean Minimal Big-Tech Navigation Bar (Mobile + Desktop Responsive) */}
-      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/70">
+      <header className="winegrid-safe-top sticky top-0 z-30 bg-white/90 backdrop-blur-md border-b border-slate-200/70">
         <div className="max-w-6xl mx-auto px-3 sm:px-8 py-2.5 sm:py-0 sm:h-16 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-4">
           {/* Top Row on Mobile: Brand Logo + Right Action Pills */}
           <div className="flex items-center justify-between w-full sm:w-auto">
@@ -676,13 +734,22 @@ export function WineGridGame() {
             </div>
 
             {/* Right Action Pills (Mobile Position) */}
-            <div className="flex sm:hidden items-center gap-1.5">
+            <div className="flex sm:hidden items-center gap-1">
+              <button
+                type="button"
+                onClick={() => setLocale(locale === "en" ? "pt-BR" : "en")}
+                className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white hover:bg-slate-50 border border-slate-200/80 text-[10px] font-bold tracking-wide text-slate-700 transition shadow-sm"
+                aria-label={t("nav.language")}
+                title={t("nav.language")}
+              >
+                {locale === "pt-BR" ? "PT" : "EN"}
+              </button>
               <button
                 type="button"
                 onClick={() => setHowToOpen(true)}
                 className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-600 transition shadow-sm"
-                aria-label="How to play"
-                title="How to play"
+                aria-label={t("nav.howTo")}
+                title={t("nav.howTo")}
               >
                 <HelpCircle className="w-4 h-4 text-slate-500" />
               </button>
@@ -693,7 +760,8 @@ export function WineGridGame() {
                   trackEvent("codex_opened");
                 }}
                 className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-600 transition shadow-sm"
-                title="Browse Wine Knowledge Graph"
+                title={t("nav.codexTitle")}
+                aria-label={t("nav.codex")}
               >
                 <BookOpen className="w-4 h-4 text-slate-500" />
               </button>
@@ -701,8 +769,9 @@ export function WineGridGame() {
               <button
                 type="button"
                 onClick={() => setObservabilityOpen(true)}
-                className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-600 transition shadow-sm"
-                title="Live Telemetry & Usage"
+                className="hidden min-[400px]:inline-flex items-center justify-center w-8 h-8 rounded-full bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-600 transition shadow-sm"
+                title={t("nav.telemetry")}
+                aria-label={t("nav.telemetry")}
               >
                 <Activity className="w-4 h-4" />
               </button>
@@ -713,16 +782,17 @@ export function WineGridGame() {
                   setAuthHistoryOpen(true);
                   trackEvent("auth_history_modal_opened");
                 }}
-                className="inline-flex items-center gap-1.5 rounded-full bg-slate-900 hover:bg-slate-800 px-3 py-1.5 text-[11px] font-semibold text-white transition shadow-sm"
+                className="inline-flex items-center gap-1 rounded-full bg-slate-900 hover:bg-slate-800 px-2.5 py-1.5 text-[11px] font-semibold text-white transition shadow-sm"
+                aria-label={currentUser ? currentUser.email : t("nav.signIn")}
               >
                 <User className="w-3 h-3" />
-                <span className="max-w-[76px] truncate">
-                  {currentUser ? currentUser.email.split("@")[0] : "Sign In"}
-                </span>
-                {playerStats.currentStreak > 0 && (
-                  <span className="inline-flex items-center gap-0.5 text-amber-300 font-bold">
+                {dailyStreak.current > 0 && (
+                  <span
+                    className="inline-flex items-center gap-0.5 text-amber-300 font-bold"
+                    title={t("streak.bestTitle", { n: dailyStreak.best })}
+                  >
                     <Flame className="w-3 h-3 fill-amber-400" />
-                    {playerStats.currentStreak}
+                    {dailyStreak.current}
                   </span>
                 )}
               </button>
@@ -740,7 +810,7 @@ export function WineGridGame() {
                   : "text-slate-500 hover:text-slate-800"
               }`}
             >
-              Daily
+              {t("mode.daily")}
             </button>
             <button
               type="button"
@@ -751,7 +821,7 @@ export function WineGridGame() {
                   : "text-slate-500 hover:text-slate-800"
               }`}
             >
-              Unlimited
+              {t("mode.unlimited")}
             </button>
             <button
               type="button"
@@ -762,7 +832,7 @@ export function WineGridGame() {
                   : "text-slate-500 hover:text-slate-800"
               }`}
             >
-              <InfinityIcon className="w-3.5 h-3.5 shrink-0" /> Infinite
+              <InfinityIcon className="w-3.5 h-3.5 shrink-0" /> {t("mode.infinite")}
             </button>
           </div>
 
@@ -770,10 +840,19 @@ export function WineGridGame() {
           <div className="hidden sm:flex items-center gap-2">
             <button
               type="button"
+              onClick={() => setLocale(locale === "en" ? "pt-BR" : "en")}
+              className="inline-flex items-center justify-center h-9 min-w-9 px-2.5 rounded-full bg-white hover:bg-slate-50 border border-slate-200/80 text-[11px] font-bold tracking-wide text-slate-700 transition shadow-sm"
+              aria-label={t("nav.language")}
+              title={t("nav.language")}
+            >
+              {locale === "pt-BR" ? "PT" : "EN"}
+            </button>
+            <button
+              type="button"
               onClick={() => setHowToOpen(true)}
               className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-600 transition shadow-sm"
-              aria-label="How to play"
-              title="How to play"
+              aria-label={t("nav.howTo")}
+              title={t("nav.howTo")}
             >
               <HelpCircle className="w-4 h-4" />
             </button>
@@ -784,17 +863,18 @@ export function WineGridGame() {
                 trackEvent("codex_opened");
               }}
               className="inline-flex items-center gap-1.5 rounded-full bg-white hover:bg-slate-50 border border-slate-200/80 px-3.5 py-2 text-xs font-medium text-slate-700 transition shadow-sm"
-              title="Browse Wine Knowledge Graph"
+              title={t("nav.codexTitle")}
             >
               <BookOpen className="w-4 h-4 text-slate-500" />
-              <span>Codex</span>
+              <span>{t("nav.codex")}</span>
             </button>
 
             <button
               type="button"
               onClick={() => setObservabilityOpen(true)}
               className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-white hover:bg-slate-50 border border-slate-200/80 text-slate-600 transition shadow-sm"
-              title="Live Telemetry & Usage"
+              title={t("nav.telemetry")}
+              aria-label={t("nav.telemetry")}
             >
               <Activity className="w-4 h-4" />
             </button>
@@ -809,12 +889,15 @@ export function WineGridGame() {
             >
               <User className="w-3.5 h-3.5" />
               <span className="max-w-[100px] truncate">
-                {currentUser ? currentUser.email.split("@")[0] : "Sign In"}
+                {currentUser ? currentUser.email.split("@")[0] : t("nav.signIn")}
               </span>
-              {playerStats.currentStreak > 0 && (
-                <span className="inline-flex items-center gap-0.5 text-amber-300 font-bold">
+              {dailyStreak.current > 0 && (
+                <span
+                  className="inline-flex items-center gap-0.5 text-amber-300 font-bold"
+                  title={t("streak.bestTitle", { n: dailyStreak.best })}
+                >
                   <Flame className="w-3.5 h-3.5 fill-amber-400" />
-                  {playerStats.currentStreak}
+                  {dailyStreak.current}
                 </span>
               )}
             </button>
@@ -831,9 +914,9 @@ export function WineGridGame() {
               <div className="grid grid-cols-3 sm:flex items-center gap-1 bg-slate-100 p-1 rounded-xl w-full sm:w-auto">
                 {(
                   [
-                    { id: "wset2", label: "Standard" },
-                    { id: "wset3", label: "Sommelier" },
-                    { id: "master_somm", label: "Master" },
+                    { id: "wset2", label: t("difficulty.standard") },
+                    { id: "wset3", label: t("difficulty.sommelier") },
+                    { id: "master_somm", label: t("difficulty.master") },
                   ] as { id: DifficultyLevel; label: string }[]
                 ).map((d) => (
                   <button
@@ -856,10 +939,10 @@ export function WineGridGame() {
               <div className="grid grid-cols-4 sm:flex items-center gap-1 bg-slate-100 p-1 rounded-xl w-full sm:w-auto">
                 {(
                   [
-                    { id: "all", label: "All" },
-                    { id: "appellation", label: "Regions" },
-                    { id: "grape", label: "Grapes" },
-                    { id: "producer", label: "Estates" },
+                    { id: "all", label: t("filter.all") },
+                    { id: "appellation", label: t("filter.regions") },
+                    { id: "grape", label: t("filter.grapes") },
+                    { id: "producer", label: t("filter.estates") },
                   ] as { id: EntityFilterMode; label: string }[]
                 ).map((f) => (
                   <button
@@ -881,7 +964,7 @@ export function WineGridGame() {
             </div>
 
             <p className="text-[11px] text-slate-500 sm:max-w-[16rem] sm:text-right">
-              Level and type each load their own board immediately.
+              {t("filter.hint")}
             </p>
 
             <button
@@ -889,7 +972,7 @@ export function WineGridGame() {
               onClick={() => requestBoardChange({ kind: "new-board" })}
               className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-wine-600 hover:bg-wine-700 px-4 py-2 text-xs font-semibold text-white shadow-sm transition w-full sm:w-auto"
             >
-              <RefreshCw className="w-3.5 h-3.5" /> New Board
+              <RefreshCw className="w-3.5 h-3.5" /> {t("action.newBoard")}
             </button>
           </div>
         )}
@@ -901,17 +984,25 @@ export function WineGridGame() {
             <div>
               <span className="winegrid-clue-category inline-flex items-center rounded-full bg-wine-50 border border-wine-200/70 px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-wine-700">
                 {board.mode === "daily"
-                  ? "Daily"
+                  ? t("mode.daily")
                   : board.mode === "infinite"
-                  ? "Infinite"
-                  : "Practice"}
+                  ? t("mode.infinite")
+                  : t("mode.practice")}
               </span>
               <div className="winegrid-clue-title font-display text-xs sm:text-xl font-bold text-slate-900 mt-1.5 sm:mt-2">
-                {board.mode === "daily" ? todayStr : "Custom 3×3"}
+                {board.mode === "daily" ? todayStr : t("mode.custom")}
               </div>
-              {board.mode !== "daily" && (
-                <div className="text-[10px] sm:text-xs font-semibold text-slate-500 mt-1">
-                  {difficultyLabel(board.difficulty)} · {filterLabel(board.entityFilter)}
+              <div className="text-[10px] sm:text-xs font-semibold text-slate-500 mt-1">
+                {board.mode === "daily"
+                  ? t("difficulty.standard")
+                  : `${t(difficultyKey(board.difficulty))} · ${t(filterKey(board.entityFilter))}`}
+              </div>
+              {board.mode === "daily" && (
+                <div className="text-[10px] sm:text-xs font-semibold text-amber-700 mt-1">
+                  {t("streak.line", {
+                    current: dailyStreak.current,
+                    best: dailyStreak.best,
+                  })}
                 </div>
               )}
             </div>
@@ -919,7 +1010,7 @@ export function WineGridGame() {
               <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-1.5 text-[10px] sm:text-xs font-medium text-slate-500 mt-2 sm:mt-3 pt-2 sm:pt-3 border-t border-slate-200/70">
                 <div className="inline-flex items-center gap-1">
                   <Clock className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-slate-400 shrink-0 hidden sm:inline" />
-                  <span>Next in</span>
+                  <span>{t("stat.nextIn")}</span>
                 </div>
                 <span className="font-mono font-semibold text-slate-800 text-[10px] sm:text-xs">
                   {nextDailyCountdown}
@@ -929,22 +1020,24 @@ export function WineGridGame() {
           </div>
 
           {/* 3 Column Headers (Tap on mobile or hover on desktop to inspect clue) */}
-          {board.colClues.map((colClue) => (
+          {board.colClues.map((sourceCol) => {
+            const colClue = presentClue(sourceCol);
+            return (
             <button
               key={colClue.id}
               type="button"
               onClick={() =>
                 setFeedback({
                   type: "info",
-                  title: `${colClue.shortLabel} (${colClue.category.replace("_", " ")})`,
-                  detail: `${colClue.label} — ${colClue.tooltip}`,
+                  title: `${colClue.shortLabel} (${t(categoryKey(colClue.category))})`,
+                  detail: t("clue.detail", { label: colClue.label, tooltip: colClue.tooltip }),
                 })
               }
               className="winegrid-clue-card group relative bg-white border border-slate-200/90 flex flex-col justify-between text-left shadow-soft hover:border-slate-300 transition"
             >
               <div className="flex items-center justify-between gap-1 w-full">
                 <span className="winegrid-clue-category inline-flex items-center rounded-full bg-slate-100 px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500 truncate max-w-full">
-                  {colClue.category.replace("_", " ")}
+                  {t(categoryKey(colClue.category))}
                 </span>
                 <HelpCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-300 group-hover:text-slate-500 transition shrink-0 hidden sm:inline" />
               </div>
@@ -965,10 +1058,13 @@ export function WineGridGame() {
                 <p className="text-slate-200 leading-relaxed">{colClue.tooltip}</p>
               </div>
             </button>
-          ))}
+            );
+          })}
 
           {/* 3 Rows */}
-          {board.rowClues.map((rowClue, rIdx) => (
+          {board.rowClues.map((sourceRow, rIdx) => {
+            const rowClue = presentClue(sourceRow);
+            return (
             <React.Fragment key={rowClue.id}>
               {/* Row Header (Tap on mobile or hover on desktop to inspect clue) */}
               <button
@@ -976,15 +1072,15 @@ export function WineGridGame() {
                 onClick={() =>
                   setFeedback({
                     type: "info",
-                    title: `${rowClue.shortLabel} (${rowClue.category.replace("_", " ")})`,
-                    detail: `${rowClue.label} — ${rowClue.tooltip}`,
+                    title: `${rowClue.shortLabel} (${t(categoryKey(rowClue.category))})`,
+                    detail: t("clue.detail", { label: rowClue.label, tooltip: rowClue.tooltip }),
                   })
                 }
                 className="winegrid-clue-card group relative bg-white border border-slate-200/90 flex flex-col justify-between text-left shadow-soft hover:border-slate-300 transition"
               >
                 <div className="flex items-center justify-between gap-1 w-full">
                   <span className="winegrid-clue-category inline-flex items-center rounded-full bg-slate-100 px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider text-slate-500 truncate max-w-full">
-                    {rowClue.category.replace("_", " ")}
+                    {t(categoryKey(rowClue.category))}
                   </span>
                   <HelpCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-300 group-hover:text-slate-500 transition shrink-0 hidden sm:inline" />
                 </div>
@@ -1052,8 +1148,8 @@ export function WineGridGame() {
                       </div>
 
                       <div className="text-[10px] sm:text-xs font-medium text-emerald-700">
-                        <span className="hidden sm:inline">View tasting note &rarr;</span>
-                        <span className="sm:hidden">Notes &rarr;</span>
+                        <span className="hidden sm:inline">{t("stat.tasting")}</span>
+                        <span className="sm:hidden">{t("stat.notes")}</span>
                       </div>
                     </button>
                   );
@@ -1080,7 +1176,7 @@ export function WineGridGame() {
                         </div>
                       </div>
                       <span className="text-[10px] sm:text-xs font-medium text-amber-800">
-                        +{cell.validEntityIds.length} valid &rarr;
+                        {t("stat.validMore", { n: cell.validEntityIds.length })}
                       </span>
                     </button>
                   );
@@ -1097,7 +1193,7 @@ export function WineGridGame() {
                     }`}
                   >
                     <div className="winegrid-possible-label text-[10px] sm:text-xs font-semibold text-slate-400 group-hover:text-slate-600 transition">
-                      {cell?.validEntityIds.length ?? 0} possible
+                      {t("stat.possible", { n: cell?.validEntityIds.length ?? 0 })}
                     </div>
 
                     <div className="winegrid-plus-btn w-8 h-8 sm:w-11 sm:h-11 rounded-full bg-slate-50 group-hover:bg-slate-900 border border-slate-200/80 group-hover:border-slate-900 flex items-center justify-center transition my-1">
@@ -1106,21 +1202,21 @@ export function WineGridGame() {
 
                     {/* Neutral Gray Accepted Answer Type Badges */}
                     <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-1.5 w-full">
-                      {acceptedTypes.map((t) => (
+                      {acceptedTypes.map((kind) => (
                         <span
-                          key={t}
+                          key={kind}
                           className="winegrid-type-pill inline-flex items-center gap-1 rounded-full px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-[11px] font-medium bg-slate-100 text-slate-600 border border-slate-200/80"
                         >
-                          {t === "appellation" && (
+                          {kind === "appellation" && (
                             <Wine className="winegrid-type-pill-icon w-3 h-3 text-slate-500 shrink-0" />
                           )}
-                          {t === "grape" && (
+                          {kind === "grape" && (
                             <Grape className="winegrid-type-pill-icon w-3 h-3 text-slate-500 shrink-0" />
                           )}
-                          {t === "producer" && (
+                          {kind === "producer" && (
                             <Castle className="winegrid-type-pill-icon w-3 h-3 text-slate-500 shrink-0" />
                           )}
-                          {formatEntityTypeLabel(t)}
+                          {formatEntityTypeLabel(kind)}
                         </span>
                       ))}
                     </div>
@@ -1128,15 +1224,16 @@ export function WineGridGame() {
                 );
               })}
             </React.Fragment>
-          ))}
+            );
+          })}
         </div>
 
         {/* Sleek Bottom Floating Status & Controls Bar (Responsive on Mobile & Desktop) */}
-        <div className="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-card flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
+        <div className="winegrid-safe-bottom bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-card flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-6">
           <div className="grid grid-cols-3 sm:flex items-center gap-3 sm:gap-10 w-full sm:w-auto text-center sm:text-left">
             <div>
               <div className="text-[10px] sm:text-[11px] font-medium text-slate-400 uppercase tracking-wider">
-                {board.mode === "infinite" ? "Misses" : "Misses left"}
+                {board.mode === "infinite" ? t("stat.misses") : t("stat.missesLeft")}
               </div>
               <div className="font-display text-xl sm:text-2xl font-bold text-slate-900 mt-0.5 flex items-center justify-center sm:justify-start gap-1">
                 {board.mode === "infinite" ? (
@@ -1162,7 +1259,7 @@ export function WineGridGame() {
 
             <div>
               <div className="text-[10px] sm:text-[11px] font-medium text-slate-400 uppercase tracking-wider">
-                Solved
+                {t("stat.solved")}
               </div>
               <div className="font-display text-xl sm:text-2xl font-bold text-emerald-600 mt-0.5">
                 {correctCount}
@@ -1174,7 +1271,7 @@ export function WineGridGame() {
 
             <div>
               <div className="text-[10px] sm:text-[11px] font-medium text-slate-400 uppercase tracking-wider flex items-center justify-center sm:justify-start gap-1">
-                <Sparkles className="w-3 h-3 text-amber-500 shrink-0" /> Rarity
+                <Sparkles className="w-3 h-3 text-amber-500 shrink-0" /> {t("stat.rarity")}
               </div>
               <div className="font-display text-xl sm:text-2xl font-bold text-slate-900 mt-0.5">
                 {currentRarityScore}
@@ -1190,7 +1287,7 @@ export function WineGridGame() {
                 className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-slate-100 hover:bg-slate-200/80 px-3.5 sm:px-4 py-2.5 text-xs font-semibold text-slate-700 transition"
               >
                 <Eye className="w-4 h-4 text-slate-500 shrink-0" />
-                Reveal Answers
+                {t("action.reveal")}
               </button>
             )}
 
@@ -1202,7 +1299,11 @@ export function WineGridGame() {
               }`}
             >
               <Share2 className="w-4 h-4 shrink-0" />
-              {copiedShare ? "Copied!" : "Share Score"}
+              {shareState === "shared"
+                ? t("action.shared")
+                : shareState === "copied"
+                ? t("action.copied")
+                : t("action.share")}
             </button>
           </div>
         </div>
@@ -1261,15 +1362,25 @@ export function WineGridGame() {
 
       <ConfirmDialog
         isOpen={pendingChange !== null}
-        title="Switch board?"
+        title={t("confirm.title")}
         body={
           pendingChange?.kind === "new-board"
-            ? "This puzzle is in progress. A new board replaces it, and this one cannot be resumed."
-            : `This puzzle is in progress. ${
-                pendingChange ? describeBoardChange(pendingChange) : "The next board"
-              } loads now, and you can switch back to this one on this device.`
+            ? t("confirm.newBody")
+            : t("confirm.switchBody", {
+                name: pendingChange
+                  ? pendingChange.kind === "mode"
+                    ? t(modeKey(pendingChange.mode))
+                    : pendingChange.kind === "difficulty"
+                    ? t(difficultyKey(pendingChange.difficulty))
+                    : pendingChange.kind === "filter"
+                    ? t(filterKey(pendingChange.filter))
+                    : t("confirm.fallback")
+                  : t("confirm.fallback"),
+              })
         }
-        confirmLabel={pendingChange?.kind === "new-board" ? "New board" : "Switch"}
+        confirmLabel={
+          pendingChange?.kind === "new-board" ? t("confirm.newBoard") : t("confirm.switch")
+        }
         onConfirm={() => {
           if (pendingChange) applyBoardChange(pendingChange);
         }}
@@ -1312,7 +1423,7 @@ export function WineGridGame() {
               type="button"
               onClick={() => setFeedback(null)}
               className="text-slate-400 hover:text-slate-600 p-1"
-              aria-label="Dismiss notification"
+              aria-label={t("action.dismiss")}
             >
               <X className="w-4 h-4" />
             </button>
