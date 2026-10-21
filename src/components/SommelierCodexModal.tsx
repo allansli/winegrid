@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useMemo, useRef, useState } from "react";
-import { ALL_WINE_ENTITIES, fieldsMatchSearch } from "@/data/wineDatabase";
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { ALL_WINE_ENTITIES, entityMatchesSearch } from "@/data/wineDatabase";
 import { localizedNote } from "@/i18n/notesPt";
-import { placeLabel, placeSearchLabels } from "@/i18n/places";
+import { originLine } from "@/i18n/places";
 import { CLUE_CATALOG } from "@/data/clueCatalog";
 import { EntityFilterMode } from "@/types/wine";
 import { ModalFrame } from "./ModalFrame";
@@ -36,22 +36,7 @@ export function SommelierCodexModal({
     return ALL_WINE_ENTITIES.filter((e) => {
       if (typeFilter !== "all" && e.entityType !== typeFilter) return false;
       if (activeClue && !activeClue.predicate(e)) return false;
-      return fieldsMatchSearch(
-        [
-          e.name,
-          e.canonicalName,
-          e.country,
-          e.macroRegion,
-          ...placeSearchLabels(e.country, "country"),
-          ...placeSearchLabels(e.macroRegion, "region"),
-          e.subRegion ?? "",
-          e.sommelierNote,
-          localizedNote(e.id, e.sommelierNote, locale),
-          ...e.aliases,
-          ...e.primaryGrapes,
-        ],
-        query
-      );
+      return entityMatchesSearch(e, query, locale);
     });
   }, [query, typeFilter, activeClue, locale]);
 
@@ -127,26 +112,7 @@ export function SommelierCodexModal({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-slate-400 shrink-0" />
-            <select
-              value={selectedClueId}
-              onChange={(e) => setSelectedClueId(e.target.value)}
-              className="w-full rounded-xl bg-slate-50 border border-slate-200/80 px-3 py-2 text-xs text-slate-700 focus:outline-none focus:border-wine-400"
-            >
-              <option value="all">
-                {t("codex.filterAll", { n: CLUE_CATALOG.length })}
-              </option>
-              {CLUE_CATALOG.map((clue) => {
-                const copy = localizedClue(clue, locale);
-                return (
-                <option key={clue.id} value={clue.id}>
-                  [{t(`category.${copy.category}` as MessageKey)}] {copy.label}
-                </option>
-                );
-              })}
-            </select>
-          </div>
+          <ClueFilter value={selectedClueId} onChange={setSelectedClueId} />
         </div>
 
         {/* Cards */}
@@ -163,7 +129,7 @@ export function SommelierCodexModal({
                       {entity.name}
                     </h3>
                     <div className="text-xs text-slate-500 mt-0.5">
-                      {placeLabel(entity.country, locale, "country")} &bull; {placeLabel(entity.macroRegion, locale, "region")}
+                      {originLine(entity.country, entity.macroRegion, locale)}
                     </div>
                   </div>
                   <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-600">
@@ -196,5 +162,93 @@ export function SommelierCodexModal({
           ))}
         </div>
     </ModalFrame>
+  );
+}
+
+function ClueFilter({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (id: string) => void;
+}) {
+  const { locale, t } = useI18n();
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const active = CLUE_CATALOG.find((clue) => clue.id === value) ?? null;
+  const activeLabel = active
+    ? `[${t(`category.${localizedClue(active, locale).category}` as MessageKey)}] ${localizedClue(active, locale).label}`
+    : t("codex.filterAll", { n: CLUE_CATALOG.length });
+
+  useEffect(() => {
+    const node = ref.current;
+    if (!open || !node) return;
+    const closeLayer = () => setOpen(false);
+    const onPointer = (event: PointerEvent) => {
+      if (!node.contains(event.target as Node)) setOpen(false);
+    };
+    node.addEventListener("winegrid-close-layer", closeLayer);
+    document.addEventListener("pointerdown", onPointer);
+    return () => {
+      node.removeEventListener("winegrid-close-layer", closeLayer);
+      document.removeEventListener("pointerdown", onPointer);
+    };
+  }, [open]);
+
+  return (
+    <div ref={ref} className="relative" data-escape-layer={open ? "open" : undefined}>
+      <div className="flex items-center gap-2">
+        <Filter className="w-4 h-4 text-slate-400 shrink-0" />
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-haspopup="listbox"
+          onClick={() => setOpen((current) => !current)}
+          className="w-full rounded-xl bg-slate-50 border border-slate-200/80 px-3 py-2 text-left text-xs text-slate-700 hover:border-wine-400"
+        >
+          {activeLabel}
+        </button>
+      </div>
+      {open && (
+        <ul
+          role="listbox"
+          className="absolute z-20 mt-1 max-h-60 w-[calc(100%-1.5rem)] overflow-y-auto rounded-xl border border-slate-200 bg-white py-1 shadow-modal"
+        >
+          <li>
+            <button
+              type="button"
+              role="option"
+              aria-selected={value === "all"}
+              onClick={() => {
+                onChange("all");
+                setOpen(false);
+              }}
+              className="w-full px-3 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
+            >
+              {t("codex.filterAll", { n: CLUE_CATALOG.length })}
+            </button>
+          </li>
+          {CLUE_CATALOG.map((clue) => {
+            const copy = localizedClue(clue, locale);
+            return (
+              <li key={clue.id}>
+                <button
+                  type="button"
+                  role="option"
+                  aria-selected={value === clue.id}
+                  onClick={() => {
+                    onChange(clue.id);
+                    setOpen(false);
+                  }}
+                  className="w-full px-3 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
+                >
+                  [{t(`category.${copy.category}` as MessageKey)}] {copy.label}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
   );
 }

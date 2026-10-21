@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef } from "react";
+import { consumeModalEscape } from "@/lib/hotkeys";
 
 const FOCUSABLE_SELECTOR = [
   "a[href]",
@@ -59,15 +60,22 @@ export function ModalFrame({
     const focusFrame = window.requestAnimationFrame(focusInitial);
 
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        event.preventDefault();
-        event.stopPropagation();
+      const root = panelRef.current;
+      const dialogs = document.querySelectorAll("[role='dialog'][aria-modal='true']");
+      const topmost = Boolean(root && dialogs[dialogs.length - 1] === root);
+      const nested = Boolean(root?.querySelector("[data-escape-layer='open']"));
+      const escape = consumeModalEscape(event, { topmost, nestedLayerOpen: nested });
+      if (escape === "close-layer") {
+        root
+          ?.querySelector("[data-escape-layer='open']")
+          ?.dispatchEvent(new Event("winegrid-close-layer"));
+        return;
+      }
+      if (escape === "close-dialog") {
         onCloseRef.current();
         return;
       }
-      if (event.key !== "Tab") return;
-      const root = panelRef.current;
-      if (!root) return;
+      if (!topmost || event.key !== "Tab" || !root) return;
       const items = getFocusable(root);
       if (items.length === 0) {
         event.preventDefault();

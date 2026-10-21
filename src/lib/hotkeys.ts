@@ -10,12 +10,43 @@ export function shouldIgnoreHotkey(event: {
   target: EventTarget | null;
   dialogOpen?: boolean;
 }): boolean {
-  if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return true;
   if (event.dialogOpen) return true;
+  if (event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) return true;
   const target = event.target as HTMLElement | null;
   if (!target || typeof target.tagName !== "string") return false;
   const tag = target.tagName;
   if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return true;
   if (target.isContentEditable) return true;
   return false;
+}
+
+export type EscapeAction = "ignore" | "close-layer" | "close-dialog";
+
+/** Escape closes the topmost dialog, or only its open nested layer. */
+export function modalEscapeAction(input: {
+  key: string;
+  topmost: boolean;
+  nestedLayerOpen?: boolean;
+}): EscapeAction {
+  if (input.key !== "Escape" && input.key !== "Esc") return "ignore";
+  if (!input.topmost) return "ignore";
+  if (input.nestedLayerOpen) return "close-layer";
+  return "close-dialog";
+}
+
+export function consumeModalEscape(
+  event: {
+    key: string;
+    preventDefault(): void;
+    stopPropagation(): void;
+    stopImmediatePropagation?(): void;
+  },
+  options: { topmost: boolean; nestedLayerOpen?: boolean }
+): EscapeAction {
+  const action = modalEscapeAction({ key: event.key, ...options });
+  if (action === "ignore") return action;
+  event.preventDefault();
+  event.stopPropagation();
+  event.stopImmediatePropagation?.();
+  return action;
 }

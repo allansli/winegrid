@@ -1,4 +1,4 @@
-import { fieldsMatchSearch, searchQuery } from "@/data/wineDatabase";
+import { entityMatchesSearch, searchQuery } from "@/data/wineDatabase";
 import { pickKeepsBoardSolvable, type SolvableCell } from "@/lib/matrixGenerator";
 import { WineEntity } from "@/types/wine";
 
@@ -27,19 +27,7 @@ export function validEntities(
 function matchesQuery(entity: WineEntity, rawQuery: string): boolean {
   const q = searchQuery(rawQuery);
   if (q === null) return false;
-  if (q === "") return true;
-  return fieldsMatchSearch(
-    [
-      entity.name,
-      entity.canonicalName,
-      entity.country,
-      entity.macroRegion,
-      entity.subRegion ?? "",
-      ...entity.aliases,
-      ...entity.primaryGrapes,
-    ],
-    rawQuery
-  );
+  return entityMatchesSearch(entity, rawQuery);
 }
 
 function byRarity(a: WineEntity, b: WineEntity): number {
@@ -57,9 +45,9 @@ function orderValids(valid: readonly WineEntity[], usedIds: ReadonlySet<string>)
 }
 
 /**
- * Suggestions and hints are the cell's valid answers, with no rarity cap.
- * Unused answers come before ones already on the board. With hints off, other
- * search hits follow and are labeled as misses.
+ * Hints on: the cell's valid answers, unused before used, with no rarity cap.
+ * Hints off: the shared search ranking only. Fitting answers are not pulled
+ * to the front, so the list does not give the cell away.
  */
 export function buildPickerResults(input: {
   query: string;
@@ -69,16 +57,13 @@ export function buildPickerResults(input: {
   extraEntities?: readonly WineEntity[];
 }): WineEntity[] {
   if (searchQuery(input.query) === null) return [];
-  const valid = orderValids(
-    input.validEntities.filter((entity) => matchesQuery(entity, input.query)),
-    input.usedIds ?? new Set()
-  );
-  if (input.hintsOn) return valid;
-  const validIds = new Set(valid.map((entity) => entity.id));
-  const extras = (input.extraEntities ?? []).filter(
-    (entity) => !validIds.has(entity.id) && matchesQuery(entity, input.query)
-  );
-  return [...valid, ...extras];
+  if (input.hintsOn) {
+    return orderValids(
+      input.validEntities.filter((entity) => matchesQuery(entity, input.query)),
+      input.usedIds ?? new Set()
+    );
+  }
+  return (input.extraEntities ?? []).filter((entity) => matchesQuery(entity, input.query));
 }
 
 export type PickDecision = "used" | "blocked" | "correct" | "miss";

@@ -109,17 +109,85 @@ describe("picker and the dead-end guard share one answer set", () => {
     );
     const ids = valid.map((entity) => entity.id);
     assert.equal(entityFitsCell("grape-chardonnay", ids), false);
+    const ranked = searchWineEntities("chardonnay");
     const listed = buildPickerResults({
       query: "chardonnay",
       hintsOn: false,
       validEntities: valid,
-      extraEntities: [WINE_ENTITY_BY_ID["grape-chardonnay"]],
+      extraEntities: ranked,
     });
+    assert.deepEqual(
+      listed.map((entity) => entity.id),
+      ranked.map((entity) => entity.id)
+    );
     assert.ok(listed.some((entity) => entity.id === "grape-chardonnay"));
     assert.equal(
-      listed.filter((entity) => entityFitsCell(entity.id, ids)).some((entity) => entity.id === "grape-chardonnay"),
-      false
+      evaluatePick([{ validEntityIds: ids, pickedEntityId: null }], 0, "grape-chardonnay"),
+      "miss"
     );
+    const hinted = buildPickerResults({
+      query: "chardonnay",
+      hintsOn: true,
+      validEntities: valid,
+      extraEntities: ranked,
+    });
+    assert.equal(hinted.some((entity) => entity.id === "grape-chardonnay"), false);
+    assert.ok(hinted.every((entity) => entityFitsCell(entity.id, ids)));
+  });
+
+  it("resolves Müller with the same alias search in a cell that accepts him", () => {
+    const muller = WINE_ENTITY_BY_ID["prod-egon-muller"];
+    const germanic = CLUE_BY_ID["geo-germanic"];
+    const white = CLUE_BY_ID["style-dry-white"];
+    assert.equal(germanic.predicate(muller) && white.predicate(muller), true);
+    const valid = ALL_WINE_ENTITIES.filter(
+      (entity) => germanic.predicate(entity) && white.predicate(entity)
+    );
+    const france = CLUE_BY_ID["geo-france"];
+    const bordeaux = CLUE_BY_ID["var-bordeaux-family"];
+    const other = ALL_WINE_ENTITIES.filter(
+      (entity) => france.predicate(entity) && bordeaux.predicate(entity)
+    );
+    assert.equal(other.some((entity) => entity.id === "prod-egon-muller"), false);
+
+    for (const query of ["Mueller", "Müller"]) {
+      const ranked = searchWineEntities(query, "all", new Set(), { acceptedTypes: ["producer"] });
+      assert.ok(ranked.some((entity) => entity.id === "prod-egon-muller"), query);
+      const whereValid = buildPickerResults({
+        query,
+        hintsOn: false,
+        validEntities: valid,
+        extraEntities: ranked,
+      });
+      assert.deepEqual(
+        whereValid.map((entity) => entity.id),
+        ranked.map((entity) => entity.id)
+      );
+      assert.equal(entityFitsCell("prod-egon-muller", valid.map((entity) => entity.id)), true);
+      const hinted = buildPickerResults({
+        query,
+        hintsOn: true,
+        validEntities: valid,
+        extraEntities: ranked,
+      });
+      assert.ok(hinted.some((entity) => entity.id === "prod-egon-muller"), query);
+
+      const whereInvalid = buildPickerResults({
+        query,
+        hintsOn: false,
+        validEntities: other,
+        extraEntities: ranked,
+      });
+      assert.ok(whereInvalid.some((entity) => entity.id === "prod-egon-muller"), query);
+      assert.equal(
+        evaluatePick(
+          [{ validEntityIds: other.map((entity) => entity.id), pickedEntityId: null }],
+          0,
+          "prod-egon-muller"
+        ),
+        "miss"
+      );
+    }
   });
 
   it("lists the validator set for every cell of sampled boards", () => {
@@ -176,9 +244,11 @@ describe("picker and the dead-end guard share one answer set", () => {
           usedIds: used,
           extraEntities: capped,
         });
-        for (const id of ids) {
-          assert.ok(withExtras.some((entity) => entity.id === id), id);
-        }
+        assert.deepEqual(
+          withExtras.map((entity) => entity.id),
+          capped.map((entity) => entity.id),
+          `${board.boardId}#${cell.index} hints off`
+        );
       }
     }
   });
