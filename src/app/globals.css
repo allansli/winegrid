@@ -106,6 +106,44 @@ body {
   }
 }
 
+@keyframes winegrid-cell-pop {
+  0% {
+    transform: scale(0.94);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.45);
+  }
+  60% {
+    transform: scale(1.035);
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.winegrid-cell-pop {
+  animation: winegrid-cell-pop 0.55s ease;
+}
+
+@keyframes winegrid-cell-miss {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  30% {
+    transform: translateX(-4px);
+  }
+  70% {
+    transform: translateX(4px);
+  }
+}
+
+.winegrid-cell-miss {
+  animation: winegrid-cell-miss 0.38s ease;
+  border-color: rgb(244 63 94) !important;
+  background-color: rgb(255 241 242);
+}
+
 /* Extra-small phones (< 380px) */
 @media (max-width: 379px) {
   .winegrid-matrix {

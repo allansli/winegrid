@@ -6,6 +6,7 @@ import {
   getLocalTelemetryEvents,
 } from "@/lib/observability";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
+import { ModalFrame } from "./ModalFrame";
 import { Activity, Database, Radio, X } from "lucide-react";
 
 interface ObservabilityDrawerProps {
@@ -29,8 +30,6 @@ export function ObservabilityDrawer({
       window.removeEventListener("winegrid:telemetry_updated", handleUpdate);
   }, [isOpen]);
 
-  if (!isOpen) return null;
-
   const posthogReady = Boolean(
     process.env.NEXT_PUBLIC_POSTHOG_KEY &&
       process.env.NEXT_PUBLIC_POSTHOG_KEY.startsWith("phc_") &&
@@ -39,14 +38,13 @@ export function ObservabilityDrawer({
   const supabaseReady = isSupabaseConfigured();
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex justify-end bg-slate-900/30 backdrop-blur-sm"
-      onClick={onClose}
+    <ModalFrame
+      isOpen={isOpen}
+      onClose={onClose}
+      ariaLabel="Observability stream"
+      overlayClassName="fixed inset-0 z-50 flex justify-end bg-slate-900/30 backdrop-blur-sm"
+      panelClassName="w-full max-w-md h-full bg-white border-l border-slate-200 flex flex-col shadow-modal"
     >
-      <div
-        className="w-full max-w-md h-full bg-white border-l border-slate-200 flex flex-col shadow-modal"
-        onClick={(e) => e.stopPropagation()}
-      >
         <div className="bg-slate-50/80 px-6 py-5 border-b border-slate-200/80 flex items-center justify-between">
           <div>
             <div className="text-[11px] uppercase tracking-wider text-wine-600 font-semibold flex items-center gap-1.5">
@@ -57,8 +55,10 @@ export function ObservabilityDrawer({
             </h2>
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="rounded-full p-2 text-slate-400 hover:bg-slate-200/60 hover:text-slate-700 transition"
+            aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
@@ -120,7 +120,6 @@ export function ObservabilityDrawer({
             </div>
           ))}
         </div>
-      </div>
-    </div>
+    </ModalFrame>
   );
 }

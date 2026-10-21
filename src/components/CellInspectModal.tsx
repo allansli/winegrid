@@ -3,6 +3,7 @@
 import React from "react";
 import { ClueDefinition, MatrixCell } from "@/types/wine";
 import { WINE_ENTITY_BY_ID } from "@/data/wineDatabase";
+import { ModalFrame } from "./ModalFrame";
 import { X, Award, Sparkles } from "lucide-react";
 
 interface CellInspectModalProps {
@@ -20,7 +21,7 @@ export function CellInspectModal({
   rowClue,
   colClue,
 }: CellInspectModalProps) {
-  if (!isOpen || !cell || !rowClue || !colClue) return null;
+  if (!cell || !rowClue || !colClue) return null;
 
   const pickedEntity = cell.pickedEntityId
     ? WINE_ENTITY_BY_ID[cell.pickedEntityId]
@@ -32,14 +33,12 @@ export function CellInspectModal({
     .sort((a, b) => b.baseRarity - a.baseRarity);
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 backdrop-blur-sm p-4"
-      onClick={onClose}
+    <ModalFrame
+      isOpen={isOpen}
+      onClose={onClose}
+      ariaLabel={`${rowClue.shortLabel} and ${colClue.shortLabel}`}
+      panelClassName="w-full max-w-2xl max-h-[85vh] flex flex-col rounded-3xl border border-slate-200 bg-white shadow-modal overflow-hidden"
     >
-      <div
-        className="w-full max-w-2xl max-h-[85vh] flex flex-col rounded-3xl border border-slate-200 bg-white shadow-modal overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
         {/* Header */}
         <div className="bg-slate-50/80 px-6 py-5 border-b border-slate-200/80 flex items-center justify-between">
           <div>
@@ -51,8 +50,10 @@ export function CellInspectModal({
             </h3>
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="rounded-full p-2 text-slate-400 hover:bg-slate-200/60 hover:text-slate-700 transition"
+            aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
@@ -127,7 +128,6 @@ export function CellInspectModal({
             </div>
           </div>
         </div>
-      </div>
-    </div>
+    </ModalFrame>
   );
 }

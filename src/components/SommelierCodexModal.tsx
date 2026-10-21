@@ -1,9 +1,10 @@
 "use client";
 
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useRef, useState } from "react";
 import { ALL_WINE_ENTITIES } from "@/data/wineDatabase";
 import { CLUE_CATALOG } from "@/data/clueCatalog";
 import { EntityFilterMode } from "@/types/wine";
+import { ModalFrame } from "./ModalFrame";
 import { Search, X, Filter } from "lucide-react";
 
 interface SommelierCodexModalProps {
@@ -18,6 +19,7 @@ export function SommelierCodexModal({
   const [query, setQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState<EntityFilterMode>("all");
   const [selectedClueId, setSelectedClueId] = useState<string>("all");
+  const searchRef = useRef<HTMLInputElement>(null);
 
   const activeClue = useMemo(
     () => CLUE_CATALOG.find((c) => c.id === selectedClueId) || null,
@@ -40,17 +42,14 @@ export function SommelierCodexModal({
     });
   }, [query, typeFilter, activeClue]);
 
-  if (!isOpen) return null;
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/30 backdrop-blur-sm p-4"
-      onClick={onClose}
+    <ModalFrame
+      isOpen={isOpen}
+      onClose={onClose}
+      ariaLabel="WineGrid Codex"
+      initialFocusRef={searchRef}
+      panelClassName="w-full max-w-4xl max-h-[86vh] flex flex-col rounded-3xl border border-slate-200 bg-white shadow-modal overflow-hidden"
     >
-      <div
-        className="w-full max-w-4xl max-h-[86vh] flex flex-col rounded-3xl border border-slate-200 bg-white shadow-modal overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
         {/* Header */}
         <div className="bg-slate-50/80 px-6 py-5 border-b border-slate-200/80 flex items-center justify-between">
           <div>
@@ -62,8 +61,10 @@ export function SommelierCodexModal({
             </h2>
           </div>
           <button
+            type="button"
             onClick={onClose}
             className="rounded-full p-2 text-slate-400 hover:bg-slate-200/60 hover:text-slate-700 transition"
+            aria-label="Close"
           >
             <X className="w-5 h-5" />
           </button>
@@ -75,6 +76,7 @@ export function SommelierCodexModal({
             <div className="relative flex-1">
               <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
+                ref={searchRef}
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -162,7 +164,6 @@ export function SommelierCodexModal({
             </div>
           ))}
         </div>
-      </div>
-    </div>
+    </ModalFrame>
   );
 }

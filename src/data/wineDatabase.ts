@@ -1,4 +1,4 @@
-import { WineEntity, EntityFilterMode } from "@/types/wine";
+import { EntityFilterMode, WineEntity, WineEntityType } from "@/types/wine";
 import { APPELLATION_ENTITIES } from "./entities/appellations";
 import { GRAPE_ENTITIES } from "./entities/grapes";
 import { PRODUCER_ENTITIES } from "./entities/producers";
@@ -28,15 +28,35 @@ export function normalizeSearchText(text: string): string {
     .trim();
 }
 
+export interface WineEntitySearchOptions {
+  /** Cell-level type constraint. Applied before ranking so the list cannot leak other types. */
+  acceptedTypes?: WineEntityType[];
+  limit?: number;
+}
+
 export function searchWineEntities(
   query: string,
   filter: EntityFilterMode = "all",
-  excludeIds: Set<string> = new Set()
+  excludeIds: Set<string> = new Set(),
+  options: WineEntitySearchOptions = {}
 ): WineEntity[] {
-  const pool = getEntitiesByFilter(filter).filter((e) => !excludeIds.has(e.id));
+  const accepted = options.acceptedTypes?.length
+    ? new Set(options.acceptedTypes)
+    : null;
+  const pool = getEntitiesByFilter(filter).filter((entity) => {
+    if (excludeIds.has(entity.id)) return false;
+    if (accepted && !accepted.has(entity.entityType)) return false;
+    return true;
+  });
+  const limit = options.limit ?? 40;
   const q = normalizeSearchText(query);
   if (!q) {
-    return pool.slice(0, 25);
+    return [...pool]
+      .sort(
+        (a, b) =>
+          a.baseRarity - b.baseRarity || a.canonicalName.localeCompare(b.canonicalName)
+      )
+      .slice(0, limit);
   }
 
   const scored = pool
@@ -66,5 +86,5 @@ export function searchWineEntities(
     .filter((item) => item.score > 0)
     .sort((a, b) => b.score - a.score || a.entity.baseRarity - b.entity.baseRarity);
 
-  return scored.map((item) => item.entity).slice(0, 20);
+  return scored.map((item) => item.entity).slice(0, limit);
 }

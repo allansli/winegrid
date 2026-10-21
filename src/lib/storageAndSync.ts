@@ -2,6 +2,7 @@
 
 import { WINE_ENTITY_BY_ID } from "@/data/wineDatabase";
 import { DifficultyLevel, EntityFilterMode, GameMode } from "@/types/wine";
+import { MISS_BUDGET } from "./guessEconomy";
 import { getOrCreateAnonId, trackEvent } from "./observability";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "./supabase/client";
 
@@ -234,7 +235,10 @@ export async function saveGameSession(entry: GameHistoryEntry): Promise<GameHist
           row_clue_ids: entry.rowClueLabels,
           col_clue_ids: entry.colClueLabels,
           cells_state: entry.cells,
-          guesses_remaining: Math.max(0, 10 - entry.guessesUsed),
+          guesses_remaining:
+            entry.mode === "infinite"
+              ? MISS_BUDGET
+              : Math.max(0, MISS_BUDGET - entry.guessesUsed),
           correct_cells: entry.correctCells,
           rarity_score: entry.rarityScore,
           is_completed: entry.isCompleted,
