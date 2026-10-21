@@ -22,26 +22,23 @@ export function freshGuessBudget(): GuessBudget {
 }
 
 /**
- * A correct pick never spends the budget. A miss does, except in Infinite
- * where misses are counted but the board does not end.
+ * A correct pick never spends the budget. A miss does, including in Infinite,
+ * where the same three misses cover the whole run.
  */
 export function applyPick(
   budget: GuessBudget,
   outcome: "correct" | "miss",
-  mode: GameMode
+  _mode: GameMode
 ): GuessBudget {
   if (outcome === "correct") return budget;
-  if (mode === "infinite") {
-    return { missesRemaining: budget.missesRemaining, missesUsed: budget.missesUsed + 1 };
-  }
   return {
     missesRemaining: Math.max(0, budget.missesRemaining - 1),
     missesUsed: budget.missesUsed + 1,
   };
 }
 
-export function isMissBudgetExhausted(budget: GuessBudget, mode: GameMode): boolean {
-  return mode !== "infinite" && budget.missesRemaining <= 0;
+export function isMissBudgetExhausted(budget: GuessBudget, _mode: GameMode): boolean {
+  return budget.missesRemaining <= 0;
 }
 
 export interface LegacyBoardSnapshot {
@@ -76,10 +73,10 @@ export function restoreGuessBudget(
   const filled = saved.cells.filter((cell) => Boolean(cell.pickedEntityId)).length;
   const attempts = Math.max(0, LEGACY_GUESS_BUDGET - saved.guessesRemaining);
   const missesUsed = Math.max(0, attempts - filled);
-  if (mode === "infinite") {
-    return { missesRemaining: MISS_BUDGET, missesUsed };
-  }
   const clamped = Math.min(missesUsed, MISS_BUDGET);
+  if (mode === "infinite") {
+    return { missesUsed: clamped, missesRemaining: Math.max(0, MISS_BUDGET - clamped) };
+  }
   return {
     missesUsed: clamped,
     missesRemaining: Math.max(0, MISS_BUDGET - clamped),

@@ -42,11 +42,14 @@ describe("guess economy", () => {
     assert.equal(stayed.missesUsed, 4);
   });
 
-  it("counts infinite misses without ending the board", () => {
-    const next = applyPick(freshGuessBudget(), "miss", "infinite");
-    assert.equal(next.missesUsed, 1);
-    assert.equal(next.missesRemaining, MISS_BUDGET);
-    assert.equal(isMissBudgetExhausted(next, "infinite"), false);
+  it("spends infinite misses and ends the run at zero", () => {
+    let budget = freshGuessBudget();
+    budget = applyPick(budget, "miss", "infinite");
+    assert.equal(budget.missesUsed, 1);
+    assert.equal(budget.missesRemaining, 2);
+    budget = applyPick(budget, "miss", "infinite");
+    budget = applyPick(budget, "miss", "infinite");
+    assert.equal(isMissBudgetExhausted(budget, "infinite"), true);
   });
 
   it("migrates a legacy save that charged a correct pick", () => {

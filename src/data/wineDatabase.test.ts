@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { searchWineEntities } from "./wineDatabase";
+import { normalizeSearchText, searchWineEntities } from "./wineDatabase";
 
 describe("cell-scoped entity search", () => {
   it("does not list other types when a cell only accepts producers", () => {
@@ -30,6 +30,32 @@ describe("cell-scoped entity search", () => {
       acceptedTypes: ["producer"],
     });
     assert.equal(results[0]?.id, "prod-drc");
+  });
+
+  it("folds accents, hyphens, umlauts, and aliases", () => {
+    assert.equal(normalizeSearchText("Côte-Rôtie"), normalizeSearchText("Cote Rotie"));
+    assert.equal(normalizeSearchText("Grüner Veltliner"), normalizeSearchText("Gruener Veltliner"));
+    assert.equal(normalizeSearchText("Gewürztraminer"), normalizeSearchText("Gewuerztraminer"));
+    assert.equal(normalizeSearchText("Müller"), normalizeSearchText("Mueller"));
+    assert.equal(normalizeSearchText("Château d’Yquem"), normalizeSearchText("Chateau d'Yquem"));
+    assert.equal(normalizeSearchText("Xarel·lo"), normalizeSearchText("Xarello"));
+    assert.ok(searchWineEntities("Cote Rotie").some((entity) => entity.id === "app-cote-rotie"));
+    assert.ok(searchWineEntities("Chateauneuf du Pape").some((entity) => entity.id === "app-chateauneuf-du-pape"));
+    assert.ok(searchWineEntities("Saint Emilion").some((entity) => entity.id === "app-saint-emilion"));
+    assert.ok(searchWineEntities("St Emilion").some((entity) => entity.id === "app-saint-emilion"));
+    assert.ok(searchWineEntities("Mueller").some((entity) => entity.id === "prod-egon-muller"));
+    assert.ok(searchWineEntities("Gruener Veltliner").some((entity) => entity.id === "grape-gruner-veltliner"));
+    assert.ok(searchWineEntities("Gewuerztraminer").some((entity) => entity.id === "grape-gewurztraminer"));
+    assert.ok(searchWineEntities("Château d’Yquem").some((entity) => entity.id === "prod-chateau-dyquem"));
+    assert.ok(searchWineEntities("Xarello").some((entity) => entity.id === "app-cava"));
+  });
+
+  it("drops an entity that matches neither clue", () => {
+    const results = searchWineEntities("cava", "all", new Set(), {
+      matchesCell: (entity) =>
+        entity.macroRegion === "Rhône Valley" || entity.alsoRegions?.includes("Rhône Valley") === true,
+    });
+    assert.equal(results.some((entity) => entity.id === "app-cava"), false);
   });
 
   it("returns no producer when the cell only accepts grapes", () => {

@@ -5,6 +5,8 @@ import { ClueDefinition, MatrixCell } from "@/types/wine";
 import { WINE_ENTITY_BY_ID } from "@/data/wineDatabase";
 import { ModalFrame } from "./ModalFrame";
 import { useI18n } from "@/i18n/I18nProvider";
+import { localizedNote } from "@/i18n/notesPt";
+import { placeLabel } from "@/i18n/places";
 import { localizedClue } from "@/i18n/clues";
 import { X, Award, Sparkles } from "lucide-react";
 
@@ -84,11 +86,11 @@ export function CellInspectModal({
                 {pickedEntity.name}
               </div>
               <div className="text-xs text-slate-500 mt-0.5">
-                {pickedEntity.country} &bull; {pickedEntity.macroRegion} &bull;{" "}
+                {placeLabel(pickedEntity.country, locale, "country")} &bull; {placeLabel(pickedEntity.macroRegion, locale, "region")} &bull;{" "}
                 {pickedEntity.primaryGrapes.join(", ")}
               </div>
               <p className="text-sm text-slate-700 mt-3 leading-relaxed">
-                {pickedEntity.sommelierNote}
+                {localizedNote(pickedEntity.id, pickedEntity.sommelierNote, locale)}
               </p>
             </div>
           )}
@@ -117,7 +119,7 @@ export function CellInspectModal({
                           {entity.name}
                         </span>
                         <span className="ml-2 text-xs text-slate-500">
-                          {entity.country} &bull; {entity.macroRegion}
+                          {placeLabel(entity.country, locale, "country")} &bull; {placeLabel(entity.macroRegion, locale, "region")}
                         </span>
                       </div>
                       <span className="text-xs font-medium text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full capitalize">
@@ -131,7 +133,7 @@ export function CellInspectModal({
                       </span>
                     </div>
                     <p className="text-xs sm:text-sm text-slate-600 mt-2 leading-relaxed">
-                      {entity.sommelierNote}
+                      {localizedNote(entity.id, entity.sommelierNote, locale)}
                     </p>
                   </div>
                 );

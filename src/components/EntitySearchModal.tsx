@@ -8,6 +8,7 @@ import {
   WineEntityType,
 } from "@/types/wine";
 import { searchWineEntities } from "@/data/wineDatabase";
+import { placeLabel } from "@/i18n/places";
 import { movePickerIndex, pickerEnterAction } from "@/lib/pickerSelection";
 import { useI18n } from "@/i18n/I18nProvider";
 import { localizedClue } from "@/i18n/clues";
@@ -83,24 +84,32 @@ export function EntitySearchModal({
 
   const validIdSet = useMemo(() => new Set(validEntityIds), [validEntityIds]);
 
+  const searchOptions = {
+    acceptedTypes,
+    matchesCell: (entity: WineEntity) => rowClue.predicate(entity) || colClue.predicate(entity),
+    limit: query.trim() ? 25 : 40,
+  };
+
   const results = useMemo(() => {
-    return searchWineEntities(query, activeTypeTab, usedEntityIds, {
-      acceptedTypes,
-      limit: query.trim() ? 25 : 40,
-    });
-  }, [query, activeTypeTab, usedEntityIds, acceptedTypes]);
+    return searchWineEntities(query, activeTypeTab, new Set(), searchOptions);
+    // Predicates are stable for a cell. Depending on the clue objects would
+    // rebuild the list on every parent render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, activeTypeTab, acceptedKey, cellKey]);
 
   renderedQueryRef.current = query;
 
+  const usedKey = [...usedEntityIds].sort().join("|");
+
   useEffect(() => {
     const firstSelectable = results.findIndex(
-      (entity) => !hintsOn || validIdSet.has(entity.id)
+      (entity) =>
+        !usedEntityIds.has(entity.id) && (!hintsOn || validIdSet.has(entity.id))
     );
     setSelectedIndex(firstSelectable >= 0 ? firstSelectable : 0);
-    // Reset the highlight when the query or hint mode changes, not when the
-    // parent re-renders an equivalent result list.
+    // Reset the highlight when the query, hint mode, or used set changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, activeTypeTab, hintsOn]);
+  }, [query, activeTypeTab, hintsOn, usedKey]);
 
   const toggleHints = () => {
     setHintsOn((current) => {
@@ -114,14 +123,17 @@ export function EntitySearchModal({
     });
   };
 
-  const rows = results.map((entity) => ({
+  const rowFor = (entity: WineEntity) => ({
     id: entity.id,
-    selectable: !hintsOn || validIdSet.has(entity.id),
-  }));
+    selectable: !usedEntityIds.has(entity.id) && (!hintsOn || validIdSet.has(entity.id)),
+  });
+
+  const rows = results.map(rowFor);
 
   const commitIndex = (index: number) => {
     const entity = results[index];
     if (!entity) return;
+    if (usedEntityIds.has(entity.id)) return;
     if (hintsOn && !validIdSet.has(entity.id)) return;
     onSelectEntity(entity);
   };
@@ -136,16 +148,28 @@ export function EntitySearchModal({
     }
     if (event.key !== "Enter" || event.nativeEvent.isComposing) return;
     event.preventDefault();
+    const typed = event.currentTarget.value;
+    if (typed !== renderedQueryRef.current) {
+      const live = searchWineEntities(typed, activeTypeTab, new Set(), {
+        ...searchOptions,
+        limit: typed.trim() ? 25 : 40,
+      });
+      const decision = pickerEnterAction({
+        inputValue: typed,
+        renderedQuery: renderedQueryRef.current,
+        results: rows,
+        selectedIndex,
+        liveResults: live.map(rowFor),
+      });
+      if (decision.action === "select") onSelectEntity(live[decision.index]);
+      return;
+    }
     const decision = pickerEnterAction({
-      inputValue: event.currentTarget.value,
+      inputValue: typed,
       renderedQuery: renderedQueryRef.current,
       results: rows,
       selectedIndex,
     });
-    if (decision.action === "sync") {
-      setQuery(event.currentTarget.value);
-      return;
-    }
     if (decision.action === "select") commitIndex(decision.index);
   };
 
@@ -268,7 +292,8 @@ export function EntitySearchModal({
           </div>
         ) : (
           results.map((entity, index) => {
-            const selectable = !hintsOn || validIdSet.has(entity.id);
+            const used = usedEntityIds.has(entity.id);
+            const selectable = !used && (!hintsOn || validIdSet.has(entity.id));
             const isSelected = index === selectedIndex && selectable;
             return (
               <button
@@ -299,8 +324,8 @@ export function EntitySearchModal({
                     <TypeBadge type={entity.entityType} muted={!selectable} label={t(typeMessage(entity.entityType))} />
                   </div>
                   <div className="text-xs text-slate-500 mt-0.5">
-                    {entity.country} · {entity.macroRegion}
-                    {!selectable ? ` · ${t("picker.noFit")}` : ""}
+                    {placeLabel(entity.country, locale, "country")} · {placeLabel(entity.macroRegion, locale, "region")}
+                    {used ? ` · ${t("picker.used")}` : !selectable ? ` · ${t("picker.noFit")}` : ""}
                   </div>
                 </div>
                 <ArrowRight

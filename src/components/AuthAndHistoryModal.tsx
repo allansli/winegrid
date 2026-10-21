@@ -13,6 +13,7 @@ import {
 import { identifyObservabilityUser, trackEvent } from "@/lib/observability";
 import { ModalFrame } from "./ModalFrame";
 import { useI18n } from "@/i18n/I18nProvider";
+import { MessageKey } from "@/i18n/messages";
 import {
   Award,
   CheckCircle2,
@@ -23,6 +24,14 @@ import {
   UserCheck,
   X,
 } from "lucide-react";
+
+const RANK_KEYS: Record<string, MessageKey> = {
+  "Cellar Apprentice": "rank.apprentice",
+  "Certified Sommelier": "rank.certified",
+  "Advanced Sommelier": "rank.advanced",
+  "Master Sommelier": "rank.master",
+  "Max Rank Achieved": "rank.max",
+};
 
 interface AuthAndHistoryModalProps {
   isOpen: boolean;
@@ -45,6 +54,7 @@ export function AuthAndHistoryModal({
   onAuthChanged,
 }: AuthAndHistoryModalProps) {
   const { t } = useI18n();
+  const rankLabel = (rank: string) => (RANK_KEYS[rank] ? t(RANK_KEYS[rank]) : rank);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
@@ -87,9 +97,7 @@ export function AuthAndHistoryModal({
             const claimed = await mergeAnonymousHistoryOnSignIn(data.user.id);
             identifyObservabilityUser(data.user.id, email.trim());
             onAuthChanged({ id: data.user.id, email: email.trim() });
-            setStatusMessage(
-              `Signed in & synced ${claimed} anonymous game(s) to your profile.`
-            );
+            setStatusMessage(t("profile.signedInSynced", { n: claimed }));
           }
         }
       } catch (err: any) {
@@ -110,9 +118,7 @@ export function AuthAndHistoryModal({
       );
       onAuthChanged({ id: simulatedId, email: email.trim() });
       setLoading(false);
-      setStatusMessage(
-        `Signed in (${claimed} anonymous session(s) merged into your profile).`
-      );
+      setStatusMessage(t("profile.signedInDemo", { n: claimed }));
     }
   };
 
@@ -163,12 +169,12 @@ export function AuthAndHistoryModal({
                   <Award className="w-4 h-4" /> {t("profile.rank")}
                 </div>
                 <div className="font-display text-lg font-bold text-slate-900 mt-0.5">
-                  {stats.sommelierRank}
+                  {rankLabel(stats.sommelierRank)}
                 </div>
               </div>
               <div className="text-right">
                 <div className="text-xs text-slate-500">
-                  {t("profile.next", { rank: stats.nextRank })}
+                  {t("profile.next", { rank: rankLabel(stats.nextRank) })}
                 </div>
                 <div className="w-32 h-2 rounded-full bg-slate-200 overflow-hidden mt-1.5">
                   <div

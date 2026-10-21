@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useMemo, useRef, useState } from "react";
-import { ALL_WINE_ENTITIES } from "@/data/wineDatabase";
+import { ALL_WINE_ENTITIES, normalizeSearchText } from "@/data/wineDatabase";
+import { localizedNote } from "@/i18n/notesPt";
+import { placeLabel } from "@/i18n/places";
 import { CLUE_CATALOG } from "@/data/clueCatalog";
 import { EntityFilterMode } from "@/types/wine";
 import { ModalFrame } from "./ModalFrame";
@@ -31,20 +33,25 @@ export function SommelierCodexModal({
   );
 
   const filteredEntities = useMemo(() => {
-    const q = query.toLowerCase().trim();
+    const q = normalizeSearchText(query);
     return ALL_WINE_ENTITIES.filter((e) => {
       if (typeFilter !== "all" && e.entityType !== typeFilter) return false;
       if (activeClue && !activeClue.predicate(e)) return false;
       if (!q) return true;
-      return (
-        e.name.toLowerCase().includes(q) ||
-        e.country.toLowerCase().includes(q) ||
-        e.macroRegion.toLowerCase().includes(q) ||
-        e.primaryGrapes.some((g) => g.toLowerCase().includes(q)) ||
-        e.sommelierNote.toLowerCase().includes(q)
-      );
+      const fields = [
+        e.name,
+        e.canonicalName,
+        e.country,
+        e.macroRegion,
+        e.subRegion ?? "",
+        e.sommelierNote,
+        localizedNote(e.id, e.sommelierNote, locale),
+        ...e.aliases,
+        ...e.primaryGrapes,
+      ];
+      return fields.some((field) => normalizeSearchText(field).includes(q));
     });
-  }, [query, typeFilter, activeClue]);
+  }, [query, typeFilter, activeClue, locale]);
 
   return (
     <ModalFrame
@@ -154,7 +161,7 @@ export function SommelierCodexModal({
                       {entity.name}
                     </h3>
                     <div className="text-xs text-slate-500 mt-0.5">
-                      {entity.country} &bull; {entity.macroRegion}
+                      {placeLabel(entity.country, locale, "country")} &bull; {placeLabel(entity.macroRegion, locale, "region")}
                     </div>
                   </div>
                   <span className="shrink-0 rounded-full bg-slate-100 px-2.5 py-0.5 text-[11px] font-medium text-slate-600">
@@ -169,7 +176,7 @@ export function SommelierCodexModal({
                 </div>
 
                 <p className="text-xs text-slate-600 mt-3 leading-relaxed">
-                  {entity.sommelierNote}
+                  {localizedNote(entity.id, entity.sommelierNote, locale)}
                 </p>
               </div>
 

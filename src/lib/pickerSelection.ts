@@ -5,22 +5,28 @@ export interface PickerRow {
 
 export type PickerEnterAction =
   | { action: "select"; index: number }
-  | { action: "sync" }
   | { action: "noop" };
 
 /**
- * Enter may select the highlighted row only when that row was rendered for
- * the exact text currently in the input. If the field is ahead of React
- * state, sync first and do not guess.
+ * Enter picks from the text in the field right now. If that text is ahead of
+ * the rendered list, use the freshly searched rows and take their top match
+ * instead of a stale highlight.
  */
 export function pickerEnterAction(input: {
   inputValue: string;
   renderedQuery: string;
   results: PickerRow[];
   selectedIndex: number;
+  liveResults?: PickerRow[];
 }): PickerEnterAction {
-  if (input.inputValue !== input.renderedQuery) return { action: "sync" };
-  const row = input.results[input.selectedIndex];
+  const live = input.inputValue !== input.renderedQuery;
+  const rows = live ? input.liveResults ?? [] : input.results;
+  if (live) {
+    const index = rows.findIndex((row) => row.selectable);
+    if (index < 0) return { action: "noop" };
+    return { action: "select", index };
+  }
+  const row = rows[input.selectedIndex];
   if (!row || !row.selectable) return { action: "noop" };
   return { action: "select", index: input.selectedIndex };
 }

@@ -4,6 +4,7 @@ import { CLUE_BY_ID } from "../data/clueCatalog";
 import { DifficultyLevel, EntityFilterMode } from "../types/wine";
 import {
   DAILY_DIFFICULTY,
+  assignmentSurvivesAnyPick,
   dailySeedForDate,
   generateDailyBoard,
   generateWineGridBoard,
@@ -43,22 +44,26 @@ const TECHNICAL_CLUE_IDS = [
 ];
 
 function assertCellFloors(board: ReturnType<typeof generateWineGridBoard>) {
-  const floor = minimumValidAnswers(board.difficulty);
-  assert.ok(floor >= (board.difficulty === "wset2" ? 3 : 2));
+  const min = minimumValidAnswers(board.difficulty);
   for (const cell of board.cells) {
     assert.ok(
-      cell.validEntityIds.length >= floor,
-      `${board.boardId} cell ${cell.index} has ${cell.validEntityIds.length}, need ${floor}`
+      cell.validEntityIds.length >= min,
+      `${board.boardId} cell ${cell.index} has ${cell.validEntityIds.length}, need at least ${min}`
     );
   }
   assert.equal(new Set(board.guaranteedSolution).size, 9);
+  assert.equal(
+    assignmentSurvivesAnyPick(board.cells.map((cell) => cell.validEntityIds)),
+    true,
+    board.boardId
+  );
 }
 
 describe("board difficulty floors", () => {
   it("keeps the easy tier on broad clues and the technical clues off it", () => {
     assert.equal(DAILY_DIFFICULTY, "wset2");
     assert.equal(minimumValidAnswers("wset2"), 3);
-    assert.equal(minimumValidAnswers("wset3"), 2);
+    assert.equal(minimumValidAnswers("wset3"), 3);
     assert.equal(minimumValidAnswers("master_somm"), 2);
     for (const id of BROAD_CLUE_IDS) {
       assert.equal(CLUE_BY_ID[id]?.difficulty, "wset2", id);
@@ -115,5 +120,17 @@ describe("board difficulty floors", () => {
       first.colClues.map((clue) => clue.id),
       again.colClues.map((clue) => clue.id)
     );
+  });
+
+  it("keeps the appellation category off most daily boards", () => {
+    let appellationDays = 0;
+    for (let day = 0; day < 365; day++) {
+      const date = new Date(Date.UTC(2026, 0, 1 + day)).toISOString().slice(0, 10);
+      const board = generateDailyBoard(date);
+      const ids = [...board.rowClues, ...board.colClues].map((clue) => clue.id);
+      if (ids.includes("type-appellation")) appellationDays++;
+      assertCellFloors(board);
+    }
+    assert.ok(appellationDays < 80, `type-appellation on ${appellationDays}/365 days`);
   });
 });

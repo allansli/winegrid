@@ -8,14 +8,18 @@ const rows = [
 ];
 
 describe("picker enter sync", () => {
-  it("does not select when the field is ahead of the rendered query", () => {
+  it("picks the top match of the live query when the field is ahead of the list", () => {
     const action = pickerEnterAction({
-      inputValue: "Romanee-Conti",
-      renderedQuery: "Romanee-Cont",
-      results: rows,
+      inputValue: "Chardonnay",
+      renderedQuery: "Char",
+      results: [{ id: "marlborough", selectable: true }],
       selectedIndex: 0,
+      liveResults: [
+        { id: "grape-chardonnay", selectable: true },
+        { id: "app-chablis", selectable: true },
+      ],
     });
-    assert.deepEqual(action, { action: "sync" });
+    assert.deepEqual(action, { action: "select", index: 0 });
   });
 
   it("selects the highlighted row only when the list matches the field", () => {
