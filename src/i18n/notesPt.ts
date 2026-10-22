@@ -37,6 +37,38 @@ export const PT_NOTES: Record<string, string> = {
     "Denominação de vilarejo no sul da Côte de Beaune (AOC em 1937, 55 Premiers Crus), dividida com Remigny; a comuna também abriga os Grands Crus Montrachet, Bâtard-Montrachet e Criots-Bâtard-Montrachet. Chardonnay e Pinot Noir crescem lado a lado, em solos que vão do calcário pedregoso à marga e a solos arenosos, a 220-325 m. Os brancos têm mineralidade profunda de pederneira.",
   "app-pommard":
     "Denominação de vilarejo só de tintos da Côte de Beaune, entre Beaune e Volnay, uma das primeiras AOCs (1936), com 28 Premiers Crus, à frente Les Rugiens e Les Épenots. Pinot Noir em aluvião antigo embaixo, argila calcária bem drenada a meia encosta e margas oxfordianas e calcário pardo no alto. Cor profunda e taninos densos, que pedem tempo.",
+  "app-chambolle-musigny":
+    "Denominação de vilarejo só de tintos da Côte de Nuits (AOC em 1936, 24 Premiers Crus, Les Amoureuses o mais conhecido); a comuna também tem os Grands Crus Musigny e Bonnes-Mares. Pinot Noir em solo raso sobre calcário jurássico duro, voltado para leste a 250-300 m. Já pertenceu à Abadia de Cîteaux. Violeta e frutas vermelhas quando jovem; trufa e sub-bosque com a idade.",
+  "app-vosne-romanee":
+    "Denominação de vilarejo só de tintos da Côte de Nuits, dividida com Flagey-Échezeaux, com 14 Premiers Crus em torno dos Grands Crus Romanée-Conti, La Tâche, Richebourg, Romanée-Saint-Vivant, La Romanée e La Grande Rue. Pinot Noir em calcário misturado a margas argilosas, voltado para leste. Aveludado e muitas vezes encorpado; austero quando jovem, evolui para especiarias, frutas em compota e caça.",
+  "app-nuits-saint-georges":
+    "Denominação de vilarejo que dá nome à Côte de Nuits (AOC em 1936, 41 Premiers Crus), nas comunas de Nuits-Saint-Georges e Premeaux-Prissey. Quase tudo Pinot Noir, com raros brancos de Chardonnay. Solos de aluvião pedregoso e calcário margoso profundo até rocha quase aflorando no alto da encosta. Rosa e alcaçuz no nariz, encorpado e mastigável, evolui para couro e trufa.",
+  "app-corton":
+    "A colina de Corton reúne o Grand Cru tinto da Côte de Beaune, Corton (AOC em 1937, sobretudo Pinot Noir em calcário pardo avermelhado e pedregoso e marga rica em potássio a meia encosta), e o Grand Cru branco Corton-Charlemagne (só Chardonnay, na parte alta e íngreme, de marga e calcário). Carlos Magno doou estas vinhas à comunidade de Saint-Andoche de Saulieu em 775. O tinto mostra violeta e kirsch; o branco, mineralidade de pederneira.",
+  "app-beaune":
+    "Denominação de vilarejo da capital do vinho da Borgonha (AOC em 1936, 42 Premiers Crus), sede do leilão dos Hospices de Beaune e um dos maiores vinhedos da Côte. Sobretudo Pinot Noir, com algum Chardonnay, em rendzinas finas sobre calcário no alto e margas e calcário misturado com argila mais abaixo. Os tintos passam de frutas negras e vermelhas a trufa e couro. A cidade faz parte do sítio Climats da UNESCO.",
+  "app-pouilly-fuisse":
+    "Denominação de vilarejo só de brancos do Mâconnais (AOC em 1936, 22 Premiers Crus desde 2020), sob as rochas de Solutré e Vergisson, nas comunas de Fuissé, Solutré-Pouilly, Vergisson e Chaintré. Só Chardonnay, em argila calcária jurássica com cascalho de encosta, voltada para leste e sudeste a 200-300 m. Notas minerais de pederneira com amêndoa, cítricos e brioche. Não confundir com o Pouilly-Fumé, do Loire.",
+  "app-pouilly-fume":
+    "Denominação da margem direita do Loire, na Nièvre, em torno da colina de Saint-Andelain (AOC em 1937), plantada só com Sauvignon Blanc, chamada ali de Blanc Fumé. Três solos: margas kimmeridgianas (terres blanches), calcário (caillottes) e argila com sílex. O rio atenua o frio. Brancos secos com nota mineral de pederneira; vizinho do Sancerre do outro lado do Loire.",
+  "app-rueda":
+    "DO castelhana de brancos na depressão central do Douro (Duero), a 700-870 m, baseada na uva nativa Verdejo. O Consejo Regulador descreve clima continental, com invernos longos e frios e verões quentes e secos, e grande amplitude entre dia e noite, que preserva a acidez, em solos pedregosos 'cascajosos' nos terraços aluviais do Douro. A colheita costuma ser noturna. Brancos herbáceos e frutados, de ótima acidez e leve amargor final.",
+  "grape-pinot-gris":
+    "Parente de casca acinzentada da Pinot Noir e uma das uvas permitidas na AOC Alsace, onde o vinho deve ir para a garrafa flûte da Alsácia. O Pinot Gris d'Alsace é amplo e encorpado, com notas defumadas, frutas secas, damasco, mel e cera de abelha, sustentado por boa acidez. Também é colhido tarde para Vendanges Tardives e com bagos botritizados para Sélection de Grains Nobles. Na Itália, é a Pinot Grigio.",
+  "grape-pinot-meunier":
+    "Uma das três principais uvas da Champagne, com cerca de 31% dos vinhedos. Brota tarde, por isso sofre menos com geadas e se adapta aos solos mais argilosos do Vale do Marne e a condições mais duras. O nome, 'moleiro', vem do aspecto farinhento das folhas jovens. No corte, traz redondeza e fruta; seus vinhos tendem a evoluir mais rápido que os de Pinot Noir ou Chardonnay.",
+  "grape-melon-de-bourgogne":
+    "A única uva do Muscadet Sèvre et Maine ('le seul cépage melon B'), cultivada a sudeste de Nantes em micaxistos, gnaisse, gabro e granodiorito da era Primária, com verões frescos pelas brisas do oceano. Os vinhos 'sur lie' ficam sobre as borras finas durante o inverno após a colheita, o que dá redondeza, nota mineral salina e leve perlage.",
+  "grape-marsanne":
+    "Uva branca emblemática do norte do Rhône, muitas vezes em corte com a Roussanne, e também usada nos cortes do sul. Gosta de solos quentes e pedregosos e dá brancos potentes, de acidez média a baixa, florais quando jovens e com avelã com a idade, às vezes com leve amargor final. Feita em versão tranquila, espumante (Saint-Péray) e como vin de paille doce.",
+  "grape-roussanne":
+    "Uva branca tradicional dos crus do norte do Rhône, muitas vezes com a Marsanne, e também plantada em Châteauneuf-du-Pape. Prefere solos de encosta quentes, pedregosos e bem drenados. Dá vinhos elegantes e complexos, com madressilva e íris que evoluem para frutas secas e mel, boa estrutura e grande potencial de guarda. Feita tranquila, espumante e como vin de paille doce.",
+  "grape-muscat-petits-grains":
+    "A Muscat de bagos pequenos, única uva do Muscat de Beaumes-de-Venise, o vin doux naturel do Rhône (AOC em 1945), de Beaumes-de-Venise e Aubignan, ao pé das Dentelles de Montmirail. As uvas são colhidas à mão com pelo menos 252 g/l de açúcar, e a fermentação é interrompida com aguardente. Clima mediterrâneo com Mistral, em solos areno-argilosos, as 'terres blondes'. Branco, com mel, damasco e flores; existe uma rara mutação tinta.",
+  "grape-verdejo":
+    "A uva nativa e emblema de Rueda, cultivada ali há mais de dez séculos. Adapta-se aos solos pedregosos 'cascajosos', à altitude e à grande amplitude térmica entre dia e noite do planalto do Douro. Seus vinhos mostram ervas de mato, fruta, ótima acidez e um leve amargor final característico.",
+  "grape-garganega":
+    "A principal uva do Soave, com no mínimo 70% do corte pelas regras do Soave DOC. O disciplinare oficial chama os solos tufáceos basálticos de origem vulcânica das colinas do Soave, com afloramentos basálticos calcários, de solo ideal para a Garganega. O Soave é seco, de corpo médio e levemente amargo; a região tem também uma antiga tradição de vinhos de uvas secas (Recioto).",
   "app-morgon":
     "Centrado na Côte du Py, de xisto manganês decomposto ('roche pourrie') e diorito vulcânico azul. Pode 'morgonner': evoluir na garrafa até lembrar um Pinot Noir estruturado da Côte de Nuits.",
   "app-cote-rotie":

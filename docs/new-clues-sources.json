@@ -246,5 +246,21 @@
   "status": "200",
   "strength": "academic",
   "quote": "Argissolos Vermelho-Amarelo … textura argilosa e … Argissolos Amarelos … média/argilosa … arenosa/média"
+ },
+ {
+  "card": "grape-melon-de-bourgogne",
+  "tag": "gneiss",
+  "url": "https://info.agriculture.gouv.fr/boagri/document_administratif-55d03fa0-d4a5-4687-81e0-55c6353e73e2/telechargement",
+  "status": "200",
+  "strength": "official (Muscadet Sèvre et Maine CDC, BO Agri 11 Dec 2025); regional anchor for a grape card, FLAGGED",
+  "quote": "Les vins sont issus du seul cépage melon B ... gneiss entrecoupés de filons de roches vertes ... orthogneiss"
+ },
+ {
+  "card": "grape-muscat-petits-grains",
+  "tag": "sandy_soil",
+  "url": "https://www.vins-rhone.com/en/aoc-vin-doux-naturel-muscat-de-beaumes-de-venise",
+  "status": "200",
+  "strength": "official interprofession (Inter Rhône); regional anchor for a grape card, FLAGGED",
+  "quote": "made exclusively from Muscat à Petits Grains ... Soils are made up of the sandy clay \"Terres Blondes\""
  }
 ]

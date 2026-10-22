@@ -217,6 +217,23 @@ describe("cell-scoped entity search", () => {
     }
   });
 
+  it("finds Vosne, Pouilly-Fumé, Garganega, and both Pouillys by name", () => {
+    const named = (query: string) =>
+      searchWineEntities(query, "all", new Set(), { scope: "name", limit: 40 });
+    assert.equal(named("vosne")[0]?.id, "app-vosne-romanee");
+    assert.equal(named("pouilly fume")[0]?.id, "app-pouilly-fume");
+    assert.equal(named("garganega")[0]?.id, "grape-garganega");
+    const pouilly = named("pouilly").map((entity) => entity.id);
+    assert.equal(pouilly.includes("app-pouilly-fuisse"), true);
+    assert.equal(pouilly.includes("app-pouilly-fume"), true);
+    for (const id of ["app-pouilly-fuisse", "app-pouilly-fume"]) {
+      const entity = WINE_ENTITY_BY_ID[id];
+      const fields = [entity.name, entity.canonicalName, ...entity.aliases].join(" ");
+      assert.match(normalizeSearchText(fields), /pouilly/);
+      assert.equal(normalizeSearchText(entity.macroRegion).includes("pouilly"), false);
+    }
+  });
+
   it("matches Almaviva and Don Melchor in the Codex Mediterranean filter", () => {
     assert.equal(codexClueMatcher("all"), undefined);
     const matchesClue = codexClueMatcher("clim-mediterranean");

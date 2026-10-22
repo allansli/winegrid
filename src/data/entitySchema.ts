@@ -254,17 +254,83 @@ export const EMPTY_REQUIRED_TAG_ALLOWLIST: Readonly<Record<string, readonly (typ
   // Embrapa classes the Campanha nights as temperate to warm, so diurnal_shift is not supported,
   // and the first-party terroir page names no other climate feature.
   "prod-salton": ["climates"],
-  // Full-review batch. Aligoté: the Bourgogne CDC gives a cool oceanic climate with continental influences in the east, which states neither climate tag for this place; the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated;
+  // Full-review batch. Aligoté: WSET maps the CDC's continental influence to the Continental tag, so climates is filled;
+  // the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated;
   // the sheet says "liveliness and citrus", which is not an explicit high-acid statement.
-  "grape-aligote": ["climates", "vinification", "sensory"],
-  // Puligny-Montrachet: the Bourgogne CDC gives a cool oceanic climate with continental influences in the east, which states neither climate tag for this place; the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated.
-  "app-puligny-montrachet": ["climates", "vinification"],
-  // Volnay: the Bourgogne CDC gives a cool oceanic climate with continental influences in the east, which states neither climate tag for this place; the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated.
-  "app-volnay": ["climates", "vinification"],
-  // Chassagne-Montrachet: the Bourgogne CDC gives a cool oceanic climate with continental influences in the east, which states neither climate tag for this place; the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated.
-  "app-chassagne-montrachet": ["climates", "vinification"],
-  // Pommard: the Bourgogne CDC gives a cool oceanic climate with continental influences in the east, which states neither climate tag for this place; the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated; the sheet gives dense, chewy tannins but no acidity, so high_tannin_high_acid is not stated.
-  "app-pommard": ["climates", "vinification", "sensory"],
+  "grape-aligote": ["vinification", "sensory"],
+  // Puligny-Montrachet: WSET maps the CDC's continental influence to the Continental tag, so climates is filled;
+  // the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated.
+  "app-puligny-montrachet": ["vinification"],
+  // Volnay: WSET maps the CDC's continental influence to the Continental tag, so climates is filled;
+  // the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated.
+  "app-volnay": ["vinification"],
+  // Chassagne-Montrachet: WSET maps the CDC's continental influence to the Continental tag, so climates is filled;
+  // the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated.
+  "app-chassagne-montrachet": ["vinification"],
+  // Pommard: WSET maps the CDC's continental influence to the Continental tag, so climates is filled;
+  // the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated;
+  // the sheet gives dense, chewy tannins but no acidity, so high_tannin_high_acid is not stated.
+  "app-pommard": ["vinification", "sensory"],
+  // Full-review batch 2. Chambolle-Musigny. Continental is tagged from the CDC's continental influence, as WSET maps it.
+  // Vinification: the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated.
+  "app-chambolle-musigny": ["vinification"],
+  // Full-review batch 2. Vosne-Romanée. Continental is tagged from the CDC's continental influence, as WSET maps it.
+  // Vinification: the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated.
+  // Sensory: the BIVB sheet says 'often full-bodied' and tannic, but the full-bodied clue also requires high alcohol
+  // (14% typical), which is not stated.
+  "app-vosne-romanee": ["vinification", "sensory"],
+  // Full-review batch 2. Nuits-Saint-Georges. Continental is tagged from the CDC's continental influence, as WSET maps it.
+  // Vinification: the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated.
+  "app-nuits-saint-georges": ["vinification"],
+  // Full-review batch 2. Corton. Continental is tagged from the CDC's continental influence, as WSET maps it.
+  // Vinification: the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated.
+  "app-corton": ["vinification"],
+  // Full-review batch 2. Beaune. Continental is tagged from the CDC's continental influence, as WSET maps it.
+  // Vinification: the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated.
+  "app-beaune": ["vinification"],
+  // Full-review batch 2. Pouilly-Fuissé. Continental is tagged from the CDC's continental influence, as WSET maps it.
+  // Vinification: the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated.
+  "app-pouilly-fuisse": ["vinification"],
+  // Full-review batch 2. Pouilly-Fumé. climates: INAO says only that the Loire tempers cold temperatures and that
+  // nights are cool, which states neither maritime nor continental; vinification: INAO and the appellation body
+  // give no winemaking rule for the dry whites.
+  "app-pouilly-fume": ["climates", "vinification"],
+  // Full-review batch 2. Rueda. vinification: the Consejo Regulador names night harvesting, which maps to no
+  // vinification tag; bottleShapes: no official bottle rule is stated for Rueda, and the existing cards' shapes
+  // would be a guess; sensory: the Consejo Regulador says 'excelente acidez', which is not the laser-sharp, low-pH
+  // benchmark the clue requires.
+  "app-rueda": ["vinification", "bottleShapes", "sensory"],
+  // Full-review batch 2. Pinot Gris. soils: Vins d'Alsace describes a mosaic of soils for the region but names none
+  // for Pinot Gris, so no soil tag is stated for the grape; vinification: no winemaking practice is stated for
+  // Pinot Gris by the official sources; sensory: Vins d'Alsace says full-bodied, but the full-bodied clue also
+  // requires high alcohol (14% typical), which is not stated; smoky notes match no tag.
+  "grape-pinot-gris": ["soils", "vinification", "sensory"],
+  // Full-review batch 2. Meunier. soils: champagne.fr says only 'soils that contain more clay', which matches no
+  // soil tag; climates: champagne.fr says only 'harsher climatic conditions', which matches no climate tag;
+  // vinification: no winemaking practice is stated for Meunier itself; sensory: 'roundness' and quicker ageing
+  // match no sensory tag.
+  "grape-pinot-meunier": ["soils", "climates", "vinification", "sensory"],
+  // Full-review batch 2. Marsanne. soils: Inter Rhône says 'warm rocky soils', which matches no soil tag; climates:
+  // Inter Rhône states no climate for the grape; vinification: no winemaking practice is stated for Marsanne;
+  // sensory: 'powerful' with medium to low acidity matches no sensory tag; power is not stated body.
+  "grape-marsanne": ["soils", "climates", "vinification", "sensory"],
+  // Full-review batch 2. Roussanne. soils: Inter Rhône names warm, stony, well-drained or silty-limestone stony
+  // soils, which match no single soil tag; climates: Inter Rhône states no climate for the grape; vinification: no
+  // winemaking practice is stated for Roussanne; sensory: floral (honeysuckle, iris) and 'vins de garde' match no
+  // sensory tag; violet/rose and 20-year cellaring are not stated.
+  "grape-roussanne": ["soils", "climates", "vinification", "sensory"],
+  // Full-review batch 2. Muscat Blanc à Petits Grains. vinification: mutage (fortification) is the style tag, and
+  // no vinification tag matches it; sensory: INAO gives white flowers, apricot and honey, which match no sensory
+  // tag (no botrytis); bottleShapes: no official bottle rule is stated for Muscat de Beaumes-de-Venise.
+  "grape-muscat-petits-grains": ["vinification", "sensory", "bottleShapes"],
+  // Full-review batch 2. Verdejo. vinification: no winemaking practice is stated for Verdejo by the Consejo
+  // Regulador; bottleShapes: no official bottle rule is stated for Verdejo; sensory: the Consejo Regulador says
+  // 'excelente acidez', which is not the laser-sharp, low-pH benchmark the clue requires.
+  "grape-verdejo": ["vinification", "bottleShapes", "sensory"],
+  // Full-review batch 2. Garganega. climates: the MASAF disciplinare says only 'clima mite e temperato', which is no climate tag;
+  // vinification: no vinification tag is stated (appassimento is a style tag); sensory: 'medio corpo' with a
+  // bitter-almond finish matches no sensory tag.
+  "grape-garganega": ["climates", "vinification", "sensory"],
 };
 
 export interface EntityValidationContext {

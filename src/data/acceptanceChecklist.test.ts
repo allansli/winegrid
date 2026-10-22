@@ -223,8 +223,8 @@ describe("acceptance checklist: clues", () => {
     assert.equal(CLUE_BY_ID["geo-south-america"].difficulty, "wset2");
     assert.equal(clueCardCount("geo-south-america-all"), 36);
     assert.equal(clueCardCount("vin-used-large-oak"), 7);
-    assert.equal(clueCardCount("soil-sandy"), 22);
-    assert.equal(clueCardCount("soil-granite"), 42);
+    assert.equal(clueCardCount("soil-sandy"), 23);
+    assert.equal(clueCardCount("soil-granite"), 43);
     assert.equal(clueCardCount("clim-tropical-double-pruning"), 3);
     assert.equal(CLUE_BY_ID["clim-tropical-double-pruning"].difficulty, "wset3");
     const doubles = ALL_WINE_ENTITIES.filter((entity) =>
