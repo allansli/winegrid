@@ -19,7 +19,6 @@ import { localizedClue, PT_CLUE_COPY } from "../i18n/clues";
 import { PT_NOTES } from "../i18n/notesPt";
 import { entityOriginLine } from "../i18n/places";
 import { displayEntityName } from "../lib/entityName";
-import { readHintsOn, writeHintsOn } from "../lib/hintsPreference";
 import { DIFFICULTY_TUNING } from "../lib/difficultyTuning";
 import {
   createPrng,
@@ -242,11 +241,10 @@ describe("acceptance checklist: answers and Codex", () => {
         const queries = [entity.name, entity.canonicalName, ...entity.aliases];
         for (const query of queries) {
           assert.ok(searchQuery(query), `${entity.id} ${query}`);
-          assert.equal(entityMatchesSearch(entity, query, locale, "identity"), true, `${locale} ${entity.id} ${query}`);
-          assert.equal(entityMatchesSearch(entity, query, locale, "full"), true, `${locale} ${entity.id} ${query}`);
+          assert.equal(entityMatchesSearch(entity, query, locale, "name"), true, `${locale} ${entity.id} ${query}`);
           const plain = accentFree(query);
           if (plain !== query) {
-            assert.equal(entityMatchesSearch(entity, plain, locale, "identity"), true, `${locale} ${entity.id} ${plain}`);
+            assert.equal(entityMatchesSearch(entity, plain, locale, "name"), true, `${locale} ${entity.id} ${plain}`);
           }
         }
       }
@@ -286,21 +284,6 @@ describe("acceptance checklist: answers and Codex", () => {
     assert.equal(narrowed.some((entity) => entity.id === "prod-almaviva"), true);
     assert.equal(narrowed.some((entity) => entity.id === "prod-don-melchor"), true);
     assert.equal(reset.length, ALL_WINE_ENTITIES.length);
-  });
-
-  it("keeps the Hints toggle in storage across a locale change", () => {
-    const saved = new Map<string, string>();
-    const storage = {
-      getItem: (key: string) => saved.get(key) ?? null,
-      setItem: (key: string, value: string) => {
-        saved.set(key, value);
-      },
-    };
-    writeHintsOn(storage, true);
-    storage.setItem("winegrid_locale_v1", "pt-BR");
-    assert.equal(readHintsOn(storage), true);
-    storage.setItem("winegrid_locale_v1", "en");
-    assert.equal(readHintsOn(storage), true);
   });
 
   it("strips entity-type suffixes from titles", () => {

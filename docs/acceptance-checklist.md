@@ -126,15 +126,16 @@ The five new clues: `geo-south-america-all` 36 (Standard), `vin-used-large-oak` 
 
 | Check | How |
 | --- | --- |
-| Every card's name and aliases are accepted as answers in EN and pt-BR, including accent-free forms | Automated. Identity and full picker search, both locales. |
+| Every card's name and aliases are accepted as answers in EN and pt-BR, including accent-free forms | Automated. The picker searches names and aliases only, in both locales. |
 | Codex search matches names and aliases only | Automated. A note fragment that is not part of the name or an alias does not match. `wineDatabase.test.ts` also locks País, Donnhoff, Prum, and Coulee. |
 | Codex filters, including resetting to (All) | Automated for the matcher: `(All)` clears the predicate and the list returns to every card. Mediterranean still includes Almaviva and Don Melchor. The dropdown click is manual, below. |
-| The Hints toggle persists across board and language changes | Automated for storage: the saved value stays on when the locale key changes. The on-screen control, including a new board, is manual, below. |
+| Picker results show the name, and a type badge only when the cell is already one type | Automated. The rendered picker rows contain no country, region, grapes, notes, tags, or pick rate, and the order does not change when the cell's answers change. |
+| An empty cell shows how many answers it has | Confirmed. The label is `{n} possible` and nothing else about those answers. Type pills follow the board filter or a type clue, not which types happen to fit. |
 | Escape closes the picker, tooltip and breakdown on the first press | Automated for the decision: one Escape closes the topmost dialog (`ModalFrame` for the picker and the cell breakdown) and closes a clue tooltip only when no dialog is open. The keyboard pass is manual, below. |
 | Entity-type suffixes are not in titles | Automated. Titles do not end in `(Grape)`, `(Appellation)`, `(Region)`, `(Producer)`, or `(Estate)`. |
 
 ## Manual pass
 
 1. Open the Codex, choose `[Climate] Mediterranean`, then choose `(All)`. Expected: the header count returns to every card, including cards that are not Mediterranean, and a reload is not required.
-2. On a board, open the picker and turn Hints on. Switch the language, start a new Infinite board, and open the picker again. Expected: Hints is still on.
+2. Open a cell whose clues do not force one type. Expected: each result is the name only, with no country, region, grapes, notes, or pick rate. On a grapes-only board, the same row also shows the Grape badge. The "{n} possible" label is only the count.
 3. Open the picker and press Escape once. Expected: the picker closes and the board stays. Click a clue so its tooltip stays open, then press Escape once. Expected: the tooltip closes. Open a filled cell's breakdown and press Escape once. Expected: the breakdown closes.

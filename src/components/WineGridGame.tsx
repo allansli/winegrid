@@ -32,7 +32,7 @@ import {
   boardStillSolvable,
   generateWineGridBoard,
 } from "@/lib/matrixGenerator";
-import { evaluatePick, validEntityIds } from "@/lib/pickerList";
+import { cellAcceptedTypes, evaluatePick, validEntityIds } from "@/lib/pickerList";
 import {
   ECONOMY_VERSION,
   MISS_BUDGET,
@@ -1112,18 +1112,15 @@ export function WineGridGame() {
     return "bg-emerald-100 text-emerald-800 border border-emerald-200";
   };
 
-  const getCellAcceptedTypes = useCallback((cell: MatrixCell): WineEntityType[] => {
-    const typesSet = new Set<WineEntityType>();
-    for (const id of validEntityIds(cell)) {
-      const ent = WINE_ENTITY_BY_ID[id];
-      if (ent) typesSet.add(ent.entityType);
-    }
-    const ordered: WineEntityType[] = [];
-    if (typesSet.has("appellation")) ordered.push("appellation");
-    if (typesSet.has("grape")) ordered.push("grape");
-    if (typesSet.has("producer")) ordered.push("producer");
-    return ordered.length > 0 ? ordered : ["appellation", "grape", "producer"];
-  }, []);
+  const getCellAcceptedTypes = useCallback(
+    (cell: MatrixCell): WineEntityType[] =>
+      cellAcceptedTypes({
+        entityFilter: board?.entityFilter ?? entityFilter,
+        rowClueId: cell.rowClueId,
+        colClueId: cell.colClueId,
+      }),
+    [board?.entityFilter, entityFilter]
+  );
 
   const formatEntityTypeLabel = (type: WineEntityType) => {
     if (type === "appellation") return t("type.region");

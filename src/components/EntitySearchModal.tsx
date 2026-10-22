@@ -7,11 +7,9 @@ import {
   WineEntity,
   WineEntityType,
 } from "@/types/wine";
-import { searchWineEntities, WINE_ENTITY_BY_ID } from "@/data/wineDatabase";
-import { entityOriginLine } from "@/i18n/places";
+import { searchWineEntities } from "@/data/wineDatabase";
 import { displayEntityName } from "@/lib/entityName";
-import { readHintsOn, writeHintsOn } from "@/lib/hintsPreference";
-import { buildPickerResults, entityFitsCell, validEntities, validEntityIds } from "@/lib/pickerList";
+import { buildPickerResults, validEntityIds } from "@/lib/pickerList";
 import { movePickerIndex, pickerEnterAction } from "@/lib/pickerSelection";
 import { useI18n } from "@/i18n/I18nProvider";
 import { localizedClue } from "@/i18n/clues";
@@ -56,14 +54,6 @@ export function EntitySearchModal({
   const [query, setQuery] = useState("");
   const [activeTypeTab, setActiveTypeTab] = useState<EntityFilterMode>("all");
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const [hintsOn, setHintsOn] = useState(() =>
-    typeof window === "undefined" ? false : readHintsOn(window.localStorage)
-  );
-  // Language switches re-render this modal. The saved toggle is the source
-  // of truth, so a locale change must not put the button back to off.
-  useEffect(() => {
-    setHintsOn(readHintsOn(window.localStorage));
-  }, [locale]);
   const inputRef = useRef<HTMLInputElement>(null);
   const renderedQueryRef = useRef("");
 
@@ -81,38 +71,24 @@ export function EntitySearchModal({
   }, [isOpen, cellKey, acceptedKey]);
 
   const answerSource = useMemo(() => validEntityIds({ validEntityIds: answerIds }), [answerIds]);
-
-  const fittingEntities = useMemo(
-    () => validEntities({ validEntityIds: answerSource }, WINE_ENTITY_BY_ID),
-    [answerSource]
-  );
+  const showTypeBadge = acceptedTypes.length === 1;
 
   const searchOptions = {
     acceptedTypes,
     locale,
-    scope: hintsOn ? ("full" as const) : ("identity" as const),
+    scope: "name" as const,
   };
 
-  const extraEntities = useMemo(() => {
-    // Hints off searches name, alias, and place. Hints on uses the full scope
-    // when it filters the valid set, and does not use this ranking.
+  const searched = useMemo(() => {
+    // Names and aliases only. The cell's clues do not filter or rank this list.
     return searchWineEntities(query, activeTypeTab, new Set(), searchOptions);
-    // Predicates are stable for a cell. Depending on the clue objects would
-    // rebuild the list on every parent render.
+    // acceptedKey is the stable identity of acceptedTypes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, activeTypeTab, acceptedKey, locale, hintsOn]);
+  }, [query, activeTypeTab, acceptedKey, locale]);
 
   const results = useMemo(
-    () =>
-      buildPickerResults({
-        query,
-        hintsOn,
-        validEntities: fittingEntities,
-        usedIds: usedEntityIds,
-        extraEntities,
-        locale,
-      }),
-    [query, hintsOn, fittingEntities, usedEntityIds, extraEntities, locale]
+    () => buildPickerResults({ query, entities: searched, locale }),
+    [query, searched, locale]
   );
 
   renderedQueryRef.current = query;
@@ -120,29 +96,15 @@ export function EntitySearchModal({
   const usedKey = [...usedEntityIds].sort().join("|");
 
   useEffect(() => {
-    const firstSelectable = results.findIndex(
-      (entity) =>
-        !usedEntityIds.has(entity.id) &&
-        (!hintsOn || entityFitsCell(entity.id, answerSource))
-    );
+    const firstSelectable = results.findIndex((entity) => !usedEntityIds.has(entity.id));
     setSelectedIndex(firstSelectable >= 0 ? firstSelectable : 0);
-    // Reset the highlight when the query, hint mode, or used set changes.
+    // Reset the highlight when the query or the used set changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, activeTypeTab, hintsOn, usedKey]);
-
-  const toggleHints = () => {
-    setHintsOn((current) => {
-      const next = !current;
-      writeHintsOn(window.localStorage, next);
-      return next;
-    });
-  };
+  }, [query, activeTypeTab, usedKey]);
 
   const rowFor = (entity: WineEntity) => ({
     id: entity.id,
-    selectable:
-      !usedEntityIds.has(entity.id) &&
-      (!hintsOn || entityFitsCell(entity.id, answerSource)),
+    selectable: !usedEntityIds.has(entity.id),
   });
 
   const rows = results.map(rowFor);
@@ -151,7 +113,6 @@ export function EntitySearchModal({
     const entity = results[index];
     if (!entity) return;
     if (usedEntityIds.has(entity.id)) return;
-    if (hintsOn && !entityFitsCell(entity.id, answerSource)) return;
     onSelectEntity(entity);
   };
 
@@ -175,10 +136,7 @@ export function EntitySearchModal({
     if (typed !== renderedQueryRef.current) {
       const live = buildPickerResults({
         query: typed,
-        hintsOn,
-        validEntities: fittingEntities,
-        usedIds: usedEntityIds,
-        extraEntities: searchWineEntities(typed, activeTypeTab, new Set(), searchOptions),
+        entities: searchWineEntities(typed, activeTypeTab, new Set(), searchOptions),
         locale,
       });
       const decision = pickerEnterAction({
@@ -319,14 +277,13 @@ export function EntitySearchModal({
           </div>
         ) : (
           results.map((entity, index) => {
-            const used = usedEntityIds.has(entity.id);
-            const fits = entityFitsCell(entity.id, answerSource);
-            const selectable = !used && (!hintsOn || fits);
+            const selectable = !usedEntityIds.has(entity.id);
             const isSelected = index === selectedIndex && selectable;
             return (
               <button
                 key={entity.id}
                 type="button"
+                data-picker-result={entity.id}
                 disabled={!selectable}
                 onClick={() => commitIndex(index)}
                 onMouseEnter={() => {
@@ -340,25 +297,21 @@ export function EntitySearchModal({
                     : "bg-white hover:bg-slate-50/60"
                 }`}
               >
-                <div>
-                  <div className="flex items-center gap-2.5 flex-wrap">
-                    <span
-                      className={`font-display font-bold text-sm sm:text-base ${
-                        selectable ? "text-slate-900" : "text-slate-400"
-                      }`}
-                    >
-                      {displayEntityName(entity.name, entity.entityType)}
-                    </span>
-                    <TypeBadge type={entity.entityType} muted={!selectable} label={t(typeMessage(entity.entityType))} />
-                  </div>
-                  <div className="text-xs text-slate-500 mt-0.5">
-                    {entityOriginLine(entity, locale, " · ")}
-                    {used
-                      ? ` · ${t("picker.used")}`
-                      : hintsOn
-                      ? ` · ${t(fits ? "picker.fits" : "picker.noFit")}`
-                      : ""}
-                  </div>
+                <div className="flex items-center gap-2.5 flex-wrap">
+                  <span
+                    className={`font-display font-bold text-sm sm:text-base ${
+                      selectable ? "text-slate-900" : "text-slate-400"
+                    }`}
+                  >
+                    {displayEntityName(entity.name, entity.entityType)}
+                  </span>
+                  {showTypeBadge ? (
+                    <TypeBadge
+                      type={entity.entityType}
+                      muted={!selectable}
+                      label={t(typeMessage(entity.entityType))}
+                    />
+                  ) : null}
                 </div>
                 <ArrowRight
                   className={`w-4 h-4 transition ${
@@ -371,19 +324,7 @@ export function EntitySearchModal({
         )}
       </div>
 
-      <div className="bg-slate-50/80 px-4 sm:px-6 py-3 border-t border-slate-200/70 flex items-center justify-between gap-3 text-[11px] text-slate-400">
-        <button
-          type="button"
-          onClick={toggleHints}
-          aria-pressed={hintsOn}
-          className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
-            hintsOn
-              ? "bg-wine-600 text-white"
-              : "bg-white text-slate-800 border border-slate-300 shadow-sm hover:bg-slate-50"
-          }`}
-        >
-          {hintsOn ? t("picker.hintsOn") : t("picker.hintsOff")}
-        </button>
+      <div className="bg-slate-50/80 px-4 sm:px-6 py-3 border-t border-slate-200/70 text-[11px] text-slate-400">
         <span className="hidden sm:inline">{t("picker.keys")}</span>
       </div>
     </ModalFrame>
