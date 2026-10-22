@@ -106,9 +106,63 @@ export function entitySearchFields(
 }
 
 /**
+ * Adjacent-transposition edit distance (optimal string alignment). Used as
+ * the picker's Damerau-Levenshtein check on names and aliases.
+ */
+export function damerauLevenshtein(a: string, b: string): number {
+  const m = a.length;
+  const n = b.length;
+  if (m === 0) return n;
+  if (n === 0) return m;
+  const dp: number[][] = Array.from({ length: m + 1 }, () => new Array<number>(n + 1).fill(0));
+  for (let i = 0; i <= m; i++) dp[i][0] = i;
+  for (let j = 0; j <= n; j++) dp[0][j] = j;
+  for (let i = 1; i <= m; i++) {
+    for (let j = 1; j <= n; j++) {
+      const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+      dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost);
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+        dp[i][j] = Math.min(dp[i][j], dp[i - 2][j - 2] + 1);
+      }
+    }
+  }
+  return dp[m][n];
+}
+
+/** 5–7 characters may miss by one edit. 8 or more may miss by two. Shorter queries stay exact. */
+export function nameFuzzyLimit(queryLength: number): number | null {
+  if (queryLength >= 8) return 2;
+  if (queryLength >= 5) return 1;
+  return null;
+}
+
+/**
+ * Best Damerau-Levenshtein distance from a normalized query to a card name,
+ * canonical name, alias, or one word of those. Null when the query is too
+ * short or nothing is close enough. Place, grapes, and notes are not read.
+ */
+export function nameFuzzyDistance(entity: WineEntity, normalizedQuery: string): number | null {
+  const max = nameFuzzyLimit(normalizedQuery.length);
+  if (max === null) return null;
+  let best = max + 1;
+  for (const field of [entity.name, entity.canonicalName, ...entity.aliases]) {
+    const norm = normalizeSearchText(field);
+    const pieces = [norm, ...norm.split(/[^a-z0-9]+/).filter((token) => token.length > 0)];
+    for (const piece of pieces) {
+      if (Math.abs(piece.length - normalizedQuery.length) > max) continue;
+      const distance = damerauLevenshtein(normalizedQuery, piece);
+      if (distance < best) best = distance;
+      if (best === 0) return 0;
+    }
+  }
+  return best <= max ? best : null;
+}
+
+/**
  * Rank for one entity. Exact and prefix hits on the name or an alias come
- * first, then any other name or alias hit, then place (country, region,
- * subregion), then grapes, then the tasting note. 0 means no match.
+ * first, then any other name or alias hit, then a name-scope typo, then
+ * place (country, region, subregion), then grapes, then the tasting note.
+ * 0 means no match. The picker uses the name scope, so place and notes stay at 0.
  */
 export function entitySearchScore(
   entity: WineEntity,
@@ -132,7 +186,12 @@ export function entitySearchScore(
   if (nameHit.some((field) => field === q)) return 100;
   if (nameHit.some((field) => field.startsWith(q))) return 85;
   if (nameHit.some((field) => field.includes(q))) return 70;
-  if (scope === "name") return 0;
+  if (scope === "name") {
+    const distance = nameFuzzyDistance(entity, q);
+    if (distance === 1) return 60;
+    if (distance === 2) return 45;
+    return 0;
+  }
   if (placeNorms.some((place) => place.includes(q))) return 50;
   if (scope === "full" && entity.primaryGrapes.some((grape) => normalizeSearchText(grape).includes(q))) {
     return 40;
@@ -212,14 +271,18 @@ export function filterCodexEntities(
   });
 }
 
-/** The one normalized/alias match used by the Codex and the picker. */
+/** The one normalized/alias match used by the Codex and the picker. Name scope also allows a short typo. */
 export function entityMatchesSearch(
   entity: WineEntity,
   rawQuery: string,
   locale?: Locale,
   scope: EntitySearchScope = "full"
 ): boolean {
-  return fieldsMatchSearch(entitySearchFields(entity, locale, scope), rawQuery);
+  if (fieldsMatchSearch(entitySearchFields(entity, locale, scope), rawQuery)) return true;
+  if (scope !== "name") return false;
+  const q = searchQuery(rawQuery);
+  if (!q) return false;
+  return nameFuzzyDistance(entity, q) !== null;
 }
 
 export interface WineEntitySearchOptions {

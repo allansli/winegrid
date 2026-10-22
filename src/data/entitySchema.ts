@@ -254,6 +254,17 @@ export const EMPTY_REQUIRED_TAG_ALLOWLIST: Readonly<Record<string, readonly (typ
   // Embrapa classes the Campanha nights as temperate to warm, so diurnal_shift is not supported,
   // and the first-party terroir page names no other climate feature.
   "prod-salton": ["climates"],
+  // Full-review batch. Aligoté: the Bourgogne CDC gives a cool oceanic climate with continental influences in the east, which states neither climate tag for this place; the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated;
+  // the sheet says "liveliness and citrus", which is not an explicit high-acid statement.
+  "grape-aligote": ["climates", "vinification", "sensory"],
+  // Puligny-Montrachet: the Bourgogne CDC gives a cool oceanic climate with continental influences in the east, which states neither climate tag for this place; the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated.
+  "app-puligny-montrachet": ["climates", "vinification"],
+  // Volnay: the Bourgogne CDC gives a cool oceanic climate with continental influences in the east, which states neither climate tag for this place; the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated.
+  "app-volnay": ["climates", "vinification"],
+  // Chassagne-Montrachet: the Bourgogne CDC gives a cool oceanic climate with continental influences in the east, which states neither climate tag for this place; the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated.
+  "app-chassagne-montrachet": ["climates", "vinification"],
+  // Pommard: the Bourgogne CDC gives a cool oceanic climate with continental influences in the east, which states neither climate tag for this place; the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated; the sheet gives dense, chewy tannins but no acidity, so high_tannin_high_acid is not stated.
+  "app-pommard": ["climates", "vinification", "sensory"],
 };
 
 export interface EntityValidationContext {

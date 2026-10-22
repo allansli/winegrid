@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import {
   codexClueMatcher,
   entityMatchesSearch,
+  entitySearchScore,
   fieldsMatchSearch,
   filterCodexEntities,
   normalizeSearchText,
@@ -173,6 +174,46 @@ describe("cell-scoped entity search", () => {
         true,
         query
       );
+    }
+  });
+
+  it("ranks a name typo after exact and prefix hits, and ignores place names", () => {
+    const meursault = WINE_ENTITY_BY_ID["app-meursault"];
+    const aligote = WINE_ENTITY_BY_ID["grape-aligote"];
+    const exact = entitySearchScore(meursault, "Meursault", "en", "name");
+    const prefix = entitySearchScore(WINE_ENTITY_BY_ID["app-chassagne-montrachet"], "chassag", "en", "name");
+    const typo = entitySearchScore(meursault, "mersault", "en", "name");
+    assert.equal(exact, 100);
+    assert.equal(prefix, 85);
+    assert.ok(exact > prefix);
+    assert.ok(prefix > typo);
+    assert.equal(typo, 60);
+
+    const named = (query: string) =>
+      searchWineEntities(query, "all", new Set(), { scope: "name", limit: 40 });
+    assert.equal(named("mersault")[0]?.id, "app-meursault");
+    assert.equal(named("aligote")[0]?.id, "grape-aligote");
+    assert.equal(entitySearchScore(aligote, "aligote", "en", "name") > typo, true);
+    assert.equal(named("puligny")[0]?.id, "app-puligny-montrachet");
+
+    const villages = [
+      "app-meursault",
+      "app-puligny-montrachet",
+      "app-chassagne-montrachet",
+      "app-volnay",
+      "app-pommard",
+      "app-gevrey-chambertin",
+      "grape-aligote",
+    ];
+    for (const query of ["burgundy", "borgonha"]) {
+      const results = named(query);
+      for (const id of villages) {
+        assert.equal(results.some((entity) => entity.id === id), false, `${query} ${id}`);
+      }
+      for (const entity of results) {
+        const fields = [entity.name, entity.canonicalName, ...entity.aliases].join(" ");
+        assert.match(fields, /burgundy|borgonha/i, entity.id);
+      }
     }
   });
 
