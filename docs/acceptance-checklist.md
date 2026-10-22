@@ -24,64 +24,64 @@ Huet and Raveneau no longer carry `large_neutral_botte_foudre`. Their vinificati
 | Every clue has EN and pt-BR labels and a tier | Automated. |
 | Each clue's card count is reported. Flag counts under 3, and over 20 if the clue is not Standard | Automated. The test fails when a clue has fewer than 3 cards or when this table disagrees with the catalog. `over 20` is a flag, not a failure. |
 
-The five new clues: `geo-south-america-all` 36 (Standard), `vin-used-large-oak` 7 (Master), `soil-sandy` 22 (Sommelier, flag over 20), `soil-granite` 42 (Sommelier, flag over 20; gneiss is included), `clim-tropical-double-pruning` 3 (Sommelier). `geo-south-america` (Andean, 22, Standard) stays beside the four-country clue.
+The five new clues: `geo-south-america-all` 36 (Standard), `vin-used-large-oak` 7 (Master), `soil-sandy` 23 (Sommelier, flag over 20), `soil-granite` 43 (Sommelier, flag over 20; gneiss is included), `clim-tropical-double-pruning` 3 (Sommelier). `geo-south-america` (Andean, 22, Standard) stays beside the four-country clue.
 
 <!-- clue-counts:start -->
 | Clue | Tier | Cards | Flag |
 | --- | --- | ---: | --- |
-| `geo-france` | Standard | 71 |  |
-| `geo-italy` | Standard | 24 |  |
-| `geo-spain` | Standard | 17 |  |
-| `geo-iberia` | Standard | 21 |  |
+| `geo-france` | Standard | 84 |  |
+| `geo-italy` | Standard | 25 |  |
+| `geo-spain` | Standard | 19 |  |
+| `geo-iberia` | Standard | 23 |  |
 | `geo-germanic` | Standard | 17 |  |
 | `geo-usa` | Standard | 9 |  |
 | `geo-oceania` | Standard | 17 |  |
 | `geo-south-america` | Standard | 22 |  |
 | `geo-south-america-all` | Standard | 36 |  |
-| `geo-old-world` | Standard | 133 |  |
+| `geo-old-world` | Standard | 149 |  |
 | `geo-new-world` | Standard | 62 |  |
 | `geo-southern-hemisphere` | Standard | 56 |  |
-| `geo-cool-latitude` | Sommelier | 77 | over 20 |
+| `geo-cool-latitude` | Sommelier | 90 | over 20 |
 | `geo-coastal-island` | Sommelier | 31 | over 20 |
 | `reg-bordeaux` | Standard | 19 |  |
-| `reg-burgundy-champagne` | Standard | 22 |  |
-| `reg-rhone-provence` | Standard | 15 |  |
-| `reg-loire` | Sommelier | 12 |  |
+| `reg-burgundy-champagne` | Standard | 29 |  |
+| `reg-rhone-provence` | Standard | 18 |  |
+| `reg-loire` | Sommelier | 14 |  |
 | `reg-piedmont-tuscany` | Standard | 12 |  |
-| `cls-aoc` | Sommelier | 51 | over 20 |
+| `cls-aoc` | Sommelier | 58 | over 20 |
 | `cls-docg` | Sommelier | 12 |  |
-| `cls-grand-cru` | Sommelier | 24 | over 20 |
+| `cls-grand-cru` | Sommelier | 25 | over 20 |
 | `cls-1855` | Sommelier | 9 |  |
-| `cls-doca-pdo` | Sommelier | 14 |  |
+| `cls-doca-pdo` | Sommelier | 15 |  |
 | `cls-new-world-ava-gi` | Sommelier | 38 | over 20 |
-| `soil-limestone-chalk` | Sommelier | 96 | over 20 |
-| `soil-kimmeridgian-pure-chalk` | Master | 30 | over 20 |
-| `soil-volcanic` | Sommelier | 40 | over 20 |
-| `soil-slate-schist` | Sommelier | 39 | over 20 |
-| `soil-gravel-galets` | Sommelier | 48 | over 20 |
-| `soil-granite` | Sommelier | 42 | over 20 |
+| `soil-limestone-chalk` | Sommelier | 104 | over 20 |
+| `soil-kimmeridgian-pure-chalk` | Master | 37 | over 20 |
+| `soil-volcanic` | Sommelier | 41 | over 20 |
+| `soil-slate-schist` | Sommelier | 40 | over 20 |
+| `soil-gravel-galets` | Sommelier | 50 | over 20 |
+| `soil-granite` | Sommelier | 43 | over 20 |
 | `soil-sand-phylloxera` | Master | 19 |  |
-| `soil-sandy` | Sommelier | 22 | over 20 |
-| `clim-maritime` | Standard | 53 |  |
-| `clim-continental` | Standard | 76 |  |
-| `clim-mediterranean` | Standard | 50 |  |
+| `soil-sandy` | Sommelier | 23 | over 20 |
+| `clim-maritime` | Standard | 54 |  |
+| `clim-continental` | Standard | 79 |  |
+| `clim-mediterranean` | Standard | 51 |  |
 | `clim-high-altitude` | Sommelier | 41 | over 20 |
 | `clim-heroic-slopes` | Sommelier | 39 | over 20 |
 | `clim-fog-current` | Sommelier | 30 | over 20 |
 | `clim-diurnal-rainshadow` | Sommelier | 46 | over 20 |
 | `clim-tropical-double-pruning` | Sommelier | 3 |  |
-| `hydro-major-river` | Sommelier | 87 | over 20 |
+| `hydro-major-river` | Sommelier | 90 | over 20 |
 | `hydro-atlantic-gironde` | Sommelier | 28 | over 20 |
-| `style-dry-red` | Standard | 123 |  |
-| `style-dry-white` | Standard | 87 |  |
-| `style-sparkling` | Standard | 21 |  |
-| `style-fortified-oxidative` | Sommelier | 16 |  |
-| `style-sweet-botrytis-passito` | Sommelier | 31 | over 20 |
+| `style-dry-red` | Standard | 128 |  |
+| `style-dry-white` | Standard | 98 |  |
+| `style-sparkling` | Standard | 22 |  |
+| `style-fortified-oxidative` | Sommelier | 17 |  |
+| `style-sweet-botrytis-passito` | Sommelier | 35 | over 20 |
 | `vin-new-french-oak` | Sommelier | 79 | over 20 |
 | `vin-large-botte-foudre` | Sommelier | 62 | over 20 |
 | `vin-used-large-oak` | Master | 7 |  |
 | `vin-extended-aging-36m` | Sommelier | 40 | over 20 |
-| `vin-sur-lie` | Sommelier | 44 | over 20 |
+| `vin-sur-lie` | Sommelier | 45 | over 20 |
 | `vin-whole-cluster-coferment` | Master | 26 | over 20 |
 | `vin-no-mlf-unoaked` | Sommelier | 52 | over 20 |
 | `vin-flor-solera` | Master | 9 |  |
@@ -89,28 +89,28 @@ The five new clues: `geo-south-america-all` 36 (Standard), `vin-used-large-oak` 
 | `sens-laser-acid` | Sommelier | 55 | over 20 |
 | `sens-delicate-low-tannin` | Sommelier | 27 | over 20 |
 | `sens-full-bodied` | Sommelier | 62 | over 20 |
-| `sens-violet-floral` | Sommelier | 46 | over 20 |
-| `sens-saline-mineral` | Sommelier | 61 | over 20 |
-| `sens-truffle-tar-pepper` | Sommelier | 48 | over 20 |
+| `sens-violet-floral` | Sommelier | 49 | over 20 |
+| `sens-saline-mineral` | Sommelier | 65 | over 20 |
+| `sens-truffle-tar-pepper` | Sommelier | 51 | over 20 |
 | `sens-petrol-botrytis` | Master | 18 |  |
 | `sens-cellar-20yr` | Sommelier | 104 | over 20 |
-| `var-bordeaux-family` | Standard | 63 |  |
-| `var-burgundy-family` | Standard | 45 |  |
-| `var-rhone-family` | Standard | 32 |  |
-| `var-indigenous-med` | Sommelier | 41 | over 20 |
-| `var-single-varietal` | Sommelier | 106 | over 20 |
+| `var-bordeaux-family` | Standard | 64 |  |
+| `var-burgundy-family` | Standard | 52 |  |
+| `var-rhone-family` | Standard | 34 |  |
+| `var-indigenous-med` | Sommelier | 44 | over 20 |
+| `var-single-varietal` | Sommelier | 112 | over 20 |
 | `var-multi-blend` | Standard | 49 |  |
 | `var-thick-skin-late` | Master | 26 | over 20 |
 | `var-thin-skin-early` | Master | 28 | over 20 |
 | `bot-bordeaux` | Sommelier | 85 | over 20 |
-| `bot-burgundy` | Sommelier | 91 | over 20 |
-| `bot-flute-specialty` | Sommelier | 47 | over 20 |
+| `bot-burgundy` | Sommelier | 102 | over 20 |
+| `bot-flute-specialty` | Sommelier | 49 | over 20 |
 | `her-ungrafted` | Sommelier | 39 | over 20 |
 | `her-bush-vines` | Sommelier | 37 | over 20 |
-| `her-unesco-monastic` | Sommelier | 43 | over 20 |
+| `her-unesco-monastic` | Sommelier | 52 | over 20 |
 | `her-pre-1855` | Sommelier | 47 | over 20 |
-| `type-appellation` | Standard | 77 |  |
-| `type-grape` | Standard | 36 |  |
+| `type-appellation` | Standard | 85 |  |
+| `type-grape` | Standard | 44 |  |
 | `type-producer` | Sommelier | 71 | over 20 |
 <!-- clue-counts:end -->
 
