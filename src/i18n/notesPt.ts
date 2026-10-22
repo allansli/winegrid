@@ -27,6 +27,16 @@ export const PT_NOTES: Record<string, string> = {
     "Tem nove Grand Crus, mais do que qualquer outro vilarejo da Côte d'Or, plantados em calcário com crinoides do Bajociano e marga ferruginosa descida da Combe de Lavaux.",
   "app-meursault":
     "Famoso pelos Premier Crus Perrières, Genevrières e Charmes. Une avelã, brioche e amêndoa tostada da fermentação em barrica e do bâtonnage à tensão do calcário cristalino.",
+  "app-puligny-montrachet":
+    "Denominação de vilarejo da Côte de Beaune, criada em 1937, com 17 Premiers Crus; a comuna também tem Grands Crus como o Montrachet. Quase só brancos de Chardonnay, em calcário pardo ou calcário alternado com marga e argila calcária, voltados para leste e sudeste a 230-320 m. Notas minerais de pederneira são típicas.",
+  "app-volnay":
+    "Denominação de vilarejo só de tintos da Côte de Beaune (AOC em 1937, 29 Premiers Crus), feita apenas de Pinot Noir na encosta íngreme de Chaignot, voltada para sudeste. Calcário oolítico rosado no alto e calcários argovianos e batonianos ferruginosos mais abaixo. O aroma clássico é de violeta e cereja.",
+  "grape-aligote":
+    "A outra uva branca da Borgonha, cultivada ali desde o século XVII e com AOC própria, Bourgogne Aligoté, desde 1937. Costuma ser plantada em calcário com marga ou argila, em encostas e locais mais altos. Bouzeron, na Côte Chalonnaise, é a única denominação de vilarejo para ela. Vivo e cítrico, é a base clássica do Kir.",
+  "app-chassagne-montrachet":
+    "Denominação de vilarejo no sul da Côte de Beaune (AOC em 1937, 55 Premiers Crus), dividida com Remigny; a comuna também abriga os Grands Crus Montrachet, Bâtard-Montrachet e Criots-Bâtard-Montrachet. Chardonnay e Pinot Noir crescem lado a lado, em solos que vão do calcário pedregoso à marga e a solos arenosos, a 220-325 m. Os brancos têm mineralidade profunda de pederneira.",
+  "app-pommard":
+    "Denominação de vilarejo só de tintos da Côte de Beaune, entre Beaune e Volnay, uma das primeiras AOCs (1936), com 28 Premiers Crus, à frente Les Rugiens e Les Épenots. Pinot Noir em aluvião antigo embaixo, argila calcária bem drenada a meia encosta e margas oxfordianas e calcário pardo no alto. Cor profunda e taninos densos, que pedem tempo.",
   "app-morgon":
     "Centrado na Côte du Py, de xisto manganês decomposto ('roche pourrie') e diorito vulcânico azul. Pode 'morgonner': evoluir na garrafa até lembrar um Pinot Noir estruturado da Côte de Nuits.",
   "app-cote-rotie":
