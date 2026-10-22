@@ -3,7 +3,14 @@ import { describe, it } from "node:test";
 import { CLUE_BY_ID } from "../data/clueCatalog";
 import { ALL_WINE_ENTITIES, searchWineEntities, WINE_ENTITY_BY_ID } from "../data/wineDatabase";
 import { generateDailyBoard, generateWineGridBoard } from "./matrixGenerator";
-import { buildPickerResults, entityFitsCell, evaluatePick, validEntities, validEntityIds } from "./pickerList";
+import {
+  buildPickerResults,
+  cellAcceptedTypes,
+  entityFitsCell,
+  evaluatePick,
+  validEntities,
+  validEntityIds,
+} from "./pickerList";
 import { DifficultyLevel, EntityFilterMode } from "../types/wine";
 
 const PLACED = [
@@ -47,35 +54,14 @@ describe("picker and the dead-end guard share one answer set", () => {
     assert.equal(evaluatePick(play, iberianNative, "grape-albarino"), "correct");
     play[iberianNative].pickedEntityId = "grape-albarino";
 
-    const used = new Set([...PLACED, "grape-albarino"]);
     const ids = validEntityIds({ validEntityIds: cellIds[iberianBottle] });
-    const fitting = validEntities({ validEntityIds: ids }, WINE_ENTITY_BY_ID);
-    const row = CLUE_BY_ID["geo-iberia"];
-    const col = CLUE_BY_ID["bot-burgundy"];
-    const capped = searchWineEntities("", "all", new Set(), {
-      matchesCell: (entity) => row.predicate(entity) || col.predicate(entity),
-      limit: 40,
-    });
-    const hidden = capped.filter((entity) => ids.includes(entity.id) && !used.has(entity.id));
-    assert.equal(hidden.length, 0);
-
-    const shown = buildPickerResults({
-      query: "",
-      hintsOn: true,
-      validEntities: fitting,
-      usedIds: used,
-      extraEntities: capped,
-    });
-    assert.equal(shown.length, ids.length);
-    assert.deepEqual(shown.map((entity) => entity.id).sort(), [...ids].sort());
-    const firstUsed = shown.findIndex((entity) => used.has(entity.id));
-    assert.ok(firstUsed > 0);
+    const ranked = searchWineEntities("", "all", new Set(), { scope: "name", limit: 40 });
+    const shown = buildPickerResults({ query: "", entities: ranked });
     assert.deepEqual(
-      shown.slice(0, firstUsed).map((entity) => entity.id).sort(),
-      // grape-pais (Listán Prieto, origin Spain, Burgundy-slope bottle) joined with the South America batch.
-      ["grape-mourvedre", "grape-pais", "prod-alvaro-palacios"]
+      shown.map((entity) => entity.id),
+      ranked.map((entity) => entity.id)
     );
-    assert.ok(shown.slice(firstUsed).every((entity) => used.has(entity.id)));
+    assert.ok(shown.some((entity) => !ids.includes(entity.id)));
     for (const id of ["grape-mourvedre", "grape-pais", "prod-alvaro-palacios"]) {
       assert.equal(entityFitsCell(id, ids), true);
       assert.equal(evaluatePick(play, iberianBottle, id) === "miss", false);
@@ -110,13 +96,8 @@ describe("picker and the dead-end guard share one answer set", () => {
     );
     const ids = valid.map((entity) => entity.id);
     assert.equal(entityFitsCell("grape-chardonnay", ids), false);
-    const ranked = searchWineEntities("chardonnay", "all", new Set(), { scope: "identity" });
-    const listed = buildPickerResults({
-      query: "chardonnay",
-      hintsOn: false,
-      validEntities: valid,
-      extraEntities: ranked,
-    });
+    const ranked = searchWineEntities("chardonnay", "all", new Set(), { scope: "name" });
+    const listed = buildPickerResults({ query: "chardonnay", entities: ranked });
     assert.deepEqual(
       listed.map((entity) => entity.id),
       ranked.map((entity) => entity.id)
@@ -126,14 +107,18 @@ describe("picker and the dead-end guard share one answer set", () => {
       evaluatePick([{ validEntityIds: ids, pickedEntityId: null }], 0, "grape-chardonnay"),
       "miss"
     );
-    const hinted = buildPickerResults({
-      query: "chardonnay",
-      hintsOn: true,
-      validEntities: valid,
-      extraEntities: ranked,
-    });
-    assert.equal(hinted.some((entity) => entity.id === "grape-chardonnay"), false);
-    assert.ok(hinted.every((entity) => entityFitsCell(entity.id, ids)));
+    const otherCell = ALL_WINE_ENTITIES.filter(
+      (entity) => france.predicate(entity) && CLUE_BY_ID["style-dry-white"].predicate(entity)
+    );
+    const sameOrder = buildPickerResults({ query: "chardonnay", entities: ranked });
+    assert.deepEqual(
+      sameOrder.map((entity) => entity.id),
+      listed.map((entity) => entity.id)
+    );
+    assert.notDeepEqual(
+      valid.map((entity) => entity.id).sort(),
+      otherCell.map((entity) => entity.id).sort()
+    );
   });
 
   it("resolves Müller with the same alias search in a cell that accepts him", () => {
@@ -154,34 +139,20 @@ describe("picker and the dead-end guard share one answer set", () => {
     for (const query of ["Mueller", "Müller"]) {
       const ranked = searchWineEntities(query, "all", new Set(), {
         acceptedTypes: ["producer"],
-        scope: "identity",
+        scope: "name",
       });
       assert.ok(ranked.some((entity) => entity.id === "prod-egon-muller"), query);
-      const whereValid = buildPickerResults({
-        query,
-        hintsOn: false,
-        validEntities: valid,
-        extraEntities: ranked,
-      });
+      const whereValid = buildPickerResults({ query, entities: ranked });
+      const whereInvalid = buildPickerResults({ query, entities: ranked });
       assert.deepEqual(
         whereValid.map((entity) => entity.id),
         ranked.map((entity) => entity.id)
       );
+      assert.deepEqual(
+        whereInvalid.map((entity) => entity.id),
+        whereValid.map((entity) => entity.id)
+      );
       assert.equal(entityFitsCell("prod-egon-muller", valid.map((entity) => entity.id)), true);
-      const hinted = buildPickerResults({
-        query,
-        hintsOn: true,
-        validEntities: valid,
-        extraEntities: ranked,
-      });
-      assert.ok(hinted.some((entity) => entity.id === "prod-egon-muller"), query);
-
-      const whereInvalid = buildPickerResults({
-        query,
-        hintsOn: false,
-        validEntities: other,
-        extraEntities: ranked,
-      });
       assert.ok(whereInvalid.some((entity) => entity.id === "prod-egon-muller"), query);
       assert.equal(
         evaluatePick(
@@ -194,45 +165,67 @@ describe("picker and the dead-end guard share one answer set", () => {
     }
   });
 
-  it("does not surface clue words when hints are off", () => {
+  it("does not surface clue words from notes, grapes, or place", () => {
     for (const query of ["volcanic", "terra rossa"]) {
       const noted = searchWineEntities(query, "all", new Set(), { scope: "full", limit: 200 });
       assert.ok(noted.length > 0, query);
-      const hintsOff = buildPickerResults({
-        query,
-        hintsOn: false,
-        validEntities: noted,
-        extraEntities: noted,
-      });
-      assert.deepEqual(
-        hintsOff.map((entity) => entity.id),
-        [],
-        query
-      );
-      const hintsOn = buildPickerResults({
-        query,
-        hintsOn: true,
-        validEntities: noted,
-        extraEntities: noted,
-      });
-      assert.deepEqual(
-        hintsOn.map((entity) => entity.id).sort(),
-        noted.map((entity) => entity.id).sort(),
-        query
-      );
+      const named = searchWineEntities(query, "all", new Set(), { scope: "name", limit: 200 });
+      const listed = buildPickerResults({ query, entities: named });
+      assert.deepEqual(listed.map((entity) => entity.id), [], query);
     }
 
     const ranked = searchWineEntities("Mueller", "all", new Set(), {
       acceptedTypes: ["producer"],
-      scope: "identity",
+      scope: "name",
     });
-    const listed = buildPickerResults({
-      query: "Mueller",
-      hintsOn: false,
-      validEntities: [],
-      extraEntities: ranked,
-    });
+    const listed = buildPickerResults({ query: "Mueller", entities: ranked });
     assert.ok(listed.some((entity) => entity.id === "prod-egon-muller"));
+    assert.equal(
+      searchWineEntities("Catalunha", "all", new Set(), { scope: "name", limit: 200 }).some(
+        (entity) => entity.country === "Spain" && !`${entity.name} ${entity.aliases.join(" ")}`.includes("Catalunha")
+      ),
+      false
+    );
+  });
+
+  it("does not change result order when the cell's clues change", () => {
+    const query = "ch";
+    const ranked = searchWineEntities(query, "all", new Set(), { scope: "name", limit: 40 });
+    assert.ok(ranked.length > 4);
+    const franceWhite = new Set(
+      ALL_WINE_ENTITIES.filter(
+        (entity) =>
+          CLUE_BY_ID["geo-france"].predicate(entity) && CLUE_BY_ID["style-dry-white"].predicate(entity)
+      ).map((entity) => entity.id)
+    );
+    const spainRed = new Set(
+      ALL_WINE_ENTITIES.filter(
+        (entity) =>
+          CLUE_BY_ID["geo-spain"].predicate(entity) && CLUE_BY_ID["style-dry-red"].predicate(entity)
+      ).map((entity) => entity.id)
+    );
+    const listed = buildPickerResults({ query, entities: ranked });
+    assert.deepEqual(
+      listed.map((entity) => entity.id),
+      ranked.map((entity) => entity.id)
+    );
+    const firstMiss = listed.findIndex((entity) => !franceWhite.has(entity.id));
+    const laterHit = listed.findLastIndex((entity) => franceWhite.has(entity.id));
+    assert.ok(firstMiss >= 0 && laterHit > firstMiss);
+    assert.notDeepEqual([...franceWhite].sort(), [...spainRed].sort());
+    assert.equal(cellAcceptedTypes({
+      entityFilter: "all",
+      rowClueId: "geo-france",
+      colClueId: "style-dry-white",
+    }).join(","), "appellation,grape,producer");
+    assert.deepEqual(
+      cellAcceptedTypes({ entityFilter: "grape", rowClueId: "geo-france", colClueId: "style-dry-red" }),
+      ["grape"]
+    );
+    assert.deepEqual(
+      cellAcceptedTypes({ entityFilter: "all", rowClueId: "type-grape", colClueId: "geo-france" }),
+      ["grape"]
+    );
   });
 
   it("lists the validator set for every cell of sampled boards", () => {
@@ -258,42 +251,23 @@ describe("picker and the dead-end guard share one answer set", () => {
         const ids = validEntityIds(cell);
         const fitting = validEntities(cell, WINE_ENTITY_BY_ID);
         assert.equal(fitting.length, ids.length, `${board.boardId}#${cell.index}`);
-        const row = board.rowClues[cell.row];
-        const col = board.colClues[cell.col];
-        const capped = searchWineEntities("", cell.row === 0 ? "grape" : "all", new Set(), {
-          matchesCell: (entity) => row.predicate(entity) || col.predicate(entity),
-          limit: 12,
+        const accepted = cellAcceptedTypes({
+          entityFilter: board.entityFilter,
+          rowClueId: cell.rowClueId,
+          colClueId: cell.colClueId,
         });
-        const used = new Set(ids.slice(0, Math.min(2, ids.length)));
-        const shown = buildPickerResults({
-          query: "",
-          hintsOn: true,
-          validEntities: fitting,
-          usedIds: used,
-          extraEntities: capped,
+        const ranked = searchWineEntities("", "all", new Set(), {
+          acceptedTypes: accepted,
+          scope: "name",
+          limit: 40,
         });
+        const shown = buildPickerResults({ query: "", entities: ranked });
         assert.deepEqual(
-          shown.map((entity) => entity.id).sort(),
-          [...ids].sort(),
+          shown.map((entity) => entity.id),
+          ranked.map((entity) => entity.id),
           `${board.boardId}#${cell.index}`
         );
-        const firstUsed = shown.findIndex((entity) => used.has(entity.id));
-        if (firstUsed > 0) {
-          assert.ok(shown.slice(0, firstUsed).every((entity) => !used.has(entity.id)));
-          assert.ok(shown.slice(firstUsed).every((entity) => used.has(entity.id)));
-        }
-        const withExtras = buildPickerResults({
-          query: "",
-          hintsOn: false,
-          validEntities: fitting,
-          usedIds: used,
-          extraEntities: capped,
-        });
-        assert.deepEqual(
-          withExtras.map((entity) => entity.id),
-          capped.map((entity) => entity.id),
-          `${board.boardId}#${cell.index} hints off`
-        );
+        assert.ok(ids.length >= 1, `${board.boardId}#${cell.index}`);
       }
     }
   });

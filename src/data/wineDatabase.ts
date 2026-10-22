@@ -69,13 +69,13 @@ export function fieldsMatchSearch(fields: readonly string[], rawQuery: string): 
 }
 
 /**
- * `identity` is the hints-off picker: name, aliases, and place
- * (country, region, subregion, and localized exonyms).
- * `full` is the hints-on picker: those fields plus the English note,
- * the note for the active locale, and the primary grapes.
- * The Codex does not use either scope. It matches names and aliases only.
+ * `name` is the answer picker: the card name, the canonical name, and aliases.
+ * `identity` adds place (country, region, subregion, and localized exonyms).
+ * `full` also adds the English note, the note for the active locale, and the
+ * primary grapes. The Codex does not use these scopes. It matches names and
+ * aliases through `entityMatchesCodexQuery`.
  */
-export type EntitySearchScope = "full" | "identity";
+export type EntitySearchScope = "full" | "identity" | "name";
 
 function placeFields(entity: WineEntity): string[] {
   return [
@@ -93,7 +93,9 @@ export function entitySearchFields(
   locale?: Locale,
   scope: EntitySearchScope = "full"
 ): string[] {
-  const identity = [entity.name, entity.canonicalName, ...entity.aliases, ...placeFields(entity)];
+  const named = [entity.name, entity.canonicalName, ...entity.aliases];
+  if (scope === "name") return named;
+  const identity = [...named, ...placeFields(entity)];
   if (scope === "identity") return identity;
   return [
     ...identity,
@@ -130,6 +132,7 @@ export function entitySearchScore(
   if (nameHit.some((field) => field === q)) return 100;
   if (nameHit.some((field) => field.startsWith(q))) return 85;
   if (nameHit.some((field) => field.includes(q))) return 70;
+  if (scope === "name") return 0;
   if (placeNorms.some((place) => place.includes(q))) return 50;
   if (scope === "full" && entity.primaryGrapes.some((grape) => normalizeSearchText(grape).includes(q))) {
     return 40;
@@ -228,8 +231,8 @@ export interface WineEntitySearchOptions {
   /** Same locale the Codex uses when it overlays a tasting note. */
   locale?: Locale;
   /**
-   * `full` searches notes and grapes. `identity` does not, so a hints-off
-   * picker cannot be led by clue words that only appear in the copy.
+   * `name` is names and aliases. `identity` adds place. `full` also searches
+   * notes and grapes. The answer picker uses `name`.
    */
   scope?: EntitySearchScope;
 }
