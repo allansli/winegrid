@@ -24,7 +24,7 @@ import { WINE_ENTITY_BY_ID } from "@/data/wineDatabase";
 import { boardClueHash, reconcileSavedBoard } from "@/lib/boardClueHash";
 import { clientVercelEnv, parseDailyQuery, searchWithoutRejectedFuture } from "@/lib/dailyDate";
 import { futureNoticeVisible } from "@/lib/futureNotice";
-import { clueTooltipEscape, overflowMenuEscape } from "@/lib/hotkeys";
+import { attachClueTooltipEscape, overflowMenuEscape } from "@/lib/hotkeys";
 import { displayEntityName } from "@/lib/entityName";
 import {
   DAILY_DIFFICULTY,
@@ -165,19 +165,18 @@ function ClueCard({
         setHover(false);
       }
     };
-    const onKey = (event: KeyboardEvent) => {
-      const dialogOpen = Boolean(document.querySelector("[role='dialog'][aria-modal='true']"));
-      if (!clueTooltipEscape(event.key, true, dialogOpen)) return;
-      event.preventDefault();
-      event.stopPropagation();
-      setPinned(false);
-      setHover(false);
-    };
+    const detachEscape = attachClueTooltipEscape({
+      isOpen: () => true,
+      close: () => {
+        setPinned(false);
+        setHover(false);
+      },
+      dialogOpen: () => Boolean(document.querySelector("[role='dialog'][aria-modal='true']")),
+    });
     document.addEventListener("pointerdown", onPointer);
-    document.addEventListener("keydown", onKey, true);
     return () => {
+      detachEscape();
       document.removeEventListener("pointerdown", onPointer);
-      document.removeEventListener("keydown", onKey, true);
     };
   }, [open]);
 
@@ -277,6 +276,8 @@ export function WineGridGame() {
     type: "success" | "error" | "info";
     title: string;
     detail: string;
+    /** Clicking a header clue pins this toast. Escape dismisses it. */
+    clueTooltip?: boolean;
   } | null>(null);
 
   const [activeCellIndex, setActiveCellIndex] = useState<number | null>(null);
@@ -491,6 +492,16 @@ export function WineGridGame() {
     const timer = window.setTimeout(() => setFeedback(null), 4600);
     return () => window.clearTimeout(timer);
   }, [feedback]);
+
+  const clueTooltipOpen = feedback?.clueTooltip === true;
+  useEffect(() => {
+    if (!clueTooltipOpen) return;
+    return attachClueTooltipEscape({
+      isOpen: () => true,
+      close: () => setFeedback(null),
+      dialogOpen: () => Boolean(document.querySelector("[role='dialog'][aria-modal='true']")),
+    });
+  }, [clueTooltipOpen]);
 
   const initBoard = useCallback(
     (
@@ -1527,6 +1538,7 @@ export function WineGridGame() {
                 onInspect={() =>
                   setFeedback({
                     type: "info",
+                    clueTooltip: true,
                     title: `${colClue.shortLabel} (${t(categoryKey(colClue.category))})`,
                     detail: t("clue.detail", { label: colClue.label, tooltip: colClue.tooltip }),
                   })
@@ -1547,6 +1559,7 @@ export function WineGridGame() {
                 onInspect={() =>
                   setFeedback({
                     type: "info",
+                    clueTooltip: true,
                     title: `${rowClue.shortLabel} (${t(categoryKey(rowClue.category))})`,
                     detail: t("clue.detail", { label: rowClue.label, tooltip: rowClue.tooltip }),
                   })
