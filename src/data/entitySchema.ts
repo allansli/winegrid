@@ -254,43 +254,43 @@ export const EMPTY_REQUIRED_TAG_ALLOWLIST: Readonly<Record<string, readonly (typ
   // Embrapa classes the Campanha nights as temperate to warm, so diurnal_shift is not supported,
   // and the first-party terroir page names no other climate feature.
   "prod-salton": ["climates"],
-  // Full-review batch. Aligoté: the Bourgogne CDC gives a cool oceanic climate with continental influences in the east, which states neither climate tag for this place; the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated;
+  // Full-review batch. Aligoté: WSET maps the CDC's continental influence to the Continental tag, so climates is filled;
+  // the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated;
   // the sheet says "liveliness and citrus", which is not an explicit high-acid statement.
-  "grape-aligote": ["climates", "vinification", "sensory"],
-  // Puligny-Montrachet: the Bourgogne CDC gives a cool oceanic climate with continental influences in the east, which states neither climate tag for this place; the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated.
-  "app-puligny-montrachet": ["climates", "vinification"],
-  // Volnay: the Bourgogne CDC gives a cool oceanic climate with continental influences in the east, which states neither climate tag for this place; the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated.
-  "app-volnay": ["climates", "vinification"],
-  // Chassagne-Montrachet: the Bourgogne CDC gives a cool oceanic climate with continental influences in the east, which states neither climate tag for this place; the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated.
-  "app-chassagne-montrachet": ["climates", "vinification"],
-  // Pommard: the Bourgogne CDC gives a cool oceanic climate with continental influences in the east, which states neither climate tag for this place; the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated; the sheet gives dense, chewy tannins but no acidity, so high_tannin_high_acid is not stated.
-  "app-pommard": ["climates", "vinification", "sensory"],
-  // Full-review batch 2. Chambolle-Musigny. climates: the official sources give a cool oceanic climate with
-  // continental influences (Bourgogne CDC) or none, which states neither climate tag for this place; vinification:
+  "grape-aligote": ["vinification", "sensory"],
+  // Puligny-Montrachet: WSET maps the CDC's continental influence to the Continental tag, so climates is filled;
   // the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated.
-  "app-chambolle-musigny": ["climates", "vinification"],
-  // Full-review batch 2. Vosne-Romanée. climates: the official sources give a cool oceanic climate with continental
-  // influences (Bourgogne CDC) or none, which states neither climate tag for this place; vinification: the BIVB
-  // appellation sheet gives no winemaking rule, so no vinification tag is stated; sensory: the BIVB sheet says
-  // 'often full-bodied' and tannic, but the full-bodied clue also requires high alcohol (14% typical), which is not
-  // stated.
-  "app-vosne-romanee": ["climates", "vinification", "sensory"],
-  // Full-review batch 2. Nuits-Saint-Georges. climates: the Nuits-Saint-Georges CDC gives a cool oceanic climate
-  // disturbed by continental or southern influences, which states neither climate tag; vinification: the BIVB
-  // appellation sheet gives no winemaking rule, so no vinification tag is stated.
-  "app-nuits-saint-georges": ["climates", "vinification"],
-  // Full-review batch 2. Corton. climates: the official sources give a cool oceanic climate with continental
-  // influences (Bourgogne CDC) or none, which states neither climate tag for this place; vinification: the BIVB
-  // appellation sheet gives no winemaking rule, so no vinification tag is stated.
-  "app-corton": ["climates", "vinification"],
-  // Full-review batch 2. Beaune. climates: the official sources give a cool oceanic climate with continental
-  // influences (Bourgogne CDC) or none, which states neither climate tag for this place; vinification: the BIVB
-  // appellation sheet gives no winemaking rule, so no vinification tag is stated.
-  "app-beaune": ["climates", "vinification"],
-  // Full-review batch 2. Pouilly-Fuissé. climates: the BIVB sheet states no climate, and the Bourgogne CDC (cool
-  // oceanic with continental and southern influences) states neither climate tag; vinification: the BIVB
-  // appellation sheet gives no winemaking rule, so no vinification tag is stated.
-  "app-pouilly-fuisse": ["climates", "vinification"],
+  "app-puligny-montrachet": ["vinification"],
+  // Volnay: WSET maps the CDC's continental influence to the Continental tag, so climates is filled;
+  // the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated.
+  "app-volnay": ["vinification"],
+  // Chassagne-Montrachet: WSET maps the CDC's continental influence to the Continental tag, so climates is filled;
+  // the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated.
+  "app-chassagne-montrachet": ["vinification"],
+  // Pommard: WSET maps the CDC's continental influence to the Continental tag, so climates is filled;
+  // the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated;
+  // the sheet gives dense, chewy tannins but no acidity, so high_tannin_high_acid is not stated.
+  "app-pommard": ["vinification", "sensory"],
+  // Full-review batch 2. Chambolle-Musigny. Continental is tagged from the CDC's continental influence, as WSET maps it.
+  // Vinification: the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated.
+  "app-chambolle-musigny": ["vinification"],
+  // Full-review batch 2. Vosne-Romanée. Continental is tagged from the CDC's continental influence, as WSET maps it.
+  // Vinification: the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated.
+  // Sensory: the BIVB sheet says 'often full-bodied' and tannic, but the full-bodied clue also requires high alcohol
+  // (14% typical), which is not stated.
+  "app-vosne-romanee": ["vinification", "sensory"],
+  // Full-review batch 2. Nuits-Saint-Georges. Continental is tagged from the CDC's continental influence, as WSET maps it.
+  // Vinification: the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated.
+  "app-nuits-saint-georges": ["vinification"],
+  // Full-review batch 2. Corton. Continental is tagged from the CDC's continental influence, as WSET maps it.
+  // Vinification: the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated.
+  "app-corton": ["vinification"],
+  // Full-review batch 2. Beaune. Continental is tagged from the CDC's continental influence, as WSET maps it.
+  // Vinification: the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated.
+  "app-beaune": ["vinification"],
+  // Full-review batch 2. Pouilly-Fuissé. Continental is tagged from the CDC's continental influence, as WSET maps it.
+  // Vinification: the BIVB appellation sheet gives no winemaking rule, so no vinification tag is stated.
+  "app-pouilly-fuisse": ["vinification"],
   // Full-review batch 2. Pouilly-Fumé. climates: INAO says only that the Loire tempers cold temperatures and that
   // nights are cool, which states neither maritime nor continental; vinification: INAO and the appellation body
   // give no winemaking rule for the dry whites.

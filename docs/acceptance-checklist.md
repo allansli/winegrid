@@ -63,7 +63,7 @@ The five new clues: `geo-south-america-all` 36 (Standard), `vin-used-large-oak` 
 | `soil-sand-phylloxera` | Master | 19 |  |
 | `soil-sandy` | Sommelier | 23 | over 20 |
 | `clim-maritime` | Standard | 54 |  |
-| `clim-continental` | Standard | 79 |  |
+| `clim-continental` | Standard | 90 |  |
 | `clim-mediterranean` | Standard | 51 |  |
 | `clim-high-altitude` | Sommelier | 41 | over 20 |
 | `clim-heroic-slopes` | Sommelier | 39 | over 20 |
@@ -76,7 +76,7 @@ The five new clues: `geo-south-america-all` 36 (Standard), `vin-used-large-oak` 
 | `style-dry-white` | Standard | 98 |  |
 | `style-sparkling` | Standard | 22 |  |
 | `style-fortified-oxidative` | Sommelier | 17 |  |
-| `style-sweet-botrytis-passito` | Sommelier | 35 | over 20 |
+| `style-sweet-botrytis-passito` | Sommelier | 33 | over 20 |
 | `vin-new-french-oak` | Sommelier | 79 | over 20 |
 | `vin-large-botte-foudre` | Sommelier | 62 | over 20 |
 | `vin-used-large-oak` | Master | 7 |  |

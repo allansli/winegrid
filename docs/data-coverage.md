@@ -45,7 +45,7 @@ An entity satisfies a category when at least one clue in that category matches i
 | region | 5 | 39 | 24 | 27 |
 | classification | 6 | 78 | 0 | 50 |
 | soil | 8 | 84 | 40 | 69 |
-| climate | 8 | 74 | 39 | 70 |
+| climate | 8 | 84 | 40 | 70 |
 | hydrology | 2 | 47 | 24 | 27 |
 | style | 5 | 85 | 44 | 71 |
 | vinification | 8 | 73 | 36 | 70 |
@@ -87,11 +87,11 @@ Each difficulty is sampled with seeds coverage-0 through coverage-5 and filters 
 
 ### Standard
 
-216 cells. Minimum 5, median 10, maximum 59. 45 cells (20.8%) sit on the floor of 5.
+216 cells. Minimum 5, median 10, maximum 59. 42 cells (19.4%) sit on the floor of 5.
 
 | Answers | Cells | Share |
 | ---: | ---: | ---: |
-| 5 | 45 | 20.8% |
+| 5 | 42 | 19.4% |
 | 6 | 9 | 4.2% |
 | 7 | 23 | 10.6% |
 | 8 | 12 | 5.6% |
@@ -99,31 +99,33 @@ Each difficulty is sampled with seeds coverage-0 through coverage-5 and filters 
 | 10 | 10 | 4.6% |
 | 11 | 7 | 3.2% |
 | 12 | 14 | 6.5% |
-| 13 | 4 | 1.9% |
-| 14 | 4 | 1.9% |
-| 15 | 17 | 7.9% |
+| 13 | 3 | 1.4% |
+| 14 | 5 | 2.3% |
+| 15 | 20 | 9.3% |
 | 16 | 3 | 1.4% |
-| 17 | 9 | 4.2% |
+| 17 | 8 | 3.7% |
 | 18 | 2 | 0.9% |
 | 19 | 1 | 0.5% |
 | 20 | 5 | 2.3% |
-| 21 | 5 | 2.3% |
-| 22 | 5 | 2.3% |
-| 23 | 2 | 0.9% |
+| 21 | 3 | 1.4% |
+| 22 | 4 | 1.9% |
+| 23 | 3 | 1.4% |
 | 24 | 2 | 0.9% |
-| 26 | 2 | 0.9% |
-| 27 | 1 | 0.5% |
-| 28 | 1 | 0.5% |
+| 26 | 1 | 0.5% |
+| 27 | 3 | 1.4% |
+| 28 | 2 | 0.9% |
 | 29 | 2 | 0.9% |
 | 30 | 1 | 0.5% |
 | 32 | 1 | 0.5% |
 | 33 | 3 | 1.4% |
 | 34 | 1 | 0.5% |
 | 35 | 1 | 0.5% |
+| 37 | 1 | 0.5% |
 | 38 | 1 | 0.5% |
 | 41 | 1 | 0.5% |
 | 42 | 2 | 0.9% |
-| 47 | 2 | 0.9% |
+| 47 | 1 | 0.5% |
+| 56 | 1 | 0.5% |
 | 59 | 1 | 0.5% |
 
 ### Sommelier
@@ -133,8 +135,8 @@ Each difficulty is sampled with seeds coverage-0 through coverage-5 and filters 
 | Answers | Cells | Share |
 | ---: | ---: | ---: |
 | 3 | 34 | 15.7% |
-| 4 | 27 | 12.5% |
-| 5 | 21 | 9.7% |
+| 4 | 26 | 12.0% |
+| 5 | 22 | 10.2% |
 | 6 | 15 | 6.9% |
 | 7 | 15 | 6.9% |
 | 8 | 13 | 6.0% |
@@ -142,8 +144,8 @@ Each difficulty is sampled with seeds coverage-0 through coverage-5 and filters 
 | 10 | 11 | 5.1% |
 | 11 | 9 | 4.2% |
 | 12 | 8 | 3.7% |
-| 13 | 8 | 3.7% |
-| 14 | 4 | 1.9% |
+| 13 | 7 | 3.2% |
+| 14 | 5 | 2.3% |
 | 15 | 4 | 1.9% |
 | 16 | 6 | 2.8% |
 | 17 | 2 | 0.9% |

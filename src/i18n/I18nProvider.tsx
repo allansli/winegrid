@@ -12,10 +12,17 @@ interface I18nContextValue {
 
 const I18nContext = createContext<I18nContextValue | null>(null);
 
-export function I18nProvider({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>("en");
+export function I18nProvider({
+  children,
+  initialLocale,
+}: {
+  children: React.ReactNode;
+  initialLocale?: Locale;
+}) {
+  const [locale, setLocaleState] = useState<Locale>(initialLocale ?? "en");
 
   useEffect(() => {
+    if (initialLocale) return;
     let saved: string | null = null;
     try {
       saved = window.localStorage.getItem(LOCALE_STORAGE_KEY);
